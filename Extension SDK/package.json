@@ -1,0 +1,16 @@
+{
+  "name": "kii-portal-ext-sdk",
+  "version": "0.0.1",
+  "description": "Kii portal extension SDK",
+  "main": "/dist/KiiExtSDK.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "kii",
+    "portal",
+    "sdk"
+  ],
+  "author": "george.lin@kii.com",
+  "license": "ISC"
+}

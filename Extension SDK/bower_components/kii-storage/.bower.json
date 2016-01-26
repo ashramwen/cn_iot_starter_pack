@@ -1,0 +1,32 @@
+{
+  "name": "kii-storage",
+  "version": "2.4.0",
+  "authors": [
+    "kiicorp"
+  ],
+  "description": "This is the Kii storage SDK",
+  "main": "KiiSDK.js",
+  "keywords": [
+    "kii",
+    "sdk"
+  ],
+  "license": "http://en.kii.com/terms/",
+  "homepage": "http://www.kii.com",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "2.4.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.4.0",
+    "commit": "d66355b52eab31a587d861a96870315c34fa2a4a"
+  },
+  "_source": "git://github.com/KiiCorp/KiiCloudSDK-JS.git",
+  "_target": "~2.4.0",
+  "_originalSource": "kii-cloud-sdk",
+  "_direct": true
+}

@@ -1,0 +1,27 @@
+{
+  "name": "kii-portal-ext-sdk",
+  "version": "0.1",
+  "authors": [
+    "george.lin@kii.com"
+  ],
+  "description": "Kii portal extension SDK",
+  "main": "/dist/KiiExtSDK.js",
+  "moduleType": [],
+  "keywords": [
+    "kii",
+    "portal",
+    "sdk"
+  ],
+  "license": "http://en.kii.com/terms/",
+  "homepage": "http://www.kii.com",
+  "dependencies": {
+    "kii-storage": "kii-cloud-sdk#~2.4.0"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
