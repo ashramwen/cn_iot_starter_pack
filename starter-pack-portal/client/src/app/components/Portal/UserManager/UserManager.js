@@ -1,0 +1,1 @@
+angular.module('StarterPack.Portal.UserManager',[]);
