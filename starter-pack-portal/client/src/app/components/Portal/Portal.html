@@ -5,13 +5,6 @@
         </a>
         <!-- Header Navbar: style can be found in header.less -->
         <nav class="navbar navbar-static-top" role="navigation">
-            <!-- Sidebar toggle button-->
-            <a class="navbar-btn sidebar-toggle" ng-click="toggleMenu()">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </a>
             <div class="navbar-right">
                 <ul class="nav navbar-nav">
                     <!-- Messages: style can be found in dropdown.less-->
@@ -43,38 +36,26 @@
     </header>
     <div class="wrapper row-offcanvas row-offcanvas-left">
         <!-- Left side column. contains the logo and sidebar -->
-        <aside class="left-side" style="min-height: 100%;">
-            <!-- sidebar: style can be found in sidebar.less -->
-            <section class="sidebar">
-                <!-- Sidebar user panel -->
-                <div class="user-panel">
-                    <div class="pull-left image">
-                        <img src="images/kiicloud-logo.png" class="img-circle" alt="User Image">
-                    </div>
-                    <div class="pull-left info">
-                        <p>Hello, {{credential.userName}}</p>
-
-                        <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
-                    </div>
-                </div>
-                <!-- search form -->
-                <form action="#" method="get" class="sidebar-form">
-                    <div class="input-group">
-                        <input type="text" name="q" class="form-control" placeholder="Search...">
-                        <span class="input-group-btn">
-                            <button type="submit" name="seach" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i></button>
-                        </span>
-                    </div>
-                </form>
+        <aside class="left-side" style="height: 100%;">
+            <section class="sidebar sidebar-left" ng-class="{'shrink': menuOff && portalNavs.length > 0}">
+                <a uib-tooltip="Toggle Menu" tooltip-placement="right" ng-click="toggleMenu()" class="toggle-button" ng-class="{'active': !menuOff}"><span class="fa fa-bars"></span></a>
                 <ul class="sidebar-menu">
-                    <li ng-repeat="nav in portalNavs | orderBy: 'order'" ng-class="{'active':$state.current.name.indexOf(nav.state)==0}" ng-if="!nav.hidden" >
-                        <a ng-click="$state.go(nav.state)"><i class="fa fa-fw" ng-class="nav.icon"></i> {{nav.name}}<span class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level" uib-collapse="$state.current.name.indexOf(nav.state)==-1">
-                            <li ng-repeat="subNav in nav.subViews | orderBy: 'order'" ng-if="!subNav.hidden" ng-class="{'active':$state.current.name.indexOf(subNav.state)==0}">
-                                <a ng-click="$state.go(subNav.state)">{{subNav.name}}</a>
+                    <li>
+                        <a ui-sref="app.Portal.AppManager.ApplicationList" class="active" uib-tooltip="Applications" tooltip-placement="right"><span class="fa fa-cloud"></span>Applications</a>
+                    </li>
+                </ul>
+            </section>
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar sidebar-right">
+                <ul class="sidebar-menu">
+                    <li ng-repeat="nav in portalNavs | orderBy: 'order'" ng-class="{'active':isActive(nav.state)}" ng-if="!nav.hidden" >
+                        <a ng-click="$state.go(nav.state, state.params)"><i class="fa fa-fw" ng-class="nav.icon"></i> {{nav.name}}<span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level" uib-collapse="!isActive(nav.state)">
+                            <li ng-repeat="subNav in nav.subViews | orderBy: 'order'" ng-if="!subNav.hidden" ng-class="{'active': isActive(subNav.state)}">
+                                <a ng-click="$state.go(subNav.state, state.params)">{{subNav.name}}</a>
                                 <ul class="nav nav-third-level" uib-collapse="!subNav._active">
-                                    <li ng-if="!thirdNav.hidden" ng-repeat="thirdNav in subNav.subViews | orderBy: '-order'"  ng-class="{'active':thirdNav._active}">
-                                        <a ng-click="$state.go(thirdNav.state)">{{thirdNav.name}}</a>
+                                    <li ng-if="!thirdNav.hidden" ng-repeat="thirdNav in subNav.subViews | orderBy: '-order'"  ng-class="{'active': isActive(thirdNav.state)}">
+                                        <a ng-click="$state.go(thirdNav.state, state.params)">{{thirdNav.name}}</a>
                                     </li>
                                 </ul>
                             </li>
@@ -91,13 +72,14 @@
             <!-- Main content -->
             <section class="content">
                 <ol class="breadcrumb">
-                    <li ng-repeat="nav in portalNavs" ng-if="$state.current.name.indexOf(nav.state) == 0">
-                      <a ng-click="nav.state">{{nav.name}}</a>
+                    <li ng-repeat="nav in getStateChan($state.current)">
+                      <a ng-if="!nav.abstract" ui-sref="{{nav.name}}(state.params)">{{nav.getName()}}</a>
+                      <span ng-if="nav.abstract">{{nav.getName()}}</span>
                     </li>
                 </ol>
-                <div class="row portal-row" ng-if="currentNav.description && currentNav.description!=''")>
-                    <div class="module-description col-lg-12">
-                        {{currentNav.description}}
+                <div class="row portal-row" ng-if="$state.current.description && $state.current.description!=''")>
+                    <div class="module-description">
+                        {{$state.current.description}}
                     </div>
                 </div>
                 <div>

@@ -1,8 +1,10 @@
 angular.module('StarterPack.AppShared')
-    .factory('AppUtils', ['$http', '$location', '$q', '$state', '$timeout', '$uibModal',
-    function ($http, $location, $q, $state, $timeout, $uibModal) {
+    .factory('AppUtils', ['$http', '$location', '$q', '$state', '$timeout', '$uibModal', 'AppConfig',
+    function ($http, $location, $q, $state, $timeout, $uibModal, AppConfig) {
         window.app = {};
         app.utils = {
+            requestInProcess:0,
+            storagePrefix: AppConfig.StoragePrefix + '.',
             initialize: function(){
                 this._initialize();
             },
@@ -63,17 +65,39 @@ angular.module('StarterPack.AppShared')
                     }
                 }
             },
+            setLocalStorageItem: function(itemName, value){
+                localStorage.setItem(this.storagePrefix + itemName, JSON.stringify(value));
+            },
+            getLocalStorageItem: function(itemName){
+                return $.parseJSON(localStorage.getItem(this.storagePrefix + itemName));
+            },
             getSessionItem: function(itemName){
-                return $.parseJSON(sessionStorage.getItem(itemName));
+                return $.parseJSON(sessionStorage.getItem(this.storagePrefix + itemName));
             },
             setSessionItem: function(itemName, value){
-                sessionStorage.setItem(itemName,JSON.stringify(value)) ;
+                sessionStorage.setItem(this.storagePrefix + itemName, JSON.stringify(value)) ;
             },
             clearSession: function(){
                 sessionStorage.clear();
             },
             removeSessionItem: function(itemName){
-                sessionStorage.removeItem(itemName);
+                sessionStorage.removeItem(this.storagePrefix + itemName);
+            },
+            doLoading: function(){
+                this.requestInProcess ++;
+                this.showLoading();
+            },
+            whenLoaded: function(){
+                this.requestInProcess --;
+                if(this.requestInProcess==0){
+                    this.hideLoading();
+                }
+            },
+            showLoading: function(){
+                $('#spinner').show();
+            },
+            hideLoading: function(){
+                $('#spinner').hide();
             },
             alert: function(msg, title){
                 title = title || '提示';

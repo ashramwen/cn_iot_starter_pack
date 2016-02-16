@@ -52,6 +52,7 @@ body .app-portal > .header {
 /* Define 2 column template */
 .right-side,
 .left-side {
+  overflow: hidden;
   -moz-transition: left 0.5s, margin-left 0.5s;
   -o-transition: left 0.5s, margin-left 0.5s;
   -webkit-transition: left 0.5s, margin-left 0.5s;
@@ -61,7 +62,7 @@ body .app-portal > .header {
 
 .left-side.sidebar-offcanvas {
   margin-top: 0px !important;
-  left: -220px; }
+  left: -270px; }
 
 /*right side - contins main content*/
 .right-side {
@@ -70,13 +71,59 @@ body .app-portal > .header {
 /*left side - contains sidebar*/
 .left-side {
   position: absolute;
-  width: 220px;
+  width: 270px;
   top: 0px;
   left: 0px;
   margin-top: 0px; }
+  .left-side .sidebar-left {
+    width: 100%;
+    float: left;
+    background: #293038;
+    height: 100%;
+    color: #fff;
+    font-size: 17px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    transition: width 0.5s; }
+    .left-side .sidebar-left .toggle-button {
+      width: 100%;
+      text-align: center;
+      display: block;
+      height: 48px;
+      line-height: 48px;
+      cursor: pointer; }
+      .left-side .sidebar-left .toggle-button span {
+        display: block;
+        height: 100%;
+        line-height: 48px;
+        transition: transform 0.5s; }
+      .left-side .sidebar-left .toggle-button:hover {
+        background: #425164; }
+      .left-side .sidebar-left .toggle-button.active {
+        background: #425164; }
+    .left-side .sidebar-left.shrink {
+      width: 50px; }
+    .left-side .sidebar-left ul li {
+      width: 270px; }
+      .left-side .sidebar-left ul li a {
+        width: 100%; }
+        .left-side .sidebar-left ul li a > .fa {
+          display: inline-block;
+          width: 20px;
+          text-align: center;
+          height: 20px;
+          line-height: 20px;
+          padding: 0px;
+          margin-right: 15px; }
+      .left-side .sidebar-left ul li a.active, .left-side .sidebar-left ul li a:hover {
+        background: #37424f; }
+  .left-side .sidebar-right {
+    width: 220px;
+    float: left;
+    transition: width 0.5px; }
 
 .right-side.shrink {
-  margin-left: 220px; }
+  margin-left: 270px; }
 
 @media screen and (min-width: 992px) {
   .left-side {
@@ -87,7 +134,7 @@ body .app-portal > .header {
     margin-top: 0px; }
   /* Left side collapse */
   .left-side.collapse-left {
-    left: -220px;
+    left: -270px;
     margin-top: 0px; } }
 
 /*Give content full width on xs screens*/
@@ -98,7 +145,7 @@ body .app-portal > .header {
     margin-left: 0; }
   /*Right side strech mode*/
   .right-side.strech {
-    margin-left: 220px; } }
+    margin-left: 270px; } }
 
 /*
     By default the layout is not fixed but if you add the class .fixed to the body element
@@ -638,7 +685,7 @@ Gradient Background colors
 .app-portal > .header .navbar {
   height: 50px;
   margin-bottom: 0;
-  margin-left: 220px; }
+  margin-left: 270px; }
 
 .app-portal > .header .navbar .sidebar-toggle {
   float: left;
@@ -653,7 +700,10 @@ Gradient Background colors
   -webkit-border-radius: 0 !important;
   -moz-border-radius: 0 !important;
   border-radius: 0 !important;
-  cursor: pointer; }
+  cursor: pointer;
+  transition: transform 0.5s; }
+  .app-portal > .header .navbar .sidebar-toggle.toggle-off {
+    transform: rotate(90deg); }
 
 .app-portal > .header .navbar .sidebar-toggle:hover .icon-bar {
   background: #f6f6f6; }
@@ -701,7 +751,7 @@ Gradient Background colors
   line-height: 50px;
   text-align: center;
   padding: 0 10px;
-  width: 220px;
+  width: 270px;
   font-family: 'Kaushan Script', cursive;
   font-weight: 500;
   height: 50px;
@@ -727,8 +777,19 @@ Gradient Background colors
 .breadcrumb {
   background-color: #fff; }
 
+.breadcrumb > li.active a {
+  color: #888;
+  cursor: default; }
+
+.breadcrumb > li:last-child a {
+  color: #777;
+  cursor: default; }
+
+.breadcrumb > li + li:before {
+  padding: 0 0px 0 5px; }
+
 .breadcrumb a {
-  color: #000; }
+  cursor: pointer; }
 
 .right-side > .content-header > .breadcrumb {
   float: right;
@@ -929,20 +990,20 @@ Gradient Background colors
   .relative {
     position: relative; }
   .row-offcanvas-right .sidebar-offcanvas {
-    right: -220px; }
+    right: -270px; }
   .row-offcanvas-left .sidebar-offcanvas {
-    left: -220px; }
+    left: -270px; }
   .row-offcanvas-right.active {
-    right: 220px; }
+    right: 270px; }
   .row-offcanvas-left.active {
-    left: 220px; }
+    left: 270px; }
   .sidebar-offcanvas {
     left: 0; }
   body.fixed .sidebar-offcanvas {
     margin-top: 50px;
-    left: -220px; }
+    left: -270px; }
   body.fixed .row-offcanvas-left.active .navbar {
-    left: 220px !important;
+    left: 270px !important;
     right: 0; }
   body.fixed .row-offcanvas-left.active .sidebar-offcanvas {
     left: 0px; } }
@@ -982,7 +1043,7 @@ Gradient Background colors
 .navbar-nav > .notifications-menu > .dropdown-menu,
 .navbar-nav > .messages-menu > .dropdown-menu,
 .navbar-nav > .tasks-menu > .dropdown-menu {
-  width: 260px;
+  width: 270px;
   padding: 0 0 0 0 !important;
   margin: 0 !important;
   top: 100%;

@@ -1,0 +1,55 @@
+<div class="app-applicationlist" ng-init="init()">
+  <div class="new-tile" ng-click="openCreateModel()">
+    <span class="fa fa-plus"></span>
+  </div>
+  <!-- start tile  -->
+  <div class="app-tile" ng-repeat="app in myApps">
+    <div class="module-top">
+        <div class="overlay" ng-click="viewApp(app)">
+           <div class="viewReport">
+               View
+           </div>                   
+        </div>
+      <div class='outputs-content-img'><img ng-src="{{'images/cloud.png'}}" /></div>   
+    </div>
+    <div class="moduleDetails">
+         <div class='per-info'>
+            <span class='info'>{{app.getAppName()}}</span>
+         </div><!-- end per info -->
+    </div>
+    
+    <div class="modulesActionsTop">
+       <i class="fa fa-pencil-square-o" uib-tooltip="编辑" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top" ng-click="editTag(tag)"></i>
+       <i class="fa fa-trash-o" uib-tooltip="删除" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top" ng-click="deleteTag(tag)"></i>
+    </div>
+  </div>
+  <!-- end tile  -->
+</div>
+
+<script type="text/ng-template" id="app.Portal.AppManager.ApplcationList.CreateModal">
+  <div class="modal-content" ng-init="init()">
+    <div class="modal-header">
+        <h3 class="modal-title">Create Application</h3>
+    </div>
+    <div class="modal-body clearfix">
+      <div class="col-sm-12">
+        <div class="form-group clearfix">
+          <label>Application Name</label>
+          <input ng-model="appBO.appName" type="text" class="form-control" placeholder="Application Name" />
+        </div>
+        <div class="form-group clearfix">
+          <label>Server</label>
+          <app-select options="serverOptions" selected-model="appBO.server" value-only="true"></app-select>
+        </div>
+        <div class="form-group clearfix">
+          <label>Application Plateform</label>
+          <div><label ng-repeat="platform in platforms" style="margin-right: 10px;"><input type="checkbox" ng-model="platform._checked" /> {{platform.text}}</label></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer ng-scope">
+        <button class="btn btn-success" type="button" ng-click="ok()">Create</button>
+        <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </div>
+</script>

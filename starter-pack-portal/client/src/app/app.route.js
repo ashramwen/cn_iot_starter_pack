@@ -6,17 +6,13 @@ angular.module('StarterPack')
       .state('app',{
         url: '', 
         templateUrl: 'app/app.html',
-        controller: 'AppController'
+        controller: 'AppController',
+        abstract: true
       })
       .state('app.Secure', {
         url: '/Secure',
         templateUrl: 'app/components/Secure/Secure.html',
         controller: 'SecureController',
-      })
-      .state('app.AppManager', {
-        url: '/AppManager',
-        templateUrl: 'app/components/AppManager/AppManager.html',
-        controller: 'AppManagerController',
       })
       .state('app.Portal', {
         url: '/Portal',
@@ -24,5 +20,5 @@ angular.module('StarterPack')
         controller: 'PortalController',
       });
 
-      $urlRouterProvider.otherwise('app/Secure/UserLogin');
+      $urlRouterProvider.otherwise('Secure');
   });

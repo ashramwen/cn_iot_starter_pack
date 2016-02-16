@@ -1,40 +1,48 @@
 'use strict';
 
 angular.module('StarterPack.Portal')
-  .factory('PortalService', ['AppUtils',function(AppUtils) {
+  .factory('PortalService', ['AppUtils', '$state', function(AppUtils, $state) {
 
     var PortalService = {};
-    PortalService.portalNavs = [
-        {name: 'Dashboard', state: 'app.Portal.Dashboard', icon:'fa-dashboard'},
-        {name: 'User Management', state: 'app.Portal.UserManager', icon: 'fa-user'},
-        {name: 'User Groups', state: 'app.Portal.UserGroupManager', icon: 'fa-group'},
-        {
-            name: 'Model Management', state: 'app.Portal.ModelManager.ModelList', icon: 'fa-cube',
-            subViews: [
-                {name: 'Models', state: 'app.Portal.ModelManager.ModelList'},
-                {name: 'Models', state: 'app.Portal.ModelManager.ModelInfo', hidden: true}
-            ]
-        },
-        {
-            name: 'Firmware Management', state: 'app.Portal.FirmwareManager.FirmwareList', icon: 'fa-user',
-            subViews: [
-                {name: 'Models', state: 'app.Portal.FirmwareManager.FirmwareList'},
-                {name: 'Models', state: 'app.Portal.FirmwareManager.FirmwareInfo', hidden: true}
-            ]
-        },
-        {name: 'Device Management', state: 'app.Portal.DeviceManager', icon: 'fa-desktop'},
-        {name: 'Device Simulation', state: 'app.Portal.VirtualDevice', icon: 'fa-gamepad'},
-        {name: 'Settings', state: 'app.Portal.Settings', icon: 'fa-cogs'},
-    ];
 
-    PortalService.allNavs = [];
-
-    function getSubNavs(nav, navArr){
-        navArr.concat(getSubNavs(nav));
-        
+    /**
+     * get state display name
+     * @param  {[type]} stateName [description]
+     * @return {[type]}           [description]
+     */
+    PortalService.getStateDisplayName = function(stateName){
+        return $state.get(stateName).getName();
     }
 
-    _.each(PortalService.portalNavs, function(){
+    /**
+     * get states chan for navigation map on portal top navigation bar
+     * @param  {[type]} currentState [description]
+     * @return {[type]}              [description]
+     */
+    PortalService.getStateChan = function(currentState){
+        var stateChan = [];
+        stateChan.push(currentState);
 
-    });
+        var statePointer = currentState;
+
+        while(statePointer.previous){
+            statePointer = $state.get(statePointer.previous);
+            stateChan.push(statePointer);
+        }
+        stateChan.reverse();
+        return stateChan;
+    };
+
+    /**
+     * if given state name is in involved state chan 
+     * @param  {[type]}  stateName [description]
+     * @return {Boolean}           [description]
+     */
+    PortalService.isActive = function(stateName){
+        var stateChan = PortalService.getStateChan($state.current);
+        var thisState = $state.get(stateName);
+        return stateChan.indexOf(thisState) >- 1;
+    }
+
+    return PortalService;
   }]);

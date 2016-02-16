@@ -325,20 +325,21 @@
 
                 refreshAppsCallbacks = {
                     success: function(response){
-                        var data, appsData;
+                        var data, appsData, apps;
+                        apps = [];
                         data = response.data;
                         appsData = data.apps;
                         __each(appsData, function(appData, index){
                             var app = new KiiPortalApp;
                             app = KiiPortalApp.fromJson(app, appData);
                             app.setAdmin(admin);
-                            data[index] = app;
+                            apps.push(app);
                         });
 
                         if(callbacks){
-                            callbacks.success.call(callbacks, data);
+                            callbacks.success.call(callbacks, apps);
                         }
-                        resolve(data);
+                        resolve(apps);
                     },
                     failure: function(response){
                         if(callbacks.failure) {
