@@ -27,7 +27,7 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
 
 
   }])
-  .controller('ModelListController.CreateModel', ['ApplicationService', 'AppUtils', '$scope', '$uibModalInstance', 'app', function(ApplicationService, AppUtils, $scope, $uibModalInstance, app){
+  .controller('ModelListController.CreateModel', ['ApplicationService', 'AppUtils', '$scope', '$uibModalInstance', 'app', 'ModelService',function(ApplicationService, AppUtils, $scope, $uibModalInstance, app, ModelService){
     
     $scope.modelBO = {};
 
