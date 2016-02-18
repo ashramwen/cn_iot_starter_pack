@@ -412,7 +412,7 @@
                 executeCallbacks = {
                     success: function(query, objects, nextQuery) {
                         __each(objects, function (object, index) {
-                            var tmpObj = _this.factory(app);
+                            var tmpObj = _this.factory(kiiApp);
                             tmpObj._cast(object);
                             objects[index] = tmpObj;
                         });

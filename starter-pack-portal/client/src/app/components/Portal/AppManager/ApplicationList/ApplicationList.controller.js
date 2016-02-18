@@ -13,41 +13,11 @@ angular.module('StarterPack.Portal.AppManager')
      * create application
      * @return {[type]} [description]
      */
-    $scope.openCreateModel = function(){
+    $scope.openCreateModal = function(){
         var modalInstance = $uibModal.open({
             animation: true,
             templateUrl: 'app.Portal.AppManager.ApplcationList.CreateModal',
-            controller: function(ApplicationService, AppUtils, $scope, $uibModalInstance){
-                $scope.appBO = {};
-
-                $scope.serverOptions = [
-                    {text: 'Japan', value: 'jp'},
-                    {text: 'China', value: 'cn3'},
-                    {text: 'America', value: 'us'}
-                ];
-
-                $scope.platforms = [
-                    {text: 'Android', value: 'android'},
-                    {text: 'iOS', value: 'ios'},
-                    {text: 'HTML 5', value: 'html5'}
-                ];
-
-                $scope.ok = function(){
-                    AppUtils.showLoading();
-                    $scope.appBO.platforms = _.pluck(_.where($scope.platforms, {_checked: true}), 'value');
-                    ApplicationService.createApp($scope.appBO).then(function(app){
-                        $uibModalInstance.close(app);
-                        $scope.$apply();
-                        AppUtils.hideLoading();
-                    }, function(){
-                        AppUtils.hideLoading();
-                    });
-                };
-                $scope.cancel = function(){
-                    $uibModalInstance.dismiss('cancel');
-                };
-                
-            },
+            controller: 'ApplicationListController.CreateApplication',
             size: 'md'
         });
 
@@ -56,6 +26,37 @@ angular.module('StarterPack.Portal.AppManager')
         }, function () {
             
         });
+    };
+    
+  }])
+  .controller('ApplicationListController.CreateApplication', ['ApplicationService', 'AppUtils', '$scope', '$uibModalInstance', function(ApplicationService, AppUtils, $scope, $uibModalInstance){
+    $scope.appBO = {};
+
+    $scope.serverOptions = [
+        {text: 'Japan', value: 'jp'},
+        {text: 'China', value: 'cn3'},
+        {text: 'America', value: 'us'}
+    ];
+
+    $scope.platforms = [
+        {text: 'Android', value: 'android'},
+        {text: 'iOS', value: 'ios'},
+        {text: 'HTML 5', value: 'html5'}
+    ];
+
+    $scope.ok = function(){
+        AppUtils.showLoading();
+        $scope.appBO.platforms = _.pluck(_.where($scope.platforms, {_checked: true}), 'value');
+        ApplicationService.createApp($scope.appBO).then(function(app){
+            $uibModalInstance.close(app);
+            $scope.$apply();
+            AppUtils.hideLoading();
+        }, function(){
+            AppUtils.hideLoading();
+        });
+    };
+    $scope.cancel = function(){
+        $uibModalInstance.dismiss('cancel');
     };
     
   }]);

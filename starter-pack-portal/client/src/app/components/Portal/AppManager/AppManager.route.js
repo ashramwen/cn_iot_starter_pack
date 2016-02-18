@@ -4,7 +4,7 @@ angular.module('StarterPack.Portal.AppManager')
   .config(function($stateProvider, $urlRouterProvider) {
     $stateProvider
       .state('app.Portal.AppManager.ApplicationList', {
-        url: '/Applications',
+        url: '/apps',
         templateUrl: 'app/components/Portal/AppManager/ApplicationList/ApplicationList.html',
         controller: 'ApplicationListController',
         getName: function(){
@@ -12,7 +12,7 @@ angular.module('StarterPack.Portal.AppManager')
         }
       })
       .state('app.Portal.AppManager.ApplicationEditor', {
-        url: '/Applications/:appId',
+        url: '/apps/:appId',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/ApplicationEditor.html',
         controller: 'ApplicationEditorController'
       });

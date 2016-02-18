@@ -1,6 +1,32 @@
 <div class="app-portal-modelmanager-modelinfo">
-  <!-- Sub State -->
-  <div ui-view>
-  </div>
-  <!-- End of Sub State-->
+  <uib-tabset>
+      <uib-tab heading="Model Info">
+        <div class="form-group">
+          <label>Model Name</label>
+          <input class="form-control" type="text" ng-model="modelInfo.modelName" />
+        </div>
+        <div class="form-group">
+          <button class="btn btn-success" ng-click="updateModel(modelInfo)">Update</button>
+        </div>
+        <div>
+          <label>Model Image</label>
+          <input type="file" id="modelImage" />
+        </div>
+        <div>
+          <img ng-src="{{modelInfo.imageUrl || 'images/bulb.jpeg' }}" width="200px">
+        </div>
+      </uib-tab>
+      <uib-tab heading="Devices">
+        
+      </uib-tab>
+      <uib-tab heading="Model Info">
+        
+      </uib-tab>
+      <uib-tab heading="Firmware Upgrate">
+        
+      </uib-tab>
+      <uib-tab heading="Industrial Schema">
+        
+      </uib-tab>
+    </uib-tabset>
 </div>

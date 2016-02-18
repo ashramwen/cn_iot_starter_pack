@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('StarterPack.Portal.AppManager').factory('AppManagerService', function () {
+angular.module('StarterPack.Portal.AppManager').factory('AppManagerService', function ($state) {
 
     var AppManagerService = {};
 
@@ -9,26 +9,26 @@ angular.module('StarterPack.Portal.AppManager').factory('AppManagerService', fun
      * @type {Array}
      */
     AppManagerService.portalNavs = [
-        {name: 'Dashboard', state: 'app.Portal.AppManager.ApplicationEditor.Dashboard', icon:'fa-dashboard'},
-        {name: 'Users', state: 'app.Portal.AppManager.ApplicationEditor.UserManager', icon: 'fa-user'},
-        {name: 'Groups', state: 'app.Portal.AppManager.ApplicationEditor.UserGroupManager', icon: 'fa-group'},
+        {name: 'Dashboard', state: $state.get('app.Portal.AppManager'), icon:'fa-dashboard'},
+        {name: 'Users', state: $state.get('app.Portal.AppManager.ApplicationEditor.UserManager'), icon: 'fa-user'},
+        {name: 'Groups', state: $state.get('app.Portal.AppManager.ApplicationEditor.UserGroupManager'), icon: 'fa-group'},
         {
             name: 'Model Management',
-            state: 'app.Portal.AppManager.ApplicationEditor.ModelManager.ModelList', icon: 'fa-cube',
+            state: $state.get('app.Portal.AppManager.ApplicationEditor.ModelManager'), icon: 'fa-cube',
             subViews: [
-                {name: 'Models', state: 'app.Portal.AppManager.ApplicationEditor.ModelManager.ModelList'}
+                {name: 'Models', state: $state.get('app.Portal.AppManager.ApplicationEditor.ModelManager.ModelList')}
             ]
         },
         {
             name: 'Firmware Management',
-            state: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList', icon: 'fa-user',
+            state: $state.get('app.Portal.AppManager.ApplicationEditor.FirmwareManager'), icon: 'fa-user',
             subViews: [
-                {name:'Firmwares', state: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList'}
+                {name:'Firmwares', state: $state.get('app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList')}
             ]
         },
-        {name: 'Device Management', state: 'app.Portal.AppManager.ApplicationEditor.DeviceManager', icon: 'fa-desktop'},
-        {name: 'Device Simulation', state: 'app.Portal.AppManager.ApplicationEditor.VirtualDevice', icon: 'fa-gamepad'},
-        {name: 'Settings', state: 'app.Portal.AppManager.ApplicationEditor.Settings', icon: 'fa-cogs'},
+        {name: 'Device Management', state: $state.get('app.Portal.AppManager.ApplicationEditor.DeviceManager'), icon: 'fa-desktop'},
+        {name: 'Device Simulation', state: $state.get('app.Portal.AppManager.ApplicationEditor.VirtualDevice'), icon: 'fa-gamepad'},
+        {name: 'Settings', state: $state.get('app.Portal.AppManager.ApplicationEditor.Settings'), icon: 'fa-cogs'},
     ];
 
     return AppManagerService;

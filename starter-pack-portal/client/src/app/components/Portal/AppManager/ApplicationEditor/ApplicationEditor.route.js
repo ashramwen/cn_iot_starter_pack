@@ -4,7 +4,7 @@ angular.module('StarterPack.Portal.AppManager')
   .config(function($stateProvider, $urlRouterProvider, AppConfig) {
     $stateProvider
       .state('app.Portal.AppManager.ApplicationEditor.ApplicationInfo', {
-        url: '/Applications/:appId',
+        url: '/Info',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/ApplicationInfo/ApplicationInfo.html',
         controller: 'ApplicationInfoController',
         getName: function(){
@@ -14,7 +14,7 @@ angular.module('StarterPack.Portal.AppManager')
         previous: 'app.Portal.AppManager.ApplicationList'
       })
       .state('app.Portal.AppManager.ApplicationEditor.Dashboard', {
-        url: '/apps/:appId/Dashboard',
+        url: '/Dashboard',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/Dashboard/Dashboard.html',
         controller: 'DashboardController',
         getName: function(){
@@ -23,7 +23,7 @@ angular.module('StarterPack.Portal.AppManager')
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       })
       .state('app.Portal.AppManager.ApplicationEditor.UserManager', {
-        url: '/apps/:appId/UserManager',
+        url: '/UserManager',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/UserManager/UserManager.html',
         controller: 'UserManagerController',
         getName: function(){
@@ -32,7 +32,7 @@ angular.module('StarterPack.Portal.AppManager')
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       })
       .state('app.Portal.AppManager.ApplicationEditor.UserGroupManager', {
-        url: '/apps/:appId/UserGroupManager',
+        url: '/UserGroupManager',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/UserGroupManager/UserGroupManager.html',
         controller: 'UserGroupManagerController',
         getName: function(){
@@ -41,27 +41,29 @@ angular.module('StarterPack.Portal.AppManager')
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       })
       .state('app.Portal.AppManager.ApplicationEditor.ModelManager', {
-        url: '/apps/:appId/ModelManager',
+        url: '/ModelManager',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/ModelManager/ModelManager.html',
         controller: 'ModelManagerController',
         abstract: true,
+        redirectTo: 'app.Portal.AppManager.ApplicationEditor.ModelManager.ModelList',
         getName: function(){
           return 'Model Management';
         },
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       })
       .state('app.Portal.AppManager.ApplicationEditor.FirmwareManager', {
-        url: '/apps/:appId/FirmwareManager',
+        url: '/FirmwareManager',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/FirmwareManager/FirmwareManager.html',
         controller: 'FirmwareManagerController',
         abstract: true,
         getName: function(){
           return 'Firmware Management';
         },
-        previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
+        previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo',
+        redirectTo: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList'
       })
       .state('app.Portal.AppManager.ApplicationEditor.DeviceManager', {
-        url: '/apps/:appId/DeviceManager',
+        url: '/DeviceManager',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/DeviceManager/DeviceManager.html',
         controller: 'DeviceManagerController',
         getName: function(){
@@ -70,7 +72,7 @@ angular.module('StarterPack.Portal.AppManager')
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       })
       .state('app.Portal.AppManager.ApplicationEditor.VirtualDevice', {
-        url: '/apps/:appId/VirtualDevice',
+        url: '/VirtualDevice',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/VirtualDevice/VirtualDevice.html',
         controller: 'VirtualDeviceController',
         getName: function(){
@@ -79,7 +81,7 @@ angular.module('StarterPack.Portal.AppManager')
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       })
       .state('app.Portal.AppManager.ApplicationEditor.DataAnalysis', {
-        url: '/apps/:appId/DataAnalysis',
+        url: '/DataAnalysis',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/DataAnalysis/DataAnalysis.html',
         controller: 'DataAnalysisController',
         getName: function(){
@@ -88,7 +90,7 @@ angular.module('StarterPack.Portal.AppManager')
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       })
       .state('app.Portal.AppManager.ApplicationEditor.Settings', {
-        url: '/apps/:appId/Settings',
+        url: '/Settings',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/Settings/Settings.html',
         controller: 'SettingsController',
         getName: function(){

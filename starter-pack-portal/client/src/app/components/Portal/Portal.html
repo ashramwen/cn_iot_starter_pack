@@ -48,14 +48,14 @@
             <!-- sidebar: style can be found in sidebar.less -->
             <section class="sidebar sidebar-right">
                 <ul class="sidebar-menu">
-                    <li ng-repeat="nav in portalNavs | orderBy: 'order'" ng-class="{'active':isActive(nav.state)}" ng-if="!nav.hidden" >
-                        <a ng-click="$state.go(nav.state, state.params)"><i class="fa fa-fw" ng-class="nav.icon"></i> {{nav.name}}<span class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level" uib-collapse="!isActive(nav.state)">
-                            <li ng-repeat="subNav in nav.subViews | orderBy: 'order'" ng-if="!subNav.hidden" ng-class="{'active': isActive(subNav.state)}">
-                                <a ng-click="$state.go(subNav.state, state.params)">{{subNav.name}}</a>
+                    <li ng-repeat="nav in portalNavs | orderBy: 'order'" ng-class="{'active':isActive(nav.state.name)}" ng-if="!nav.hidden" >
+                        <a ng-click="$state.go(!nav.state.abstract? nav.state.name: nav.state.redirectTo, $state.params)"><i class="fa fa-fw" ng-class="nav.icon"></i> {{nav.name}}<span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level" uib-collapse="!isActive(nav.state.name)">
+                            <li ng-repeat="subNav in nav.subViews | orderBy: 'order'" ng-if="!subNav.hidden" ng-class="{'active': isActive(subNav.state.name)}">
+                                <a ng-click="$state.go(!subNav.state.abstract? subNav.state.name: subNav.state.redirectTo, $state.params)">{{subNav.name}}</a>
                                 <ul class="nav nav-third-level" uib-collapse="!subNav._active">
-                                    <li ng-if="!thirdNav.hidden" ng-repeat="thirdNav in subNav.subViews | orderBy: '-order'"  ng-class="{'active': isActive(thirdNav.state)}">
-                                        <a ng-click="$state.go(thirdNav.state, state.params)">{{thirdNav.name}}</a>
+                                    <li ng-if="!thirdNav.hidden" ng-repeat="thirdNav in subNav.subViews | orderBy: '-order'"  ng-class="{'active': isActive(thirdNav.state.name)}">
+                                        <a ng-click="$$state.go(!thirdNav.state.abstract? thirdNav.state.name: thirdNav.state.redirectTo, $state.params)">{{thirdNav.name}}</a>
                                     </li>
                                 </ul>
                             </li>
@@ -73,8 +73,7 @@
             <section class="content">
                 <ol class="breadcrumb">
                     <li ng-repeat="nav in getStateChan($state.current)">
-                      <a ng-if="!nav.abstract" ui-sref="{{nav.name}}(state.params)">{{nav.getName()}}</a>
-                      <span ng-if="nav.abstract">{{nav.getName()}}</span>
+                      <a ui-sref="{{!nav.abstract? nav.name: nav.redirectTo}}(state.params)">{{nav.getName()}}</a>
                     </li>
                 </ol>
                 <div class="row portal-row" ng-if="$state.current.description && $state.current.description!=''")>

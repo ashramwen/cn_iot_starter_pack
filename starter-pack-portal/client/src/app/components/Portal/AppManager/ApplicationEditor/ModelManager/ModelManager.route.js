@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.ModelManager')
-  .config(function($stateProvider, $urlRouterProvider) {
+  .config(function($stateProvider, $urlRouterProvider, AppConfig) {
     $stateProvider
       .state('app.Portal.AppManager.ApplicationEditor.ModelManager.ModelList', {
         url: '/ModelList',
@@ -13,11 +13,12 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         previous: 'app.Portal.AppManager.ApplicationEditor.ModelManager'
       })
       .state('app.Portal.AppManager.ApplicationEditor.ModelManager.ModelInfo', {
-        url: '/ModelInfo',
+        url: '/:modelId/ModelInfo',
         templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/ModelManager/ModelInfo/ModelInfo.html',
         controller: 'ModelInfoController',
         getName: function(){
-          return 'Model Info';
+          var modelName = app.utils.getLocalStorageItem(AppConfig.NavNames.MODEL_NAME);
+          return modelName;
         },
         previous: 'app.Portal.AppManager.ApplicationEditor.ModelManager.ModelList'
       });
