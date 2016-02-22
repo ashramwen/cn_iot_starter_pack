@@ -71,13 +71,14 @@
             return new Promise(function (resolve, reject){
                 var refreshAppsCallbacks = {
                     success: function(apps){
+                        _this.setApps(apps);
                         if(callbacks){
                             callbacks.success.call(callbacks, apps);
                         }
                         resolve(apps);
                     },
                     failure: function(response){
-                        if(callbacks.failure) {
+                        if(callbacks && callbacks.failure) {
                             callbacks.failure.call(callbacks, response);
                         }
                         reject(response);

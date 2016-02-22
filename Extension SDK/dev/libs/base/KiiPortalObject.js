@@ -54,7 +54,7 @@
         };
 
         KiiPortalObject.prototype._cast = function(kiiObject){
-            var portalObject = this.constructor.factory(this.getKiiApp(), this.constructor._getBucketName());
+            var portalObject = this.constructor.factory(this.getKiiApp());
             __cast(portalObject, kiiObject);
             __cast(this, portalObject);
             this.init();
@@ -412,7 +412,7 @@
                 executeCallbacks = {
                     success: function(query, objects, nextQuery) {
                         __each(objects, function (object, index) {
-                            var tmpObj = _this.factory(app);
+                            var tmpObj = _this.factory(kiiApp);
                             tmpObj._cast(object);
                             objects[index] = tmpObj;
                         });

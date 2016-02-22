@@ -1,0 +1,24 @@
+.app-portal table[st-table] {
+  width: 100%; }
+  .app-portal table[st-table] span.fa-plus-circle, .app-portal table[st-table] span.fa-trash {
+    cursor: pointer; }
+  .app-portal table[st-table] span.fa-plus-circle {
+    color: #5cb85c; }
+  .app-portal table[st-table] span.fa-trash {
+    color: #d9534f; }
+
+.app-portal .tab-content {
+  padding: 20px 15px;
+  background: #fff;
+  border-left: solid 1px #ccc;
+  border-right: solid 1px #ccc;
+  border-bottom: solid 1px #ccc; }
+
+.app-portal .app-appmanager-applicationeditor div[ui-view].ng-enter {
+  animation: zoomIn 0.2s both ease-in;
+  z-index: 8888;
+  delay: 0.2s; }
+
+.app-portal .app-appmanager-applicationeditor div[ui-view].ng-leave {
+  animation: zoomOut 0.2s both ease-in;
+  z-index: 9999; }

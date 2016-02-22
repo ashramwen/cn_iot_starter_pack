@@ -1,0 +1,215 @@
+<div class="app-portal-firmwaremanager-firmwarenamespaceinfo">
+  <uib-tabset>
+    <!-- =========================== Unpublished firmwares ==================== -->
+    <uib-tab heading="Unpublished">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="new-firmware" ng-click="openFirmwareCreationModal()"><button>Create Firmware</button></div>
+          <!-- start of firmware -->
+          <div class="firmware" ng-repeat="firmware in unpublishedFirmwares | leftHalf">
+            <div class="header">
+              <div class="name">
+                <span>{{firmware.getName()}}</span>
+                <div class="sub-title">Modified: {{getTime(firmware._modified)}}</div>
+              </div>
+              <div class="operators">
+                <span class="fa fa-feed" uib-tooltip="Publish" ng-if="firmware.getDownloadURL()" ng-click="publishFirmware(firmware)"></span>
+                <span class="fa fa-plane" uib-tooltip="Push" ng-if="firmware.getDownloadURL()" ng-click="pushFirmware(firmware)"></span>
+                <span class="fa fa-edit" uib-tooltip="Edit" ng-click="openFirmwareEditorModal(firmware)"></span>
+                <span class="fa fa-trash" uib-tooltip="Delete" ng-click="removeFirmware(firmware)"></span>
+              </div>
+            </div>
+            <div class="body">
+              <div ng-if="firmware.getModels().join(',') || 'None models..'.length>0">
+                <div class="header">Applicable Models</div>
+                <div class="info">{{firmware.getModels().join(',') || 'None models..'}}</div>
+              </div>
+              <div class="header">Release Notes</div>
+              <div class="info">{{firmware.getDescription()}}</div>
+            </div>
+          </div>
+          <!-- end of firmware -->
+        </div>
+        <div class="col-md-6">
+          <!-- start of firmware -->
+          <div class="firmware" ng-repeat="firmware in unpublishedFirmwares | rightHalf">
+            <div class="header">
+              <div class="name">
+                <span>{{firmware.getName()}}</span>
+                <div class="sub-title">Modified: {{getTime(firmware._modified)}}</div>
+              </div>
+              <div class="operators">
+                <span class="fa fa-feed" uib-tooltip="Publish" ng-if="firmware.getDownloadURL()" ng-click="publishFirmware(firmware)"></span>
+                <span class="fa fa-plane" uib-tooltip="Push" ng-if="firmware.getDownloadURL()" ng-click="pushFirmware(firmware)"></span>
+                <span class="fa fa-edit" uib-tooltip="Edit" ng-click="openFirmwareEditorModal(firmware)"></span>
+                <span class="fa fa-trash" uib-tooltip="Delete" ng-click="removeFirmware(firmware)"></span>
+              </div>
+            </div>
+            <div class="body">
+              <div class="header">Applicable Models</div>
+              <div class="info">{{firmware.getModels().join(',') || 'None models..'}}</div>
+              <div class="header">Release Notes</div>
+              <div class="info">{{firmware.getDescription()}}</div>
+            </div>
+          </div>
+          <!-- end of firmware -->
+        </div>
+      </div>
+      <!-- =========================== end of Unpublished firmwares ==================== -->
+    </uib-tab>
+    <uib-tab heading="Published">
+      <!-- =========================== published firmwares ==================== -->
+      <div class="row">
+        <div class="col-md-6">
+          <!-- start of firmware -->
+          <div class="firmware" ng-repeat="firmware in publishedFirmwares | rightHalf">
+            <div class="header">
+              <div class="name">
+                <span>{{firmware.getName()}}</span>
+                <div class="sub-title">Modified: {{getTime(firmware._modified)}}</div>
+              </div>
+              <div class="operators">
+                <span class="fa fa-lock" ng-if="firmware._state == 'DISABLED'" uib-tooltip="Enable" ng-click="enableFirmware(firmware)"></span>
+                <span class="fa fa-unlock" ng-if="firmware._state != 'DISABLED'" uib-tooltip="Disable" ng-click="disableFirmware(firmware)"></span>
+                <span class="fa fa-plane" uib-tooltip="Push" ng-if="firmware._state != 'DISABLED'" ng-click="pushFirmware(firmware)"></span>
+                <span class="fa fa-edit" uib-tooltip="Edit" ng-click="openFirmwareEditorModal(firmware)"></span>
+              </div>
+            </div>
+            <div class="body">
+              <div class="header">Applicable Models</div>
+              <div class="info">{{firmware.getModels().join(',') || 'None models..'}}</div>
+              <div class="header">Release Notes</div>
+              <div class="info">{{firmware.getDescription()}}</div>
+            </div>
+          </div>
+          <!-- end of firmware -->
+        </div>
+        <div class="col-md-6">
+          <!-- start of firmware -->
+          <div class="firmware" ng-repeat="firmware in publishedFirmwares | leftHalf">
+            <div class="header">
+              <div class="name">
+                <span>{{firmware.getName()}}</span>
+                <div class="sub-title">Modified: {{getTime(firmware._modified)}}</div>
+              </div>
+              <div class="operators">
+                <span class="fa fa-lock" ng-if="firmware._state == 'DISABLED'" uib-tooltip="Enable" ng-click="enableFirmware(firmware)"></span>
+                <span class="fa fa-unlock" ng-if="firmware._state != 'DISABLED'" uib-tooltip="Disable" ng-click="disableFirmware(firmware)"></span>
+                <span class="fa fa-plane" uib-tooltip="Push" ng-if="firmware._state != 'DISABLED'" ng-click="pushFirmware(firmware)"></span>
+                <span class="fa fa-edit" uib-tooltip="Edit" ng-click="openFirmwareEditorModal(firmware)"></span>
+              </div>
+            </div>
+            <div class="body">
+              <div class="header">Applicable Models</div>
+              <div class="info">{{firmware.getModels().join(',') || 'None models..'}}</div>
+              <div class="header">Release Notes</div>
+              <div class="info">{{firmware.getDescription()}}</div>
+            </div>
+          </div>
+          <!-- end of firmware -->
+        </div>
+      </div>
+      <!-- =========================== end of published firmwares ==================== -->
+    </uib-tab>
+    <uib-tab heading="Pushed">
+      <!-- =========================== pushed firmwares ==================== -->
+      <div class="row">
+        <div class="col-md-6">
+          <!-- start of firmware -->
+          <div class="firmware" ng-repeat="firmware in pushedFirmwares | rightHalf">
+            <div class="header">
+              <div class="name">
+                <span>{{firmware.getName()}}</span>
+                <div class="sub-title">Modified: {{getTime(firmware._modified)}}</div>
+              </div>
+            </div>
+            <div class="body">
+              <div class="header">Applicable Models</div>
+              <div class="info">{{firmware.getModels().join(',') || 'None models..'}}</div>
+              <div class="header">Release Notes</div>
+              <div class="info">{{firmware.getDescription()}}</div>
+            </div>
+          </div>
+          <!-- end of firmware -->
+        </div>
+        <div class="col-md-6">
+          <!-- start of firmware -->
+          <div class="firmware" ng-repeat="firmware in pushedFirmwares | leftHalf">
+            <div class="header">
+              <div class="name">
+                <span>{{firmware.getName()}}</span>
+                <div class="sub-title">Modified: {{getTime(firmware._modified)}}</div>
+              </div>
+            </div>
+            <div class="body">
+              <div class="header">Applicable Models</div>
+              <div class="info">{{firmware.getModels().join(',') || 'None models..'}}</div>
+              <div class="header">Release Notes</div>
+              <div class="info">{{firmware.getDescription()}}</div>
+            </div>
+          </div>
+          <!-- end of firmware -->
+        </div>
+      </div>
+      <!-- =========================== end of pushed firmwares ==================== -->
+    </uib-tab>
+  </uib-tabset>
+</div>
+
+<script type="text/ng-template" id="app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareEditorModal">
+  <div class="modal-content" ng-init="init()">
+    <div class="modal-header">
+        <h3 class="modal-title">Edit Firmware</h3>
+    </div>
+    <div class="modal-body clearfix">
+      <div class="col-sm-12">
+        <div class="form-group">
+          <label>Firmware Name</label>
+          <input ng-model="firmwareBO.firmwareName" type="text" class="form-control" placeholder="Firmware Name" />
+        </div>
+        <div class="form-group clearfix">
+          <label>Firmware Description</label>
+          <textarea ng-model="firmwareBO.description" type="text" class="form-control" placeholder="Firmware Description"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Upload Firmware File</label>
+          <input type="file" id="firmwareFile" />
+        </div>
+        <div class="form-group">
+          <button class="btn btn-success" ng-click="uploadFirmwareFile()">Upload</button>
+        </div>
+        <div class="form-group" ng-if="firmware.getDownloadURL()">
+          <a href="{{firmware.getDownloadURL()}}" target="_blank">Click to Download</a>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer ng-scope">
+        <button class="btn btn-success" type="button" ng-click="ok()">Create</button>
+        <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareCreateModal">
+  <div class="modal-content" ng-init="init()">
+    <div class="modal-header">
+        <h3 class="modal-title">Create Firmware</h3>
+    </div>
+    <div class="modal-body clearfix">
+      <div class="col-sm-12">
+        <div class="form-group clearfix">
+          <label>Firmware Name</label>
+          <input ng-model="firmwareBO.firmwareName" type="text" class="form-control" placeholder="Firmware Name" />
+        </div>
+        <div class="form-group clearfix">
+          <label>Firmware Description</label>
+          <textarea ng-model="firmwareBO.description" type="text" class="form-control" placeholder="Firmware Description"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer ng-scope">
+        <button class="btn btn-success" type="button" ng-click="ok()">Create</button>
+        <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </div>
+</script>

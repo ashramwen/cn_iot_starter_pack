@@ -1,0 +1,92 @@
+<div class="app-portal skin-black" id="wrapper" ng-init="portalInit()">
+    <header class="header">
+        <a href="index.html" class="logo">
+            Starter Pack
+        </a>
+        <!-- Header Navbar: style can be found in header.less -->
+        <nav class="navbar navbar-static-top" role="navigation">
+            <div class="navbar-right">
+                <ul class="nav navbar-nav">
+                    <!-- Messages: style can be found in dropdown.less-->
+                    <li class="dropdown messages-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-envelope"></i>
+                        </a>
+                    </li>
+                    <li class="dropdown tasks-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-tasks"></i>
+                        </a>
+                    </li>
+                    <!-- User Account: style can be found in dropdown.less -->
+                    <li class="dropdown user user-menu" uib-dropdown>
+                        <a href="#" class="dropdown-toggle" uib-dropdown-toggle>
+                            <i class="fa fa-user"></i>
+                            <span>{{credential.userName}} <i class="caret"></i></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-custom dropdown-menu-right">
+                            <li>
+                                <a ng-click="logout()"><i class="fa fa-ban fa-fw pull-right"></i> Logout</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="wrapper row-offcanvas row-offcanvas-left">
+        <!-- Left side column. contains the logo and sidebar -->
+        <aside class="left-side" style="height: 100%;">
+            <section class="sidebar sidebar-left" ng-class="{'shrink': menuOff && portalNavs.length > 0}">
+                <a uib-tooltip="Toggle Menu" tooltip-placement="right" ng-click="toggleMenu()" class="toggle-button" ng-class="{'active': !menuOff}"><span class="fa fa-bars"></span></a>
+                <ul class="sidebar-menu">
+                    <li>
+                        <a ui-sref="app.Portal.AppManager.ApplicationList" class="active" uib-tooltip="Applications" tooltip-placement="right"><span class="fa fa-cloud"></span>Applications</a>
+                    </li>
+                </ul>
+            </section>
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar sidebar-right">
+                <ul class="sidebar-menu">
+                    <li ng-repeat="nav in portalNavs | orderBy: 'order'" ng-class="{'active':isActive(nav.state.name)}" ng-if="!nav.hidden" >
+                        <a ng-click="$state.go(!nav.state.abstract? nav.state.name: nav.state.redirectTo, $state.params)"><i class="fa fa-fw" ng-class="nav.icon"></i> {{nav.name}}<span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level" uib-collapse="!isActive(nav.state.name)">
+                            <li ng-repeat="subNav in nav.subViews | orderBy: 'order'" ng-if="!subNav.hidden" ng-class="{'active': isActive(subNav.state.name)}">
+                                <a ng-click="$state.go(!subNav.state.abstract? subNav.state.name: subNav.state.redirectTo, $state.params)">{{subNav.name}}</a>
+                                <ul class="nav nav-third-level" uib-collapse="!subNav._active">
+                                    <li ng-if="!thirdNav.hidden" ng-repeat="thirdNav in subNav.subViews | orderBy: '-order'"  ng-class="{'active': isActive(thirdNav.state.name)}">
+                                        <a ng-click="$$state.go(!thirdNav.state.abstract? thirdNav.state.name: thirdNav.state.redirectTo, $state.params)">{{thirdNav.name}}</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <!-- /.nav-second-level -->
+                    </li>
+                </ul>
+            </section>
+            <!-- /.sidebar -->
+        </aside>
+
+        <!-- Right side column. Contains the navbar and content of the page -->
+        <aside class="right-side shrink">
+            <!-- Main content -->
+            <section class="content">
+                <ol class="breadcrumb">
+                    <li ng-repeat="nav in getStateChan($state.current)">
+                      <a ui-sref="{{!nav.abstract? nav.name: nav.redirectTo}}(state.params)">{{nav.getName()}}</a>
+                    </li>
+                </ol>
+                <div class="row portal-row" ng-if="$state.current.description && $state.current.description!=''")>
+                    <div class="module-description">
+                        {{$state.current.description}}
+                    </div>
+                </div>
+                <div>
+                    <div ui-view class="portal-content-body"></div>
+                </div>
+            </section><!-- /.content -->
+        </aside><!-- /.right-side -->
+    </div>
+
+</div>
+<!-- /#wrapper -->

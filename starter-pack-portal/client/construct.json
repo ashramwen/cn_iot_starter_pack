@@ -1,0 +1,67 @@
+{
+    "appName": "StarterPack",
+    "structure": {
+        "name": "app",
+        "subModules":[
+            {
+                "name": "AppShared"
+            },
+            {
+                "name": "Secure"
+            },
+            {
+                "name": "AppManager"
+            },
+            {
+                "name": "Portal",
+                "subModules": [
+                    {
+                        "name": "Dashboard",
+                        "isModule": true
+                    },
+                    {
+                        "name": "UserManager",
+                        "isModule": true
+                    },
+                    {
+                        "name": "UserGroupManager",
+                        "isModule": true
+                    },
+                    {
+                        "name": "ModelManager",
+                        "subModules": [
+                            {"name": "ModelList"},
+                            {"name": "ModelInfo"}
+                        ],
+                        "isModule": true,
+                        "abstract": true
+                    },
+                    {
+                        "name": "FirmwareManager",
+                        "subModules": [
+                            {"name": "FirmwareList"},
+                            {"name": "FirmwareInfo"}
+                        ],
+                        "isModule": true,
+                        "abstract": true
+                    },
+                    {
+                        "name": "DeviceManager",
+                        "isModule": true
+                    },
+                    {
+                        "name": "VirtualDevice",
+                        "isModule": true
+                    },
+                    {
+                        "name": "DataAnalysis",
+                        "isModule": true
+                    },
+                    {
+                        "name": "Settings"
+                    }
+                ]
+            }
+        ]
+    }
+}

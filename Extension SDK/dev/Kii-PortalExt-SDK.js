@@ -12,7 +12,8 @@
     root.KiiExtensionBuckets = {
         FIRMWARE: 'FIRMWARE_BUCKET',
         MODEL: 'MODEL_BUCKET',
-        TAG: 'TAG_BUCKET'
+        TAG: 'TAG_BUCKET',
+        FIRMWARE_NAMESPACE: 'FIRMWARE_NAMESPACE'
     };
 
     /**

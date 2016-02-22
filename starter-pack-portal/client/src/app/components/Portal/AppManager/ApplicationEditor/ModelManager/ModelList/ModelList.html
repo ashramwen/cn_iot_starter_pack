@@ -1,0 +1,48 @@
+<div class="app-portal-modelmanager-modellist">
+  <div class="new-tile" ng-click="openCreateModal()">
+    <span class="fa fa-plus"></span>
+  </div>
+  <!-- start tile  -->
+  <div class="app-tile" ng-repeat="model in myModels">
+    <div class="module-top">
+        <div class="overlay" ng-click="viewModel(model)">
+           <div class="viewReport">
+               View
+           </div>                   
+        </div>
+      <div class='outputs-content-img'><img ng-src="{{model.getImageUrl() || 'images/bulb.jpeg'}}" /></div>   
+    </div>
+    <div class="moduleDetails">
+         <div class='per-info'>
+            <span class='info'>{{model.getName()}}</span>
+         </div><!-- end per info -->
+    </div>
+    
+    <div class="modulesActionsTop">
+       <i class="fa fa-pencil-square-o" uib-tooltip="Edit" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top" ng-click="editModel(tag)"></i>
+       <i class="fa fa-trash-o" uib-tooltip="Delete" uib-tooltip-trigger="mouseenter" uib-tooltip-placement="top" ng-click="deleteModel(tag)"></i>
+    </div>
+  </div>
+  <!-- end tile  -->
+</div>
+
+
+<script type="text/ng-template" id="app.Portal.AppManager.ApplicationEditor.ModelManager.CreateModal">
+  <div class="modal-content" ng-init="init()">
+    <div class="modal-header">
+        <h3 class="modal-title">Create Model</h3>
+    </div>
+    <div class="modal-body clearfix">
+      <div class="col-sm-12">
+        <div class="form-group clearfix">
+          <label>Model Name</label>
+          <input ng-model="modelBO.modelName" type="text" class="form-control" placeholder="Model Name" />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer ng-scope">
+        <button class="btn btn-success" type="button" ng-click="ok()">Create</button>
+        <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </div>
+</script>

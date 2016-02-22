@@ -1,0 +1,29 @@
+@import 'src/app/components/AppShared/scss/global.scss';
+.app-portal{
+
+    table[st-table]{
+        width: 100%;
+        span{
+            &.fa-plus-circle, &.fa-trash{
+                cursor: pointer;
+            }
+            &.fa-plus-circle{
+                color: $success;
+            }
+            &.fa-trash{
+                color: $danger;
+            }
+        }
+    }
+
+    .tab-content{
+        padding: 20px 15px;
+        background: #fff;
+        border-left: solid 1px #ccc;
+        border-right: solid 1px #ccc;
+        border-bottom: solid 1px #ccc;
+    }
+
+    .app-appmanager-applicationeditor div[ui-view].ng-enter{ animation: zoomIn 0.2s both ease-in; z-index: 8888; delay:0.2s;}
+    .app-appmanager-applicationeditor div[ui-view].ng-leave{ animation: zoomOut 0.2s both ease-in; z-index: 9999; }
+}

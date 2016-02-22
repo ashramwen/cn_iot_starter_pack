@@ -36,12 +36,12 @@
                 _this._models = models;
             };
 
-            this.getFirmwares = function(){
-                return _this._firmwares;
+            this.getFirmwareNamespaces = function(){
+                return _this._firmwareNamespaces;
             };
 
-            this.setFirmwares = function(firmwares){
-                _this._firmwares = firmwares;
+            this.setFirmwareNamespaces = function(firmwareNamespaces){
+                _this._firmwareNamespaces = firmwareNamespaces;
             };
 
             this.getSiteURL = function(){
@@ -325,20 +325,21 @@
 
                 refreshAppsCallbacks = {
                     success: function(response){
-                        var data, appsData;
+                        var data, appsData, apps;
+                        apps = [];
                         data = response.data;
                         appsData = data.apps;
                         __each(appsData, function(appData, index){
                             var app = new KiiPortalApp;
                             app = KiiPortalApp.fromJson(app, appData);
                             app.setAdmin(admin);
-                            data[index] = app;
+                            apps.push(app);
                         });
 
                         if(callbacks){
-                            callbacks.success.call(callbacks, data);
+                            callbacks.success.call(callbacks, apps);
                         }
-                        resolve(data);
+                        resolve(apps);
                     },
                     failure: function(response){
                         if(callbacks.failure) {
@@ -443,8 +444,8 @@
          * @param UUID
          * @returns {*}
          */
-        KiiPortalApp.prototype.getFirmwareByID = function(id, callbacks){
-            return KiiPortalFirmware.refreshByID(this, id, callbacks);
+        KiiPortalApp.prototype.getFirmwareNamespaceByID = function(id, callbacks){
+            return KiiPortalFirmwareNamespace.refreshByID(this, id, callbacks);
         };
 
 
@@ -454,9 +455,9 @@
          * @returns {Array|*}
          * @private
          */
-        KiiPortalApp.prototype._addFirmware = function(firmware){
-            this._firmwares.push(firmware);
-            return this._firmwares;
+        KiiPortalApp.prototype._addFirmwareNamespace = function(firmwareNamespace){
+            this._firmwareNamespaces.push(firmwareNamespace);
+            return this._firmwareNamespaces;
         };
 
         /**
@@ -465,9 +466,9 @@
          * @returns {Array|*}
          * @private
          */
-        KiiPortalApp.prototype._removeFirmware = function(firmware){
-            __remove(this._firmwares, firmware);
-            return this._firmwares;
+        KiiPortalApp.prototype._removeFirmwareNamespace = function(firmwareNamespace){
+            __remove(this._firmwareNamespaces, firmwareNamespace);
+            return this._firmwareNamespaces;
         };
 
 
@@ -476,8 +477,8 @@
          * create a firmware
          * @returns {KiiPortalFirmware}
          */
-        KiiPortalApp.prototype.createFirmware = function(){
-            return KiiPortalFirmware.factory(this);
+        KiiPortalApp.prototype.createFirmwareNamespace = function(){
+            return KiiPortalFirmwareNamespace.factory(this);
         };
 
         /**
@@ -485,8 +486,8 @@
          * @param callbacks
          * @returns {Promise}
          */
-        KiiPortalApp.prototype.refreshFirmwares = function(callbacks){
-            return KiiPortalFirmware._getAll(this, callbacks);
+        KiiPortalApp.prototype.refreshFirmwareNamespaces = function(callbacks){
+            return KiiPortalFirmwareNamespace._getAll(this, callbacks);
         };
 
         /* =================================== end of firmware ===================================================== */
