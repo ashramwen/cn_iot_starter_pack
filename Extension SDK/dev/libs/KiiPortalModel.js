@@ -18,8 +18,7 @@
             this._things = null;
             this._imageUrl = null;
             this._firmwares = [];
-            this._firmwareName = null;
-
+            this._firmwareNamespace = null;
 
 
             this.getImageUrl = function(){
@@ -48,12 +47,12 @@
                 _this.set('firmwares', _this._firmwares);
             };
 
-            this.setFirmwareName = function(firmwareName){
-                _this._firmwareName = firmwareName;
-                _this.setFirmwareName(firmwareName);
+            this.setFirmwareNamespace = function(firmwareNamespace){
+                _this._firmwareNamespace = firmwareNamespace;
+                _this.set('firmwareNamespace' ,firmwareNamespace);
             };
-            this.getFirmwareName = function(){
-                return _this._firmwareName;
+            this.getFirmwareNamespace = function(){
+                return _this.get('firmwareNamespace');
             };
 
         }
@@ -68,6 +67,7 @@
         KiiPortalModel.prototype.init = function(){
             this.setName(_super.prototype.get.call(this, 'name'));
             this.setImageUrl(_super.prototype.get.call(this, 'imageUrl'));
+            this.setFirmwareNamespace(_super.prototype.get.call(this, 'firmwareNamespace'));
             this.setFirmwares(_super.prototype.get.call(this, 'firmwares'));
         };
 
@@ -137,9 +137,9 @@
         KiiPortalModel.prototype.addFirmware = function(firmware, callbacks){
             var _this = this;
             if(this._firmwares.indexOf(firmware.getUUID())>-1) return null;
-            var addModelPromise = firmware.addModel(this);
             this._firmwares.push(firmware.getUUID());
-
+            var addModelPromise = firmware.addModel(this);
+            
             return new Promise(function(resolve, reject){
 
                 var saveCallbacks = {

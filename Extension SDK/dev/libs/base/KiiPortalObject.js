@@ -54,7 +54,7 @@
         };
 
         KiiPortalObject.prototype._cast = function(kiiObject){
-            var portalObject = this.constructor.factory(this.getKiiApp(), this.constructor._getBucketName());
+            var portalObject = this.constructor.factory(this.getKiiApp());
             __cast(portalObject, kiiObject);
             __cast(this, portalObject);
             this.init();

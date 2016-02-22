@@ -1,25 +1,25 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.FirmwareManager')
-  .config(function($stateProvider, $urlRouterProvider) {
-    $stateProvider
-      .state('app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList', {
-        url: '/FirmwareList',
-        templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/FirmwareManager/FirmwareList/FirmwareList.html',
-        controller: 'FirmwareListController',
-        getName: function(){
-          return 'Firmwares';
-        },
-        previous: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager'
-      })
-      .state('app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareInfo', {
-        url: '/FirmwareInfo',
-        templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/FirmwareManager/FirmwareInfo/FirmwareInfo.html',
-        controller: 'FirmwareInfoController',
-        getName: function(){
-          var firmwareName = app.utils.getLocalStorageItem('myFirmwareName');
-          return firmwareName;
-        },
-        previous: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList'
-      });
-  });
+  .config(['$stateProvider', '$urlRouterProvider', 'AppConfig', function($stateProvider, $urlRouterProvider, AppConfig) {
+      $stateProvider
+        .state('app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareNamespaceList', {
+          url: '/FirmwareNamespaceList',
+          templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/FirmwareManager/FirmwareNamespaceList/FirmwareNamespaceList.html',
+          controller: 'FirmwareNamespaceListController',
+          getName: function(){
+            return 'FirmwareNamespaces';
+          },
+          previous: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager'
+        })
+        .state('app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareNamespaceInfo', {
+          url: ':firmwareNamespaceId/FirmwareNamespaceInfo',
+          templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/FirmwareManager/FirmwareNamespaceInfo/FirmwareNamespaceInfo.html',
+          controller: 'FirmwareNamespaceInfoController',
+          getName: function(){
+            var firmwareNamespaceName = app.utils.getLocalStorageItem(AppConfig.NavNames.FIRMWARE_NAMESPACE_NAME);
+            return firmwareNamespaceName;
+          },
+          previous: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareNamespaceList'
+        });
+    }]);

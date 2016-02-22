@@ -1,6 +1,21 @@
 @import 'src/app/components/AppShared/scss/global.scss';
 .app-portal{
 
+    table[st-table]{
+        width: 100%;
+        span{
+            &.fa-plus-circle, &.fa-trash{
+                cursor: pointer;
+            }
+            &.fa-plus-circle{
+                color: $success;
+            }
+            &.fa-trash{
+                color: $danger;
+            }
+        }
+    }
+
     .tab-content{
         padding: 20px 15px;
         background: #fff;

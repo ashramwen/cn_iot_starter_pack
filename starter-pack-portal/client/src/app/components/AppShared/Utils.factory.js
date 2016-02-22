@@ -112,7 +112,7 @@ angular.module('StarterPack.AppShared')
                 template += '    </div>';
                 template += '  </div>';
                 template += '  <div class="modal-footer ng-scope">';
-                template += '      <button class="btn btn-primary" style="width:100%;" type="button" ng-click="ok()">OK</button>';
+                template += '      <button class="btn btn-primary" style="width:100%;" type="button" ng-click="ok()">Ok</button>';
                 template += '  </div>';
                 template += '</div>';
                 var modalInstance = $uibModal.open({
@@ -140,7 +140,7 @@ angular.module('StarterPack.AppShared')
                 template += '    </div>';
                 template += '  </div>';
                 template += '  <div class="modal-footer ng-scope">';
-                template += '      <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>';
+                template += '      <button class="btn btn-primary" type="button" ng-click="ok()">Confirm</button>';
                 template += '      <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>';
                 template += '  </div>';
                 template += '</div>';

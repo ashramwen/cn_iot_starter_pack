@@ -323,7 +323,8 @@
     root.KiiExtensionBuckets = {
         FIRMWARE: 'FIRMWARE_BUCKET',
         MODEL: 'MODEL_BUCKET',
-        TAG: 'TAG_BUCKET'
+        TAG: 'TAG_BUCKET',
+        FIRMWARE_NAMESPACE: 'FIRMWARE_NAMESPACE'
     };
 
     /**
@@ -419,7 +420,7 @@
         };
 
         KiiPortalObject.prototype._cast = function(kiiObject){
-            var portalObject = this.constructor.factory(this.getKiiApp(), this.constructor._getBucketName());
+            var portalObject = this.constructor.factory(this.getKiiApp());
             __cast(portalObject, kiiObject);
             __cast(this, portalObject);
             this.init();
@@ -1033,12 +1034,12 @@
                 _this._models = models;
             };
 
-            this.getFirmwares = function(){
-                return _this._firmwares;
+            this.getFirmwareNamespaces = function(){
+                return _this._firmwareNamespaces;
             };
 
-            this.setFirmwares = function(firmwares){
-                _this._firmwares = firmwares;
+            this.setFirmwareNamespaces = function(firmwareNamespaces){
+                _this._firmwareNamespaces = firmwareNamespaces;
             };
 
             this.getSiteURL = function(){
@@ -1441,8 +1442,8 @@
          * @param UUID
          * @returns {*}
          */
-        KiiPortalApp.prototype.getFirmwareByID = function(id, callbacks){
-            return KiiPortalFirmware.refreshByID(this, id, callbacks);
+        KiiPortalApp.prototype.getFirmwareNamespaceByID = function(id, callbacks){
+            return KiiPortalFirmwareNamespace.refreshByID(this, id, callbacks);
         };
 
 
@@ -1452,9 +1453,9 @@
          * @returns {Array|*}
          * @private
          */
-        KiiPortalApp.prototype._addFirmware = function(firmware){
-            this._firmwares.push(firmware);
-            return this._firmwares;
+        KiiPortalApp.prototype._addFirmwareNamespace = function(firmwareNamespace){
+            this._firmwareNamespaces.push(firmwareNamespace);
+            return this._firmwareNamespaces;
         };
 
         /**
@@ -1463,9 +1464,9 @@
          * @returns {Array|*}
          * @private
          */
-        KiiPortalApp.prototype._removeFirmware = function(firmware){
-            __remove(this._firmwares, firmware);
-            return this._firmwares;
+        KiiPortalApp.prototype._removeFirmwareNamespace = function(firmwareNamespace){
+            __remove(this._firmwareNamespaces, firmwareNamespace);
+            return this._firmwareNamespaces;
         };
 
 
@@ -1474,8 +1475,8 @@
          * create a firmware
          * @returns {KiiPortalFirmware}
          */
-        KiiPortalApp.prototype.createFirmware = function(){
-            return KiiPortalFirmware.factory(this);
+        KiiPortalApp.prototype.createFirmwareNamespace = function(){
+            return KiiPortalFirmwareNamespace.factory(this);
         };
 
         /**
@@ -1483,8 +1484,8 @@
          * @param callbacks
          * @returns {Promise}
          */
-        KiiPortalApp.prototype.refreshFirmwares = function(callbacks){
-            return KiiPortalFirmware._getAll(this, callbacks);
+        KiiPortalApp.prototype.refreshFirmwareNamespaces = function(callbacks){
+            return KiiPortalFirmwareNamespace._getAll(this, callbacks);
         };
 
         /* =================================== end of firmware ===================================================== */
@@ -1557,12 +1558,22 @@
             __bindMethod(_this);
 
             this._name = null;
-            this._versionName = null;
-            this._versions = [];
             this._models = [];
             this._state = null;
             this._downloadURL = null;
             this._description = null;
+            this._namespace = null;
+            this.namespace = null;
+
+            this.setNamespace = function(namespace){
+                this._namespace = namespace;
+                _this.set('namespace', namespace);
+            };
+
+            this.getNamespace = function(){
+                return _this.get('namespace');
+            };
+
 
             this.setDownloadURL = function(url){
                 _this._downloadURL = url;
@@ -1588,20 +1599,6 @@
                 _this.set('name', name);
             };
 
-            /** get current version of this firmware
-             @return {[KiiPortalFirmwareVersion]} of this firmware.
-             */
-            this.getVersionName = function () {
-                return _this.get('versionName');
-            };
-            /** set current version of this firmware
-             @return {String} name of this firmware.
-             */
-            this.setVersionName = function (currentVersion) {
-                _this._versionName = currentVersion;
-                _this.set('versionName', currentVersion);
-            };
-
 
             this.setState = function(state){
                 _this._state = state;
@@ -1610,6 +1607,15 @@
             this.getState = function(){
                 return _this.get('state');
             }
+
+            this.setDescription = function(description){
+                _this.description = description;
+                _this.set('description', description);
+            };
+
+            this.getDescription = function(){
+                return _this.get('description');
+            };
         }
 
         KiiPortalFirmware._bucketName = root.KiiExtensionBuckets.FIRMWARE;
@@ -1623,8 +1629,8 @@
         KiiPortalFirmware.prototype.addModel = function(model, callbacks){
             var _this = this;
             if(this._models.indexOf(model.getName())>-1) return null;
-            var addFirmwarePromise = model.addFirmware(this);
             this._models.push(model.getName());
+            var addFirmwarePromise = model.addFirmware(this);
 
             return new Promise(function(resolve, reject){
                 var saveCallbacks = {
@@ -1642,18 +1648,8 @@
                     }
                 };
 
-                if(addFirmwarePromise){
-                    addFirmwarePromise.then(function(){
-                        _this.set('models', _this._models);
-                        _this.save(saveCallbacks);
-                    },function(error){
-                        saveCallbacks.failure(error);
-                        reject(error);
-                    });
-                }else{
-                    this.set('models', _this._models);
-                    _this.save(saveCallbacks);
-                }
+                _this.set('models', _this._models);
+                _this.save(saveCallbacks);
             });
         };
         KiiPortalFirmware.prototype.getModels = function(){
@@ -1885,11 +1881,14 @@
 
             return new Promise(function(resolve, reject){
                 var finishedCount = 0;
+
+                if(models.length == 0){
+                    reject('No model uses this firmware, push command is rejected!');
+                }
                 __each(models, function(modelName){
                     var bucketName, bucket, firmware;
 
                     firmware = _this.clone();
-
 
                     bucketName = ReservedBucketPrefix.MODEL + modelName;
                     bucket = _this.getKiiApp().getAdminContext().bucketWithName(bucketName);
@@ -1953,9 +1952,24 @@
         /**
          * publish this firmware
          */
-        KiiPortalFirmware.prototype.publish = function (){
+        KiiPortalFirmware.prototype.publish = function (callbacks){
+            var _this = this;
             return new Promise(function(resolve, reject){
-                this.setState(KiiPortalFirmware.StateEnum.PUBLISHED);
+                _this.setState(KiiPortalFirmware.StateEnum.PUBLISHED);
+                _this.save({
+                    success: function(){
+                        if(callbacks && callbacks.success){
+                            callbacks.success();
+                        }
+                        resolve();
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                });
             });
         };
 
@@ -1970,7 +1984,7 @@
             return new Promise(function(resolve, reject){
                 var deleteCallbacks = {
                     success: function(){
-                        _this._kiiApp._removeFirmware(_this);
+                        _this.namespace._removeFirmware(_this);
                         if(callbacks && callbacks.success){
                             callbacks.success(_this);
                         }
@@ -1998,7 +2012,7 @@
                 var saveCallbacks = {
                     success: function(firmware){
                         if(createFlag){
-                            _this._kiiApp._addFirmware(_this);
+                            _this.namespace._addFirmware(_this);
                         }
                         if(callbacks && callbacks.success){
                             callbacks.success(_this);
@@ -2021,10 +2035,15 @@
          * @override
          * @returns {KiiPortalFirmware}
          */
-        KiiPortalFirmware.factory = function (kiiApp) {
-            var firmware = _super.factory.call(this, kiiApp);
+        KiiPortalFirmware.factory = function (kiiApp, firmwareNamespace) {
+            var firmware;
+            firmware = _super.factory.call(this, kiiApp);
             firmware.setState(KiiPortalFirmware.StateEnum.CREATED);
-
+            if(firmwareNamespace){
+                firmware.setNamespace(firmwareNamespace.getName());
+                firmware.namespace = firmwareNamespace;
+            }
+        
             return firmware;
         };
 
@@ -2035,9 +2054,41 @@
          */
         KiiPortalFirmware.prototype.init = function(){
             this.setName(this.get('name'));
-            this.setVersionName(this.get('versionName'));
+            this.setNamespace(this.get('namespace'));
             this.setState(this.get('state'));
-            this.setModels((this.get('models')))
+            this.setModels((this.get('models')));
+        };
+
+
+        KiiPortalFirmware._withFirmwareNamespace = function(firmwareNamespace, callbacks, pageIndex, numberPerPage){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks, clause, app;
+
+
+                app = firmwareNamespace.getKiiApp();
+                clause = KiiClause.equals("namespace", firmwareNamespace.getName());
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause(clause);
+
+                getAllCallbacks = {
+                    success: function(query, firmwares, nextQuery){
+                        firmwareNamespace.setFirmwares(firmwares);
+                        __each(firmwares, function(firmware){
+                            firmware.namespace = firmwareNamespace;
+                        });
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, firmwares, nextQuery);
+                        }
+                        resolve(query, firmwares, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+                // execute query
+                return _this.executeQuery(app ,all_query, getAllCallbacks);
+            });
         };
 
 
@@ -2077,180 +2128,197 @@
         return KiiPortalFirmware;
     })(KiiPortalObject);
 
-
+    
     /**
-     * currently disabled. please don't use it.
+     @class Firmware class
      */
-    root.KiiPortalFirmwareVersion = (function (KiiObject) {
+    root.KiiPortalFirmwareNamespace = (function (KiiPortalObject) {
         var _super;
-        _super = KiiObject;
-        /**
-         @class Firmware version class
-         */
-        __inherits(KiiPortalFirmwareVersion, KiiObject);
-        function KiiPortalFirmwareVersion() {
+
+        _super = KiiPortalObject;
+
+        KiiPortalFirmwareNamespace.prototype = new _super();
+        __inherits(KiiPortalFirmwareNamespace, _super);
+        KiiPortalFirmwareNamespace.prototype.constructor = KiiPortalFirmwareNamespace;
+
+        function KiiPortalFirmwareNamespace() {
             var _this = this;
-            this._firmwareID = null;
-            this._versionCode = null;
-            this._downloadUrl = null;
-            this._published = null;
-            this._createdDate = null;
-            this._publishedDate = null;
-            this._description = null;
+            __bindMethod(_this);
 
-            this.setFirmwareID = function (firmwareID) {
-                _this._firmwareID = firmwareID;
-                _this.set('firmwareID', firmwareID);
-            }
+            this._name = '';
+            this._versionName = null;
+            this._firmwares = [];
 
-            this.setDownloadUrl = function (downloadUrl) {
-                _this._downloadUrl = downloadUrl;
-                _super.prototype.set.call(_this, 'downloadUrl', downloadUrl);
-            };
-            this.getDownloadUrl = function () {
-                return _super.prototype.get.call(_this, 'downloadUrl');
+            this.setName = function(name){
+                _this._name = name;
+                _this.set('name', name);
             };
 
-            this.getVersionCode = function () {
-                return _super.prototype.get.call(_this,"versionCode");
-            };
-            this.setVersionCode = function (versionCode) {
-                _this._versionCode = versionCode;
-                _super.prototype.set.call(_this, 'versionCode', versionCode);
+            this.getName = function(name){
+                return _this.get('name');
             };
 
-            this.setPublished = function (published) {
-                _this._published = published;
-                _super.prototype.set.call(_this, 'published', published);
-            };
-            this.getPublished = function () {
-                return _super.prototype.get.call(_this, "published");
+            this.getFirmwares = function(){
+                return _this._firmwares;
             };
 
-            this.setCreatedDate = function (createdDate) {
-                _this._createdDate = createdDate;
-                _super.prototype.set.call(_this, 'createdDate', createdDate);
-            };
-            this.getCreatedDate = function () {
-                return _super.prototype.get.call(_this, "createdDate");
+            this.setFirmwares = function(firmwares){
+                _this._firmwares = firmwares;
             };
 
-            this.setPublishedDate = function (publishedDate) {
-                _this._publishedDate = publishedDate;
-                _super.prototype.set.call(_this, 'publishedDate', publishedDate);
-            };
-            this.getPublishedDate = function () {
-                return _super.prototype.get.call(_this, "publishedDate");
+            this._addFirmware = function(firmware){
+                _this._firmwares.push(firmware);
             };
 
-            this.setDescription = function (description) {
-                _this._description = description;
-                _super.prototype.set.call(_this, 'description', description);
-            };
-            this.getDescription = function () {
-                return _super.prototype.get.call(_this, "description");
+            this._removeFirmware = function(firmware){
+                _this._firmwares.splice(_this._firmwares.indexOf(firmware), 1);
             };
 
+            /** get current version of this firmware
+             @return {[KiiPortalFirmware]} of this firmware.
+             */
+            this.getVersionName = function () {
+                return _this.get('versionName');
+            };
+
+            /** set current version of this firmware
+             @return {String} name of this firmware.
+             */
+            this.setVersionName = function (currentVersion) {
+                _this._versionName = currentVersion;
+                _this.set('versionName', currentVersion);
+            };
 
         }
 
+        KiiPortalFirmwareNamespace._bucketName = root.KiiExtensionBuckets.FIRMWARE_NAMESPACE;
+
+        KiiPortalFirmwareNamespace.prototype.refreshFirmwares = function(callbacks, pageIndex, numberPerPage){
+            return KiiPortalFirmware._withFirmwareNamespace(this, callbacks, pageIndex, numberPerPage);
+        };
+
         /**
-         * get firmware version of given firmware
-         * static method
-         * @param firmware instance of firmware
+         * [createFirmware description]
+         * @return {[type]} [description]
+         */
+        KiiPortalFirmwareNamespace.prototype.createFirmware = function(){
+            return KiiPortalFirmware.factory(this.getKiiApp(), this);
+        };
+
+        /**
+         * delete firmware
          * @param callbacks
          * @returns {Promise|*}
          */
-        KiiPortalFirmwareVersion.withFirmware = function (firmware, callbacks) {
-            return new Promise((function (_this) {
-                return function (resolve, reject) {
-                    var getVersionsCallbacks = {
-                        success: function (objects) {
-                            __each(objects, function (object, index) {
-                                var _version = KiiPortalFirmwareVersion._factory(firmware);
-                                _version._renew(object);
-                                objects[index] = _version;
-                            });
-
-                            if (callbacks) {
-                                callbacks.success.call(callbacks, objects);
-                            }
-                            resolve(objects);
-                        },
-                        failed: function () {
-                            if (callbacks) {
-                                callbacks.failed.apply(callbacks, arguments);
-                            }
-                            reject(arguments);
+        KiiPortalFirmwareNamespace.prototype.delete = function (callbacks) {
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var deleteCallbacks = {
+                    success: function(){
+                        _this._kiiApp._removeFirmwareNamespace(_this);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
                         }
-                    };
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        reject(response);
+                    }
+                };
 
-                    var bucket, firmwareUUID, all_query;
-                    firmwareUUID = firmware.getUUID();
-                    bucket = KiiPortalAdmin.bucketWithName(ReservedBucketPrefix.FIRMWARE + firmwareUUID);
-                    all_query = KiiQuery.queryWithClause();
-
-                    return bucket.executeQuery(all_query, getVersionsCallbacks);
-                }
-            })(this));
+                _super.prototype.delete.call(_this, deleteCallbacks);
+            });
         };
 
         /**
-         * create instance of KiiPortalFirmwareVersion
+         * create or update firmware
+         * @param callbacks
+         * @returns {Promise|*}
          */
-        KiiPortalFirmwareVersion.factory = function (firmware) {
-            return KiiPortalFirmwareVersion._factory(firmware);
-        }
+        KiiPortalFirmwareNamespace.prototype.save = function (callbacks) {
+            var _this = this;
+            var createFlag = _this.getUUID()? false : true;
+
+            return new Promise(function(resolve, reject){
+                var saveCallbacks = {
+                    success: function(firmware){
+                        if(createFlag){
+                            _this._kiiApp._addFirmwareNamespace(_this);
+                        }
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+                _super.prototype.save.call(_this, saveCallbacks);
+            });
+        };
 
         /**
-         * create instance of KiiPortalFirmwareVersion
-         * @param firmware
-         * @returns {KiiPortalFirmwareVersion}
+         * factory an instance of KiiFirmware
+         * @override
+         * @returns {KiiPortalFirmware}
+         */
+        KiiPortalFirmwareNamespace.factory = function (kiiApp) {
+            var firmwareNamespace = _super.factory.call(this, kiiApp);
+
+            return firmwareNamespace;
+        };
+
+        /**
+         * This is called in KiiPortalObject factory process.
+         * @override
+         * @public
+         */
+        KiiPortalFirmwareNamespace.prototype.init = function(){
+            this.setName(this.get('name'));
+            this.setVersionName(this.get('versionName'));
+        };
+
+
+        /**
+         * get all firmware namespace instances
+         * bucket is defined as KiiPortalFirmwareNamespace._bucketName
+         * @param app
+         * @param callbacks
+         * @param pageIndex
+         * @param numberPerPage
+         * @returns {*|u}
          * @private
          */
-        KiiPortalFirmwareVersion._factory = function (firmware) {
-            var version = new KiiPortalFirmwareVersion();
+        KiiPortalFirmwareNamespace._getAll = function (app, callbacks, pageIndex, numberPerPage) {
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks;
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause();
 
-            var adminContext, bucket, kiiObject, firmwareUUID, kiiApp;
-
-            firmwareUUID = firmware.getUUID();
-            kiiApp = firmware.getKiiApp();
-            adminContext = kiiApp.getAdminContext();
-            bucket = adminContext.bucketWithName(ReservedBucketPrefix.FIRMWARE + firmwareUUID);
-            kiiObject = bucket.createObject();
-
-            __extends(version, kiiObject);
-            version.setFirmwareID(firmwareUUID);
-
-            return version;
+                getAllCallbacks = {
+                    success: function(query, firmwareNamespaces, nextQuery){
+                        app.setFirmwareNamespaces(firmwareNamespaces);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, firmwares, nextQuery);
+                        }
+                        resolve(query, firmwareNamespaces, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+                // execute query
+                return _this.executeQuery(app ,all_query, getAllCallbacks);
+            });
         };
 
-        /**
-         * cast KiiObject instance to KiiPortalFirmwareVersion Object
-         * @param object KiiObject
-         * @private
-         */
-        KiiPortalFirmwareVersion.prototype._renew = function (object) {
-            __extends(this, object);
-            this.setVersionCode(object.get('versionCode'));
-            this.setFirmwareID(object.get('firmwareID'));
-            this.setDownloadUrl(object.get('downloadUrl'));
-            this.setPublished(object.get('published'));
-            this.setCreatedDate(object.get('createdDate'));
-            this.setPublishedDate(object.get('publishedDate'));
-            this.setDescription(object.get('description'));
-        }
-
-        /**
-         * save portal firmware version
-         * @returns {Promise|*|Promise|*}
-         */
-        KiiPortalFirmwareVersion.prototype.save = function () {
-            return _super.prototype.save.apply(this, arguments);
-        };
-
-        return KiiPortalFirmwareVersion;
-    })(KiiObject);    /**
+        return KiiPortalFirmwareNamespace;
+    })(KiiPortalObject);    /**
      * class KiiPortalModel
      */
     root.KiiPortalModel = (function (KiiPortalObject) {
@@ -2270,8 +2338,7 @@
             this._things = null;
             this._imageUrl = null;
             this._firmwares = [];
-            this._firmwareName = null;
-
+            this._firmwareNamespace = null;
 
 
             this.getImageUrl = function(){
@@ -2300,12 +2367,12 @@
                 _this.set('firmwares', _this._firmwares);
             };
 
-            this.setFirmwareName = function(firmwareName){
-                _this._firmwareName = firmwareName;
-                _this.setFirmwareName(firmwareName);
+            this.setFirmwareNamespace = function(firmwareNamespace){
+                _this._firmwareNamespace = firmwareNamespace;
+                _this.set('firmwareNamespace' ,firmwareNamespace);
             };
-            this.getFirmwareName = function(){
-                return _this._firmwareName;
+            this.getFirmwareNamespace = function(){
+                return _this.get('firmwareNamespace');
             };
 
         }
@@ -2320,6 +2387,7 @@
         KiiPortalModel.prototype.init = function(){
             this.setName(_super.prototype.get.call(this, 'name'));
             this.setImageUrl(_super.prototype.get.call(this, 'imageUrl'));
+            this.setFirmwareNamespace(_super.prototype.get.call(this, 'firmwareNamespace'));
             this.setFirmwares(_super.prototype.get.call(this, 'firmwares'));
         };
 
@@ -2389,9 +2457,9 @@
         KiiPortalModel.prototype.addFirmware = function(firmware, callbacks){
             var _this = this;
             if(this._firmwares.indexOf(firmware.getUUID())>-1) return null;
-            var addModelPromise = firmware.addModel(this);
             this._firmwares.push(firmware.getUUID());
-
+            var addModelPromise = firmware.addModel(this);
+            
             return new Promise(function(resolve, reject){
 
                 var saveCallbacks = {

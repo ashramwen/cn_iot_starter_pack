@@ -60,7 +60,7 @@ angular.module('StarterPack.Portal.AppManager')
           return 'Firmware Management';
         },
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo',
-        redirectTo: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList'
+        redirectTo: 'app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareNamespaceList'
       })
       .state('app.Portal.AppManager.ApplicationEditor.DeviceManager', {
         url: '/DeviceManager',

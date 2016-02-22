@@ -1,3 +1,12 @@
+.app-portal table[st-table] {
+  width: 100%; }
+  .app-portal table[st-table] span.fa-plus-circle, .app-portal table[st-table] span.fa-trash {
+    cursor: pointer; }
+  .app-portal table[st-table] span.fa-plus-circle {
+    color: #5cb85c; }
+  .app-portal table[st-table] span.fa-trash {
+    color: #d9534f; }
+
 .app-portal .tab-content {
   padding: 20px 15px;
   background: #fff;

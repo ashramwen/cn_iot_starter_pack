@@ -23,7 +23,7 @@ angular.module('StarterPack.Portal.AppManager').factory('AppManagerService', fun
             name: 'Firmware Management',
             state: $state.get('app.Portal.AppManager.ApplicationEditor.FirmwareManager'), icon: 'fa-user',
             subViews: [
-                {name:'Firmwares', state: $state.get('app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareList')}
+                {name:'Firmwares', state: $state.get('app.Portal.AppManager.ApplicationEditor.FirmwareManager.FirmwareNamespaceList')}
             ]
         },
         {name: 'Device Management', state: $state.get('app.Portal.AppManager.ApplicationEditor.DeviceManager'), icon: 'fa-desktop'},

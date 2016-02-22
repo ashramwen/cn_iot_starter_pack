@@ -20,6 +20,10 @@ angular.module('StarterPack.AppShared')
             scope.selectedOption = {};
 
             scope.setting.text = attrs.text || scope.setting.text;
+
+            scope.$watch('selectedModel', function(newVal){
+                scope.selectedOption = _.clone(newVal);
+            });
             
             scope.selectOption = function(option){
                 if(attrs.valueOnly){

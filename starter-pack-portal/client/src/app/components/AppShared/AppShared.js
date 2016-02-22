@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('StarterPack.AppShared', ['ngAnimate', 'ngCookies', 'ngSanitize', 
-    'ui.bootstrap', 'LocalStorageModule', 'awesome-context-menu'])
+    'ui.bootstrap', 'LocalStorageModule', 'awesome-context-menu', 'smart-table'])
 .constant('AppConfig', {
     StoragePrefix: 'SSP',
     Tags:{
@@ -13,7 +13,8 @@ angular.module('StarterPack.AppShared', ['ngAnimate', 'ngCookies', 'ngSanitize',
     NavNames:{
         APP_NAME: 'APP_NAME',
         FIRMWARE_NAME: 'FIRMWARE_NAME',
-        MODEL_NAME: 'MODEL_NAME'
+        MODEL_NAME: 'MODEL_NAME',
+        FIRMWARE_NAMESPACE_NAME: 'FIRMWARE_NAMESPACE_NAME'
     }
 })
 .config(function(localStorageServiceProvider, AppConfig) {

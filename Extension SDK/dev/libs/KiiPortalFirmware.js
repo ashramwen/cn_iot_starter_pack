@@ -16,12 +16,22 @@
             __bindMethod(_this);
 
             this._name = null;
-            this._versionName = null;
-            this._versions = [];
             this._models = [];
             this._state = null;
             this._downloadURL = null;
             this._description = null;
+            this._namespace = null;
+            this.namespace = null;
+
+            this.setNamespace = function(namespace){
+                this._namespace = namespace;
+                _this.set('namespace', namespace);
+            };
+
+            this.getNamespace = function(){
+                return _this.get('namespace');
+            };
+
 
             this.setDownloadURL = function(url){
                 _this._downloadURL = url;
@@ -47,20 +57,6 @@
                 _this.set('name', name);
             };
 
-            /** get current version of this firmware
-             @return {[KiiPortalFirmwareVersion]} of this firmware.
-             */
-            this.getVersionName = function () {
-                return _this.get('versionName');
-            };
-            /** set current version of this firmware
-             @return {String} name of this firmware.
-             */
-            this.setVersionName = function (currentVersion) {
-                _this._versionName = currentVersion;
-                _this.set('versionName', currentVersion);
-            };
-
 
             this.setState = function(state){
                 _this._state = state;
@@ -69,6 +65,15 @@
             this.getState = function(){
                 return _this.get('state');
             }
+
+            this.setDescription = function(description){
+                _this.description = description;
+                _this.set('description', description);
+            };
+
+            this.getDescription = function(){
+                return _this.get('description');
+            };
         }
 
         KiiPortalFirmware._bucketName = root.KiiExtensionBuckets.FIRMWARE;
@@ -82,8 +87,8 @@
         KiiPortalFirmware.prototype.addModel = function(model, callbacks){
             var _this = this;
             if(this._models.indexOf(model.getName())>-1) return null;
-            var addFirmwarePromise = model.addFirmware(this);
             this._models.push(model.getName());
+            var addFirmwarePromise = model.addFirmware(this);
 
             return new Promise(function(resolve, reject){
                 var saveCallbacks = {
@@ -101,18 +106,8 @@
                     }
                 };
 
-                if(addFirmwarePromise){
-                    addFirmwarePromise.then(function(){
-                        _this.set('models', _this._models);
-                        _this.save(saveCallbacks);
-                    },function(error){
-                        saveCallbacks.failure(error);
-                        reject(error);
-                    });
-                }else{
-                    this.set('models', _this._models);
-                    _this.save(saveCallbacks);
-                }
+                _this.set('models', _this._models);
+                _this.save(saveCallbacks);
             });
         };
         KiiPortalFirmware.prototype.getModels = function(){
@@ -149,18 +144,9 @@
                     }
                 };
 
-                if(deleteModelPromise){
-                    deleteModelPromise.then(function(){
-                        _this.set('models' ,_this._models);
-                        _this.save(saveCallbacks);
-                    },function(error){
-                        saveCallbacks.failure(error);
-                        reject(error);
-                    });
-                }else{
-                    _this.set('models' ,_this._models);
-                    _this.save(saveCallbacks);
-                }
+
+                _this.set('models' ,_this._models);
+                _this.save(saveCallbacks);
             });
         };
 
@@ -344,11 +330,14 @@
 
             return new Promise(function(resolve, reject){
                 var finishedCount = 0;
+
+                if(models.length == 0){
+                    reject('No model uses this firmware, push command is rejected!');
+                }
                 __each(models, function(modelName){
                     var bucketName, bucket, firmware;
 
                     firmware = _this.clone();
-
 
                     bucketName = ReservedBucketPrefix.MODEL + modelName;
                     bucket = _this.getKiiApp().getAdminContext().bucketWithName(bucketName);
@@ -412,9 +401,24 @@
         /**
          * publish this firmware
          */
-        KiiPortalFirmware.prototype.publish = function (){
+        KiiPortalFirmware.prototype.publish = function (callbacks){
+            var _this = this;
             return new Promise(function(resolve, reject){
-                this.setState(KiiPortalFirmware.StateEnum.PUBLISHED);
+                _this.setState(KiiPortalFirmware.StateEnum.PUBLISHED);
+                _this.save({
+                    success: function(){
+                        if(callbacks && callbacks.success){
+                            callbacks.success();
+                        }
+                        resolve();
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                });
             });
         };
 
@@ -429,7 +433,7 @@
             return new Promise(function(resolve, reject){
                 var deleteCallbacks = {
                     success: function(){
-                        _this._kiiApp._removeFirmware(_this);
+                        _this.namespace._removeFirmware(_this);
                         if(callbacks && callbacks.success){
                             callbacks.success(_this);
                         }
@@ -457,7 +461,7 @@
                 var saveCallbacks = {
                     success: function(firmware){
                         if(createFlag){
-                            _this._kiiApp._addFirmware(_this);
+                            _this.namespace._addFirmware(_this);
                         }
                         if(callbacks && callbacks.success){
                             callbacks.success(_this);
@@ -480,10 +484,15 @@
          * @override
          * @returns {KiiPortalFirmware}
          */
-        KiiPortalFirmware.factory = function (kiiApp) {
-            var firmware = _super.factory.call(this, kiiApp);
+        KiiPortalFirmware.factory = function (kiiApp, firmwareNamespace) {
+            var firmware;
+            firmware = _super.factory.call(this, kiiApp);
             firmware.setState(KiiPortalFirmware.StateEnum.CREATED);
-
+            if(firmwareNamespace){
+                firmware.setNamespace(firmwareNamespace.getName());
+                firmware.namespace = firmwareNamespace;
+            }
+        
             return firmware;
         };
 
@@ -494,9 +503,41 @@
          */
         KiiPortalFirmware.prototype.init = function(){
             this.setName(this.get('name'));
-            this.setVersionName(this.get('versionName'));
+            this.setNamespace(this.get('namespace'));
             this.setState(this.get('state'));
-            this.setModels((this.get('models')))
+            this.setModels((this.get('models')));
+        };
+
+
+        KiiPortalFirmware._withFirmwareNamespace = function(firmwareNamespace, callbacks, pageIndex, numberPerPage){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks, clause, app;
+
+
+                app = firmwareNamespace.getKiiApp();
+                clause = KiiClause.equals("namespace", firmwareNamespace.getName());
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause(clause);
+
+                getAllCallbacks = {
+                    success: function(query, firmwares, nextQuery){
+                        firmwareNamespace.setFirmwares(firmwares);
+                        __each(firmwares, function(firmware){
+                            firmware.namespace = firmwareNamespace;
+                        });
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, firmwares, nextQuery);
+                        }
+                        resolve(query, firmwares, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+                // execute query
+                return _this.executeQuery(app ,all_query, getAllCallbacks);
+            });
         };
 
 
