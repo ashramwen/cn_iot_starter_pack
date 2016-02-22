@@ -1,5 +1,5 @@
 ##Thing Model API
-> Thing model maps to thing attribute `_iot` in Kii Cloud. One thing model may have serveral schema versions, and we keep all the created versions. Schema name is the same as thing model, so thing does not need extra custom attribute for it.
+> Thing model maps to thing attribute `_iot` in Kii Cloud. One thing model may have serveral schema versions, and we keep all the created versions. Schema name is the same as thing model, so thing does not need extra custom attribute for it. `schema_name` in command sending = `_iot` in thing attribute = `thing_model` in portal
 > 
 > Developers would need to create a thing model with an initial schema version in the portal first. And then use them in the thing side onboarding.
 

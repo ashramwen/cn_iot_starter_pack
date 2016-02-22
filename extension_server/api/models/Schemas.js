@@ -5,12 +5,12 @@ module.exports = {
       type: 'string',
       required: true
     },
-    name: {
-      type: 'string',
+    version: {
+      type: 'integer',
       required: true
     },
-    description: {
-      type: 'string',
+    properties: {
+      type: 'array',
       required: true
     },
     uuid: {
@@ -19,9 +19,8 @@ module.exports = {
       unique: true,
       primaryKey: true
     },
-    schemas: {
-      collection: 'schemas',
-      via: 'bindedWith'
+    bindedWith: {
+      model: 'models'
     }
   }
 };

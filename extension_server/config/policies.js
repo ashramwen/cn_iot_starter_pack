@@ -44,6 +44,10 @@ module.exports.policies = {
 
   ServerCodeController: {
     '*': ['isAdmin', 'appOwner']
+  },
+
+  ModelsController: {
+    '*': ['isAdmin']
   }
 	// RabbitController: {
 

@@ -101,5 +101,26 @@ module.exports.routes = {
   'POST /serverCode': {
     controller: 'ServerCodeController',
     action: 'create'
+  },
+
+  //Models
+  'POST /models': {
+    controller: 'ModelsController',
+    action: 'create'
+  },
+
+  'GET /models': {
+    controller: 'ModelsController',
+    action: 'find'
+  },
+
+  'GET /models/:modelID/schemas': {
+    controller: 'ModelsController',
+    action: 'populate'
+  },
+
+  'GET /models/:modelID': {
+    controller: 'ModelsController',
+    action: 'findOne'
   }
 };

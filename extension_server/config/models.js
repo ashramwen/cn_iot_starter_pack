@@ -29,6 +29,6 @@ module.exports.models = {
   ***************************************************************************/
   migrate: 'safe',
   //turn off auto Primary Key
-  autoPK: false,
+  autoPK: false
 
 };
