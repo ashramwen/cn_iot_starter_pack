@@ -7,10 +7,10 @@
             &.fa-plus-circle, &.fa-trash{
                 cursor: pointer;
             }
-            &.fa-plus-circle{
+            &.fa-plus-circle, &.fa-check{
                 color: $success;
             }
-            &.fa-trash{
+            &.fa-trash, &.close{
                 color: $danger;
             }
         }
@@ -23,6 +23,8 @@
         border-right: solid 1px #ccc;
         border-bottom: solid 1px #ccc;
     }
+
+    
 
     .app-appmanager-applicationeditor div[ui-view].ng-enter{ animation: zoomIn 0.2s both ease-in; z-index: 8888; delay:0.2s;}
     .app-appmanager-applicationeditor div[ui-view].ng-leave{ animation: zoomOut 0.2s both ease-in; z-index: 9999; }

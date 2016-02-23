@@ -47,7 +47,72 @@
         </table>
       </uib-tab>
       <uib-tab heading="Industrial Schema">
-        
+        <div class="form-group">
+          <button class="btn btn-success" ng-click="openCreatePropertyModal()"><span class="fa fa-plus"></span> Add Property</button>
+        </div>
+        <table st-table="schemaProperties" class="table table-striped">
+          <thead>
+            <th>Display Name</th>
+            <th>Key</th>
+            <th>Type</th>
+            <th>Unit</th>
+            <th>Controllable</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="property in schemaProperties">
+              <td>{{property.displayName}}</td>
+              <td>{{property.key}}</td>
+              <td>{{property.type}}</td>
+              <td>{{property.unit}}</td>
+              <td><span class="fa fa-check" ng-if="property.controllable"></span><span class="fa fa-close"  ng-if="!property.controllable"></span></td>
+            </tr>
+          </tbody>
+        </table>
       </uib-tab>
     </uib-tabset>
 </div>
+<script type="text/ng-template" id="app.Portal.AppManager.ApplicationEditor.ModelManager.CreatSchemaProperty">
+  <div class="modal-content" ng-init="init()">
+    <div class="modal-header">
+        <h3 class="modal-title">Create Model</h3>
+    </div>
+    <div class="modal-body clearfix">
+      <div class="col-sm-12">
+        <div class="form-group clearfix">
+          <label>Property Key</label>
+          <input ng-model="propertyBO.key" type="text" class="form-control" placeholder="Property Key" />
+        </div>
+        <div class="form-group clearfix">
+          <label>Property Display Name</label>
+          <input ng-model="propertyBO.displayName" type="text" class="form-control" placeholder="Property Display Name" />
+        </div>
+        <div class="form-group clearfix">
+          <label>Property Type</label>
+          <app-select selected-model="propertyBO.type" value-only="true" type="text" options="schemaTypes" />
+        </div>
+        <div class="form-group clearfix">
+          <label>Unit</label>
+          <input ng-model="propertyBO.unit" type="text"  ng-if="propertyBO.type==schemaTypeEnum.INT || propertyBO.type==schemaTypeEnum.FLOAT" class="form-control" placeholder="Property Type" />
+        </div>
+        <div class="form-group clearfix" ng-if="propertyBO.type==schemaTypeEnum.INT || propertyBO.type==schemaTypeEnum.FLOAT">
+          <label>Minimun</label>
+          <input ng-model="propertyBO.min" type="text" class="form-control" placeholder="Property Type" />
+        </div>
+        <div class="form-group clearfix" ng-if="propertyBO.type==schemaTypeEnum.INT || propertyBO.type==schemaTypeEnum.FLOAT">
+          <label>Maximun</label>
+          <input ng-model="propertyBO.max" type="text" class="form-control" placeholder="Property Type" />
+        </div>
+        <div class="form-group clearfix">
+          <label>
+            <input ng-model="propertyBO.controllable" type="checkbox"/>
+            Controllable
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer ng-scope">
+        <button class="btn btn-success" type="button" ng-click="ok()">Create</button>
+        <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+    </div>
+  </div>
+</script>

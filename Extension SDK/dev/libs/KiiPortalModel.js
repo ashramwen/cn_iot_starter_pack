@@ -19,6 +19,7 @@
             this._imageUrl = null;
             this._firmwares = [];
             this._firmwareNamespace = null;
+            this._portalSchema = null;
 
 
             this.getImageUrl = function(){
@@ -53,6 +54,14 @@
             };
             this.getFirmwareNamespace = function(){
                 return _this.get('firmwareNamespace');
+            };
+
+            this.getPortalSchema = function(){
+                return _this._portalSchema;
+            };
+            this.setPortalSchema = function(schema){
+                _this._portalSchema = schema;
+                _this.set('portalSchema', schema);
             };
 
         }
@@ -375,7 +384,28 @@
             });
         };
 
+        KiiPortalModel.prototype.initSchema = function(schema){
+            this._portalSchema = new KiiPortalSchema(schema);
+        }
 
+        KiiPortalModel.prototype.savePortalSchema = function(callbacks){
+            _.each(this._portalSchema.properties, function(property){
+
+            });
+        };
+
+        KiiPortalModel.prototype.refreshPortalSchema = function(callbacks){
+
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                _this._portalSchema = new KiiPortalSchema();
+
+                /**
+                 * TODO
+                 */
+                resolve(this._portalSchema);
+            });
+        };
 
         /**
          * get firmware bucket
@@ -388,3 +418,57 @@
 
         return KiiPortalModel;
     })(root.KiiPortalObject);
+
+    root.KiiPortalSchema = (function(){
+
+        function KiiPortalSchema(schema){
+            var _this = this;
+            this.properties = [];
+            
+            if(schema){
+                __each(schema.properties, function(property){
+                    _this.properties.push(new KiiPortalSchemaProperty(property));
+                });    
+            }
+        }
+
+        KiiPortalSchema.prototype.createProperty = function(){
+            var property = new KiiPortalSchemaProperty;
+            this.addProperty(property);
+            return property;
+        }
+
+        KiiPortalSchema.prototype.addProperty = function(property){
+            this.properties.push(property);
+        };
+
+        KiiPortalSchema.prototype.removeProperty = function(property){
+            this.properties.splice(this.properties.indexOf(property), 1);
+        };
+    })();
+
+    root.KiiPortalSchemaProperty = (function(){
+
+        function KiiPortalSchemaProperty(property){
+            this.key = null;
+            this.displayName = null;
+            this.type = null;
+            this.controllable = null;
+            this.unit = null;
+            this.min = null;
+            this.max = null
+
+            if(property){
+                __extend(this, property);
+            }
+        }
+
+        KiiPortalSchemaProperty.Schema_Type_Enum = {
+            BOOLEAN: 'boolean',
+            INT: 'integer',
+            FLOAT: 'float',
+            STRING: 'string'
+        };
+
+        return KiiPortalSchemaProperty;
+    })();

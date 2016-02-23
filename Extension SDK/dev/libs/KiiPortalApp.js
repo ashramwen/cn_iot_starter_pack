@@ -188,6 +188,32 @@
             return app;
         };
 
+        KiiPortalApp.prototype.extRequest = function(spec){
+            var _this = this;
+
+            var headers = {
+                "x-kii-appid": _this.getAppID(),
+                "x-kii-appkey": _this.getAppKey(),
+                "x-app-site": _this.getSite(),
+                "Authorization": _this.getTokenType() + ' ' + _this.getAccessToken()
+            };
+
+            __extends(headers, spec.headers);
+
+            var settings = {
+                headers: headers,
+                method: spec.method,
+                data: spec.data,
+                url: root._extensionUrl + spec.path
+            };
+
+            callbacks = callbacks || {};
+            settings.success = callbacks.success;
+            settings.failure = callbacks.failure;
+
+            return __ajax(settings);
+        }
+
 
         KiiPortalApp.prototype.save = function(callbacks){
 

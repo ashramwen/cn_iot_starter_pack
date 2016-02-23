@@ -39,6 +39,16 @@
     };
 
     /**
+     * extension server url
+     * @type {String}
+     */
+    root._extensionUrl = 'http://localhost:1336';
+
+    root._extApis = {
+        MODEL: '/models'
+    };
+
+    /**
      * api base path
      * @type {string}
      * @private

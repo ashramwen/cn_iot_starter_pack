@@ -27,7 +27,8 @@ gulp.task('inject', function () {
 
   var injectOptions = {
     ignorePath: [paths.src, paths.tmp + '/serve'],
-    addRootSlash: false
+    addRootSlash: false,
+    ignorePath: paths.src + '/**/bin/*.js'
   };
 
   var wiredepOptions = {
@@ -36,7 +37,7 @@ gulp.task('inject', function () {
   };
 
   var injectBin = gulp.src([
-    paths.src + '/bin/*.js'
+    paths.src + '/**/bin/*.js'
   ]);
 
   var injectBinOptions = {
