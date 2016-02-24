@@ -424,6 +424,10 @@
         function KiiPortalSchema(schema){
             var _this = this;
             this.properties = [];
+
+            this.getProperties = function(){
+                return _this.properties;
+            };
             
             if(schema){
                 __each(schema.properties, function(property){
@@ -445,6 +449,8 @@
         KiiPortalSchema.prototype.removeProperty = function(property){
             this.properties.splice(this.properties.indexOf(property), 1);
         };
+
+        return KiiPortalSchema;
     })();
 
     root.KiiPortalSchemaProperty = (function(){

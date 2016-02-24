@@ -68,6 +68,7 @@
             </tr>
           </tbody>
         </table>
+        <div><button class="btn btn-success">Save Schema</button></div>
       </uib-tab>
     </uib-tabset>
 </div>
@@ -90,9 +91,9 @@
           <label>Property Type</label>
           <app-select selected-model="propertyBO.type" value-only="true" type="text" options="schemaTypes" />
         </div>
-        <div class="form-group clearfix">
+        <div class="form-group clearfix" ng-if="propertyBO.type==schemaTypeEnum.INT || propertyBO.type==schemaTypeEnum.FLOAT">
           <label>Unit</label>
-          <input ng-model="propertyBO.unit" type="text"  ng-if="propertyBO.type==schemaTypeEnum.INT || propertyBO.type==schemaTypeEnum.FLOAT" class="form-control" placeholder="Property Type" />
+          <input ng-model="propertyBO.unit" type="text" class="form-control" placeholder="Property Type" />
         </div>
         <div class="form-group clearfix" ng-if="propertyBO.type==schemaTypeEnum.INT || propertyBO.type==schemaTypeEnum.FLOAT">
           <label>Minimun</label>
