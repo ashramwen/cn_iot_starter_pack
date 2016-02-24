@@ -22,6 +22,7 @@
             this._description = null;
             this._namespace = null;
             this.namespace = null;
+            this._initialSchema = null;
 
             this.setNamespace = function(namespace){
                 this._namespace = namespace;
@@ -74,6 +75,13 @@
             this.getDescription = function(){
                 return _this.get('description');
             };
+
+            this.setInitialSchema = function(){
+
+            };
+            this.getInitialSchema = function(){
+                return _this.get('initialSchema');
+            }
         }
 
         KiiPortalFirmware._bucketName = root.KiiExtensionBuckets.FIRMWARE;

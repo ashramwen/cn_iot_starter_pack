@@ -13,7 +13,8 @@ angular.module('StarterPack.AppShared')
         },
         link: function(scope, element, attrs){
             scope.setting = {
-                text: 'text'
+                text: 'text',
+                value: 'value'
             };
             scope.myClass = attrs.class;
             scope.setting = _.extend(scope.setting, scope.extraSetting);
@@ -22,12 +23,19 @@ angular.module('StarterPack.AppShared')
             scope.setting.text = attrs.text || scope.setting.text;
 
             scope.$watch('selectedModel', function(newVal){
-                scope.selectedOption = _.clone(newVal);
+                if(attrs.valueOnly){
+                    scope.selectedOption = _.find(scope.options, function(option){
+                        return option[scope.setting.value] == newVal;
+                    });
+                }else{
+                    scope.selectedOption = _.clone(newVal);
+                }
+                
             });
             
             scope.selectOption = function(option){
                 if(attrs.valueOnly){
-                    scope.selectedModel = option['value'];
+                    scope.selectedModel = option[scope.setting.value];
                 }else{
                     scope.selectedModel = _.clone(option);
                 }

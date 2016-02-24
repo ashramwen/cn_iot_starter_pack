@@ -350,6 +350,16 @@
     };
 
     /**
+     * extension server url
+     * @type {String}
+     */
+    root._extensionUrl = 'http://localhost:1336';
+
+    root._extApis = {
+        MODEL: '/models'
+    };
+
+    /**
      * api base path
      * @type {string}
      * @private
@@ -1186,6 +1196,32 @@
             return app;
         };
 
+        KiiPortalApp.prototype.extRequest = function(spec){
+            var _this = this;
+
+            var headers = {
+                "x-kii-appid": _this.getAppID(),
+                "x-kii-appkey": _this.getAppKey(),
+                "x-app-site": _this.getSite(),
+                "Authorization": _this.getTokenType() + ' ' + _this.getAccessToken()
+            };
+
+            __extends(headers, spec.headers);
+
+            var settings = {
+                headers: headers,
+                method: spec.method,
+                data: spec.data,
+                url: root._extensionUrl + spec.path
+            };
+
+            callbacks = callbacks || {};
+            settings.success = callbacks.success;
+            settings.failure = callbacks.failure;
+
+            return __ajax(settings);
+        }
+
 
         KiiPortalApp.prototype.save = function(callbacks){
 
@@ -1564,6 +1600,7 @@
             this._description = null;
             this._namespace = null;
             this.namespace = null;
+            this._initialSchema = null;
 
             this.setNamespace = function(namespace){
                 this._namespace = namespace;
@@ -1616,6 +1653,13 @@
             this.getDescription = function(){
                 return _this.get('description');
             };
+
+            this.setInitialSchema = function(){
+
+            };
+            this.getInitialSchema = function(){
+                return _this.get('initialSchema');
+            }
         }
 
         KiiPortalFirmware._bucketName = root.KiiExtensionBuckets.FIRMWARE;
@@ -1686,18 +1730,9 @@
                     }
                 };
 
-                if(deleteModelPromise){
-                    deleteModelPromise.then(function(){
-                        _this.set('models' ,_this._models);
-                        _this.save(saveCallbacks);
-                    },function(error){
-                        saveCallbacks.failure(error);
-                        reject(error);
-                    });
-                }else{
-                    _this.set('models' ,_this._models);
-                    _this.save(saveCallbacks);
-                }
+
+                _this.set('models' ,_this._models);
+                _this.save(saveCallbacks);
             });
         };
 
@@ -2339,6 +2374,7 @@
             this._imageUrl = null;
             this._firmwares = [];
             this._firmwareNamespace = null;
+            this._portalSchema = null;
 
 
             this.getImageUrl = function(){
@@ -2373,6 +2409,14 @@
             };
             this.getFirmwareNamespace = function(){
                 return _this.get('firmwareNamespace');
+            };
+
+            this.getPortalSchema = function(){
+                return _this._portalSchema;
+            };
+            this.setPortalSchema = function(schema){
+                _this._portalSchema = schema;
+                _this.set('portalSchema', schema);
             };
 
         }
@@ -2695,7 +2739,28 @@
             });
         };
 
+        KiiPortalModel.prototype.initSchema = function(schema){
+            this._portalSchema = new KiiPortalSchema(schema);
+        }
 
+        KiiPortalModel.prototype.savePortalSchema = function(callbacks){
+            _.each(this._portalSchema.properties, function(property){
+
+            });
+        };
+
+        KiiPortalModel.prototype.refreshPortalSchema = function(callbacks){
+
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                _this._portalSchema = new KiiPortalSchema();
+
+                /**
+                 * TODO
+                 */
+                resolve(this._portalSchema);
+            });
+        };
 
         /**
          * get firmware bucket
@@ -2707,7 +2772,67 @@
 
 
         return KiiPortalModel;
-    })(root.KiiPortalObject);    /**
+    })(root.KiiPortalObject);
+
+    root.KiiPortalSchema = (function(){
+
+        function KiiPortalSchema(schema){
+            var _this = this;
+            this.properties = [];
+
+            this.getProperties = function(){
+                return _this.properties;
+            };
+            
+            if(schema){
+                __each(schema.properties, function(property){
+                    _this.properties.push(new KiiPortalSchemaProperty(property));
+                });    
+            }
+        }
+
+        KiiPortalSchema.prototype.createProperty = function(){
+            var property = new KiiPortalSchemaProperty;
+            this.addProperty(property);
+            return property;
+        }
+
+        KiiPortalSchema.prototype.addProperty = function(property){
+            this.properties.push(property);
+        };
+
+        KiiPortalSchema.prototype.removeProperty = function(property){
+            this.properties.splice(this.properties.indexOf(property), 1);
+        };
+
+        return KiiPortalSchema;
+    })();
+
+    root.KiiPortalSchemaProperty = (function(){
+
+        function KiiPortalSchemaProperty(property){
+            this.key = null;
+            this.displayName = null;
+            this.type = null;
+            this.controllable = null;
+            this.unit = null;
+            this.min = null;
+            this.max = null
+
+            if(property){
+                __extend(this, property);
+            }
+        }
+
+        KiiPortalSchemaProperty.Schema_Type_Enum = {
+            BOOLEAN: 'boolean',
+            INT: 'integer',
+            FLOAT: 'float',
+            STRING: 'string'
+        };
+
+        return KiiPortalSchemaProperty;
+    })();    /**
      * class KiiPortalTag.js
      */
     root.KiiPortalTag = (function (KiiPortalObject) {

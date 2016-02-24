@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.ModelManager')
-  .controller('ModelInfoController', ['$scope', '$rootScope', '$state', 'AppUtils', 'AppConfig', 'FirmwareService', function($scope, $rootScope, $state, AppUtils, AppConfig, FirmwareService) {
+  .controller('ModelInfoController', ['$scope', '$rootScope', '$state', 'AppUtils', 'AppConfig', 'FirmwareService', '$uibModal',function($scope, $rootScope, $state, AppUtils, AppConfig, FirmwareService, $uibModal) {
     
     $scope.modelInfo = {
         selectedNamespace: {}
@@ -15,6 +15,17 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         $scope.$watch('modelsReady', function(newVal){
             if(newVal){
                 $scope.initModel();
+
+                // get schema
+                AppUtils.doLoading();
+                $scope.myModel.refreshPortalSchema().then(function(){
+                    $scope.schemaProperties = $scope.myModel.getPortalSchema();
+                    $scope.$apply();
+                    AppUtils.whenLoaded();
+                }, function(erro){
+                    AppUtils.whenLoaded();
+                });
+
 
                 AppUtils.doLoading();
 
@@ -139,6 +150,10 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         });
     };
 
+    /**
+     * add firmware
+     * @param {[type]} firmware [description]
+     */
     $scope.addFirmware = function(firmware){
         AppUtils.doLoading();
         $scope.myModel.addFirmware(firmware).then(function(){
@@ -151,6 +166,11 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         });
     };
 
+    /**
+     * remove firmware
+     * @param  {[type]} firmware [description]
+     * @return {[type]}          [description]
+     */
     $scope.removeFirmware = function(firmware){
         AppUtils.doLoading();
         $scope.myModel.deleteFirmware(firmware).then(function(){
@@ -162,5 +182,57 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         });
     };
 
+    $scope.openCreatePropertyModal = function(){
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'app.Portal.AppManager.ApplicationEditor.ModelManager.CreatSchemaProperty',
+            resolve: {
+                model: $scope.myModel
+            },
+            controller: 'ModelInfoController.createSchemaProperty',
+            size: 'md'
+        });
+
+        modalInstance.result.then(function (property) {
+            $scope.schemaProperties = $scope.myModel.getPortalSchema().getProperties();
+        }, function () {
+            
+        });
+    };
+
     
+  }])
+  .controller('ModelInfoController.createSchemaProperty',['$scope', 'model', '$uibModalInstance', 'AppConfig', function($scope, model, $uibModalInstance, AppConfig){
+
+    $scope.propertyBO = {
+        key: null,
+        displayName: null,
+        type: AppConfig.Schema_Type_Enum.BOOLEAN,
+        controllable: null,
+        unit: null,
+        min: null,
+        max: null
+    };
+
+    $scope.schemaTypes = [];
+    $scope.schemaTypeEnum = AppConfig.Schema_Type_Enum;
+
+    _.each(AppConfig.Schema_Type_Enum, function(value, key){
+        $scope.schemaTypes.push({
+            text: key,
+            value: value
+        });
+    });
+
+    $scope.ok = function(){
+        var schema = model.getPortalSchema();
+        var property = schema.createProperty();
+        _.extend(property, $scope.propertyBO); 
+        $uibModalInstance.close(property);
+    };
+
+    $scope.cancel = function(){
+        $uibModalInstance.dismiss('cancel');
+    };
+
   }]);

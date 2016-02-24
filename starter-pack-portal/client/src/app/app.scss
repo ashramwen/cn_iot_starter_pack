@@ -55,6 +55,11 @@
       }
     }
     /* end of spinner */
-
-
 }
+
+.modal{
+    .modal-body{
+        overflow:auto;
+        max-height: 350px
+    }
+} 
