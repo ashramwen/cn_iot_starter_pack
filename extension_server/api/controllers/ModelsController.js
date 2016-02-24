@@ -1,17 +1,14 @@
 module.exports = {
 	create: function (req, res) {
 		var body = req.body;
-		if (!(body.name && body.description && body.initialSchema)) {
+		if (!(body.modelID && body.initialSchema)) {
 			res.badRequest("miss body argument")
 			return
 		}
 		var appID = req.headers['x-app-id'];
-		var uuid = sails.uuid.v1();		
 		var model = {
-			name: body.name,
-			description: body.description,
 			appID: appID,
-			uuid: uuid
+			modelID: body.modelID
 		}
 		Models.create(model).exec(function createCB(err, createdModel) {
 			if (err) {
@@ -23,7 +20,7 @@ module.exports = {
 				version: 1,
 				properties: body.initialSchema.properties,
 				uuid: sails.uuid.v1(),
-				bindedWith: createdModel.uuid
+				bindedWith: createdModel.modelID
 			}
 			Schemas.create(schema).exec(function createdCB(err, created) {
 				if (err) {
@@ -47,12 +44,39 @@ module.exports = {
 
 	populate: function (req, res) {
 		var modelID = req.param('modelID')
-		Models.findOne({uuid: modelID}).populate('schemas').exec(function findOneCB(err, found) {
+		Models.findOne({modelID: modelID}).populate('schemas').exec(function findOneCB(err, found) {
 			if (err) {
 				res.badRequest(err)
 				return
 			}
 			res.ok(found)
+		})
+	},
+
+	add: function (req, res) {
+		var modelID = req.param('modelID')
+		var properties = req.body.properties
+		var appID = req.headers['x-app-id'];
+		Models.findOne({modelID: modelID}).populate('schemas').exec(function findOneCB(err, found) {
+			if (err) {
+				res.badRequest(err)
+				return
+			}
+			var version = found.schemas.length + 1
+			var schema = {
+				appID: appID,
+				version: version,
+				properties: properties,
+				uuid: sails.uuid.v1(),
+				bindedWith: modelID
+			}
+			Schemas.create(schema).exec(function createdCB(err, created) {
+				if (err) {
+					res.badRequest(err)
+					return
+				}
+				res.created(created)
+			})
 		})
 	}
 }

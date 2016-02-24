@@ -122,5 +122,10 @@ module.exports.routes = {
   'GET /models/:modelID': {
     controller: 'ModelsController',
     action: 'findOne'
+  },
+
+  'POST /models/:modelID/schemas': {
+    controller: 'ModelsController',
+    action: 'add'
   }
 };

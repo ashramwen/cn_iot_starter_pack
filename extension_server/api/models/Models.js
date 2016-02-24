@@ -5,15 +5,7 @@ module.exports = {
       type: 'string',
       required: true
     },
-    name: {
-      type: 'string',
-      required: true
-    },
-    description: {
-      type: 'string',
-      required: true
-    },
-    uuid: {
+    modelID: {
       type: 'string',
       required: true,
       unique: true,
