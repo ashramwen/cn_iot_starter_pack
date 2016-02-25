@@ -78,5 +78,38 @@ module.exports = {
 				res.created(created)
 			})
 		})
+	},
+
+	findSchema: function (req, res) {
+		var modelID = req.param('modelID')
+		var version = req.param('versionNumber')
+
+		if (version == 'latest') {
+			Schemas.findOne({where: {
+				appID: req.headers['x-app-id'], 
+				bindedWith: modelID}, sort: 'updatedAt DESC'}).exec(function findOneCB(err, found) {
+					if (err) {
+						res.badRequest(err)
+						return
+					}
+					res.ok(found)
+					return
+			})
+		}
+
+		Schemas.findOne({
+			appID: req.headers['x-app-id'], 
+			bindedWith: modelID, 
+			version: version}).exec(function findOneCB(err, found) {
+				if (err) {
+					res.badRequest(err)
+					return
+				}
+				if (found == undefined) {
+					res.badRequest('No schema matches given version number')
+					return
+				}
+				res.ok(found)
+		})
 	}
 }

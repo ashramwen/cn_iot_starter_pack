@@ -49,18 +49,6 @@
 ```
 ####Reponse
  - **`201`**: Created
- 
-###2. update a thing model
-`PUT /models/:modelID`
-####Body
-```
-{
-	modelName: "air conditional",
-	description: "whatever it is"
-}
-```
-####Reponse
- - **`200`** OK
 
 ###3. remove a thing model
 `DELETE /models/:modelID`
@@ -71,11 +59,6 @@
 `GET /models`
 ####Reponse
  - **`200`**: OK
-
-###4.1 get one thing model with model ID
-`GET /models/:modelID`
-####Reponse
- - **`200`** OK
 
 ###5. add a schema version to a thing model
 > Please note that I do not expose update schema content for purpose. add a new version of schema instead. the version does not need to be manually input, but managed incrementally by the system
@@ -120,7 +103,7 @@
  - **`200`** OK
 
 ###7. get schema given thing model and version
-`GET /models/:modelID/schemas/:schemaID`
+`GET /models/:modelID/schemas/:versionNumber`
 ###Reponse
  - **`200`**: OK
 
