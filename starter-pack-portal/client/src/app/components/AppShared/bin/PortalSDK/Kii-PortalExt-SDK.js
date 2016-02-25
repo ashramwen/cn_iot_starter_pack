@@ -811,7 +811,144 @@
         };
 
         return KiiPortalObject;
-    }(KiiObject, KiiObjectAdmin);
+    }(KiiObject, KiiObjectAdmin);    
+    /**
+     * Portal Query
+     */
+    root.KiiPortalQuery = (function(KiiQuery){
+        var _super = KiiQuery;
+
+        __inherits(KiiPortalQuery, _super);
+
+        KiiPortalQuery.prototype.constructor = KiiPortalQuery;
+
+        function KiiPortalQuery(query){
+            var _this = this;
+        };
+
+        KiiPortalQuery.prototype._dictValue = function() {
+            var portalQuery, data;
+
+            data = {};
+            data.bestEffortLimit = this._limit;
+            if (this._paginationKey != null) {
+                data.paginationKey = this._paginationKey;
+            }
+
+            portalQuery = {
+                descending: this._sortDescending
+            };
+            if (this._clause != null) {
+                portalQuery.clause = this._clause._getDictValue();
+            } else {
+                portalQuery.clause = this.constructor._emptyDictValue();
+            }
+            if (this._sortField != null) {
+                portalQuery.orderBy = this._sortField;
+            }
+            data[this.constructor.queryName] = portalQuery;
+            return data;
+        };
+
+        KiiPortalQuery.queryWithClause = function(clause) {
+            var query;
+            query = new this;
+            query._setClause(clause);
+            return query;
+        };
+
+        
+        /**
+         * abstract
+         * @param  {[type]} kiiApp [description]
+         * @param  {[type]} spec   [description]
+         * @return {[type]}        [description]
+         */
+        KiiPortalQuery._getRequest = function(kiiApp, spec) {
+
+            spec.headers = spec.headers || {};
+
+            return new KiiPortalRequest(kiiApp, spec);
+        };
+
+        /**
+         * abstract
+         * @param  {[type]} kiiApp [description]
+         * @return {[type]}        [description]
+         */
+        KiiPortalQuery._generatePath = function(kiiApp){
+            return (DevelopmentSettings.SERVER_ADDRESS || kiiApp.getSiteURL())+ '/apps/' + kiiApp.getAppID();
+        };
+
+        /**
+         * abstract
+         * @return {[type]} [description]
+         */
+        KiiPortalQuery._instantiate = function(){
+            // Empty
+        };
+
+        /**
+         * [executeQuery description]
+         * @param  {[type]} kiiApp    [description]
+         * @param  {[type]} query     [description]
+         * @param  {[type]} callbacks [description]
+         * @return {[type]}           [description]
+         */
+        KiiPortalQuery.executeQuery = function(kiiApp, query, callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var data, executeCallbacks, path, spec, request;
+                path = _this._generatePath(kiiApp) + "/query";
+                data = {};
+
+                if (query != null) {
+                    data = query._dictValue();
+                } else {
+                    data[_this.queryName] = {
+                        "clause": KiiQuery._emptyDictValue()
+                    };
+                }
+
+                spec = {
+                    data: data,
+                    url: path,
+                    method: 'POST'
+                };
+
+                request = _this._getRequest(kiiApp, spec);
+
+                executeCallbacks = {
+                    success: function(response) {
+                        var result, resultSet, _i, _len, _ref;
+
+                        resultSet = [];
+                        _ref = response.data.results;
+                        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                            result = _ref[_i];
+                            resultSet.push(_this._instantiate(result));
+                        }
+
+                        if (callbacks != null && callbacks.success) {
+                            callbacks.success(query, resultSet);
+                        }
+                        resolve(query ,resultSet);
+                    },
+                    failure: function(error) {
+                        if (callbacks != null && callbacks.failure) {
+                            callbacks.failure(error);
+                        }
+                        reject(query, error);
+                    }
+                };
+
+                request.execute(executeCallbacks);
+            });
+        };
+
+        return KiiPortalQuery;
+    })(KiiQuery);
+
 
     
     root.KiiPortalAdmin = (function(){
@@ -2988,12 +3125,13 @@
     /**
      * Thing request
      */
-    root.KiiThingQuery = (function(KiiQuery){
-        var _super = KiiQuery;
+    root.KiiThingQuery = (function(_super){
 
         __inherits(KiiThingQuery, _super);
+        KiiThingQuery.prototype.constructor = KiiThingQuery;
 
         function KiiThingQuery(query){
+            /*
             var _this = this;
             __each(KiiPortalFirmware.prototype, function(value, key){
                 if(__isFunction(value))
@@ -3001,109 +3139,46 @@
             });
 
             return this._clone(query);
+            */
         };
 
-        KiiThingQuery.prototype._dictValue = function() {
-            var thingQuery, data;
-            data = {};
-            data.bestEffortLimit = this._limit;
-            if (this._paginationKey != null) {
-                data.paginationKey = this._paginationKey;
-            }
-            thingQuery = {
-                descending: this._sortDescending
-            };
-            if (this._clause != null) {
-                thingQuery.clause = this._clause._getDictValue();
-            } else {
-                thingQuery.clause = KiiThingQuery._emptyDictValue();
-            }
-            if (this._sortField != null) {
-                thingQuery.orderBy = this._sortField;
-            }
-            data.thingQuery = thingQuery;
-            return data;
+        KiiThingQuery.queryName = 'thingQuery';
+
+        /**
+         * override
+         * @param  {[type]} kiiApp [description]
+         * @param  {[type]} spec   [description]
+         * @return {[type]}        [description]
+         */
+        KiiThingQuery._getRequest = function(kiiApp, spec){
+            spec.headers = spec.headers || {};
+            spec.headers["Content-Type"] = "application/vnd.kii.thingqueryrequest+json";
+
+            return new KiiPortalRequest(kiiApp, spec);
         };
 
-        KiiThingQuery.queryWithClause = function(clause) {
-            var query;
-            query = new KiiThingQuery();
-            query._setClause(clause);
-            return query;
+        /**
+         * override
+         * @param  {[type]} kiiApp [description]
+         * @return {[type]}        [description]
+         */
+        KiiThingQuery._generatePath = function(kiiApp){
+            return _super._generatePath.call(this, kiiApp) + '/things';
+        };
+
+        /**
+         * override
+         * @param  {[type]} data [description]
+         * @return {[type]}      [description]
+         */
+        KiiThingQuery._instantiate = function(data){
+            return new KiiThing(data);
         };
 
         return KiiThingQuery;
-    })(KiiQuery);
+    })(KiiPortalQuery);
 
-    /**
-     * Extend KiiThing class
-     * @param app
-     * @private
-     */
-
-    KiiThing._getRequest = function(app, spec) {
-
-        spec.headers = spec.headers || {};
-        spec.headers["Content-Type"] = "application/vnd.kii.thingqueryrequest+json";
-
-        return new KiiPortalRequest(app, spec);
-    };
-
-    KiiThing._generatePath = function(app){
-        return app.getSiteURL() + '/apps/' + app.getAppID() + '/things';
-    };
-
-    KiiThing.executeQuery = function(kiiApp, query, callbacks){
-        return new Promise(function(resolve, reject){
-            var data, executeCallbacks, path, spec, request;
-            path = KiiThing._generatePath(app) + "/query";
-            data = {};
-
-            if (query != null) {
-                data = query._dictValue();
-            } else {
-                data.thingQuery = {
-                    "clause": KiiQuery._emptyDictValue()
-                };
-            }
-
-            spec = {
-                data: data,
-                url: path,
-                method: 'POST'
-            };
-
-            request = KiiThing._getRequest(app, spec);
-
-            executeCallbacks = {
-                success: function(response) {
-                    var result, resultSet, _i, _len, _ref;
-
-                    resultSet = [];
-                    _ref = response.data;
-                    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                        result = _ref[_i];
-                        resultSet.push(new KiiThing(result));
-                    }
-
-                    if (callbacks != null && callbacks.success) {
-                        return callbacks.success(query, resultSet);
-                    }
-                    resolve(query ,resultSet);
-                },
-                failure: function(error) {
-                    if (callbacks != null && callbacks.failure) {
-                        return callbacks.failure(error);
-                    }
-                    reject(query, error);
-                }
-            };
-
-            request.execute(executeCallbacks);
-        });
-    };
-
-    KiiThing._withApp = function(app, callbacks, order){
+    KiiThing._withApp = function(kiiApp, callbacks, order){
         return new Promise(function(resolve, reject){
             var query;
             query = KiiThingQuery.queryWithClause();
@@ -3122,7 +3197,7 @@
 
             var queryCallbacks = {
                 success: function(query, things){
-                    app._setThings(things);
+                    kiiApp._setThings(things);
 
                     if(callbacks && callbacks.success){
                         callbacks.success.apply(callbacks.success, arguments);
@@ -3137,7 +3212,7 @@
                 }
             };
 
-            return KiiThing.executeQuery(app, query, queryCallbacks);
+            return KiiThingQuery.executeQuery(kiiApp, query, queryCallbacks);
         });
     };
 

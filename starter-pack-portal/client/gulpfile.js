@@ -7,6 +7,7 @@ gulp.paths = {
   dist: 'dist',
   tmp: '.tmp',
   e2e: 'e2e',
+  sdk: '../../Extension SDK/',
   appPath: 'src/',
   appStructFile: 'construct.json',
   templatePath: 'app_templates/'

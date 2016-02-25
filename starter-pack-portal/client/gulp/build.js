@@ -63,6 +63,11 @@ gulp.task('html', ['inject', 'partials'], function () {
     .pipe($.size({ title: paths.dist + '/', showFiles: true }));
 });
 
+gulp.task('sdk', function(){
+  return gulp.src(paths.sdk + '/dist/*.js')
+    .pipe(gulp.dest(paths.src + '/app/components/AppShared/bin/PortalSDK/'));
+});
+
 gulp.task('images', function () {
   return gulp.src(paths.src + '/images/**/*')
     .pipe(gulp.dest(paths.dist + '/images/'));
@@ -99,4 +104,4 @@ gulp.task('sass', function () {
 });
 
 gulp.task('dist', ['html', 'images', 'misc', 'fonts']);
-gulp.task('build',['sass','inject','partials','watch']);
+gulp.task('build',['sass','inject','partials', 'sdk', 'watch']);
