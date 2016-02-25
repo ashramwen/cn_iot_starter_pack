@@ -14,6 +14,17 @@ angular.module('StarterPack.Portal.AppManager')
                 console.log($scope.myApp);
                 AppUtils.doLoading();
                 $rootScope.portalAdmin.useApp($scope.myApp).then(function(){
+                    /**
+                     * TEST ONLY
+                     * @type {[type]}
+                     */
+                    window.myApp = $scope.myApp;
+
+                    /**
+                     * END OF TEST
+                     */
+
+
                     $scope.appReady = true;
                     localStorageService.set(AppConfig.NavNames.APP_NAME, $scope.myApp.getAppName());
                     $scope.turnOffMenu();
