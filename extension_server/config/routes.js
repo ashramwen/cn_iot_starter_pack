@@ -132,5 +132,17 @@ module.exports.routes = {
   'GET /models/:modelID/schemas/:versionNumber': {
     controller: 'ModelsController',
     action: 'findSchema'
+  },
+
+  //Apps
+  'POST /apps': {
+    controller: 'AppsController',
+    action: 'create'
+  },
+
+  //Firmwares
+  'POST /initFirmware': {
+    controller: 'FirmwaresController',
+    action: 'init'
   }
 };
