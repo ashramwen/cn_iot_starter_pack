@@ -10,30 +10,29 @@ angular.module('StarterPack.Portal.AppManager.FirmwareManager')
     $scope.pushedFirmwares = [];
 
     $scope.init = function(){
-        $scope.myFirmwareNamespace = _.find($scope.myFirmwareNamespaces, function(firmwareNamespace){
-            return firmwareNamespace.getUUID() == $state.params['firmwareNamespaceId'];
+
+        $scope.$watch('firmwareNamespacesReady', function(ready){
+            if(!ready) return;
+
+            $scope.myFirmwareNamespace = _.find($scope.myFirmwareNamespaces, function(firmwareNamespace){
+                return firmwareNamespace.getUUID() == $state.params['firmwareNamespaceId'];
+            });
+
+            AppUtils.doLoading();
+            $scope.myFirmwareNamespace.refreshFirmwares().then(function(){
+                var firmwares = $scope.myFirmwareNamespace.getFirmwares();
+
+                initFirmwares(firmwares);
+
+                $scope.$apply();
+                AppUtils.whenLoaded();
+            }, function(){
+                AppUtils.whenLoaded();
+            });
+
+            AppUtils.setLocalStorageItem(AppConfig.NavNames.FIRMWARE_NAMESPACE_NAME, $scope.myFirmwareNamespace.getName());
         });
-
-        AppUtils.doLoading();
-        $scope.myFirmwareNamespace.refreshFirmwares().then(function(){
-            var firmwares = $scope.myFirmwareNamespace.getFirmwares();
-
-            initFirmwares(firmwares);
-
-            $scope.$apply();
-            AppUtils.whenLoaded();
-        }, function(){
-            AppUtils.whenLoaded();
-        });
-
-        AppUtils.setLocalStorageItem(AppConfig.NavNames.FIRMWARE_NAMESPACE_NAME, $scope.myFirmwareNamespace.getName());
     };
-
-    $scope.$watch('firmwareNamespacesReady', function(newVal){
-        if(newVal){
-            $scope.init();
-        }
-    });
 
     function initFirmwares(firmwares){
         $scope.unpublishedFirmwares = _.where(firmwares, {_state: KiiPortalFirmware.StateEnum.CREATED});

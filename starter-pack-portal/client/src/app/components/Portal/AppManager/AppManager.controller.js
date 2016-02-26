@@ -3,9 +3,8 @@
 angular.module('StarterPack.Portal.AppManager')
   .controller('AppManagerController', ['$scope', '$rootScope', '$state', 'AppUtils', 'AppManagerService', 'ApplicationService', function($scope, $rootScope, $state, AppUtils, AppManagerService, ApplicationService) {
     $rootScope.portalNavs = [];
-
-
     $scope.appsReady = false;
+
     $scope.myApps = [];
     /**
      * init applications

@@ -3,11 +3,11 @@
 angular.module('StarterPack.Portal.AppManager')
   .controller('ApplicationEditorController', ['$scope', '$rootScope', '$state', 'AppUtils', 'AppManagerService', 'localStorageService', 'AppConfig', function($scope, $rootScope, $state, AppUtils, AppManagerService, localStorageService, AppConfig) {
     $rootScope.portalNavs = AppManagerService.portalNavs;
-
     $scope.appReady = false;
+
     $scope.init = function(){
-        $scope.$watch('appsReady', function(newVal){
-            if(newVal){
+        $scope.$watch('appsReady', function(ready){
+            if(ready){
                 $scope.myApp = _.find($scope.myApps, function(app){
                     return app.getAppID() == $state.params['appId'];
                 });
@@ -24,8 +24,8 @@ angular.module('StarterPack.Portal.AppManager')
                      * END OF TEST
                      */
 
-
                     $scope.appReady = true;
+
                     localStorageService.set(AppConfig.NavNames.APP_NAME, $scope.myApp.getAppName());
                     $scope.turnOffMenu();
                     $scope.$apply();
