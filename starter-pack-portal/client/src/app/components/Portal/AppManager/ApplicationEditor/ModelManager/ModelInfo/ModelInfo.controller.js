@@ -12,8 +12,8 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
      * @return {[null]} [description]
      */
     $scope.init = function(){
-        $scope.$watch('modelsReady', function(newVal){
-            if(newVal){
+        $scope.$watch('modelsReady', function(ready){
+            if(ready){
                 $scope.initModel();
 
                 // get schema

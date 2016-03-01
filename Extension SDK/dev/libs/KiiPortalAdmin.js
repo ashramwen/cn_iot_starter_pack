@@ -20,6 +20,7 @@
                 _this._adminContenxt = adminContext;
                 KiiportalAdmin.setCurrentAdminContext(adminContext);
             };
+            
             this.getAdminContext = function(){
                 return _this._adminContenxt;
             };

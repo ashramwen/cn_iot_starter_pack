@@ -2,8 +2,9 @@
 
 angular.module('StarterPack.Portal.AppManager.ModelManager')
   .controller('ModelManagerController', ['$scope', '$rootScope', '$state', 'AppUtils', 'AppConfig',function($scope, $rootScope, $state, AppUtils, AppConfig) {
-    
+
     $scope.modelsReady = false;
+    
     $scope.init = function(){
         AppUtils.doLoading();
         $scope.myApp.refreshModels().then(function(models){
@@ -15,6 +16,7 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
                 });
                 AppUtils.setLocalStorageItem(AppConfig.NavNames.MODEL_NAME, model.getName()); 
             }
+
             $scope.modelsReady = true;
             $scope.$apply();
         }, function(){
@@ -22,8 +24,8 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         });
     };
 
-    $scope.$watch('appReady', function(newVal){
-        if(newVal){
+    $scope.$watch('appReady', function(ready){
+        if(ready){
             $scope.init();
         }
     });
