@@ -32,6 +32,7 @@ module.exports = {
 			} 
 
 			var appID = body['app_id']
+			var appKey = body['app_key']
 
 			var options = {
 				method: 'POST',
@@ -50,7 +51,13 @@ module.exports = {
 
 				var authorization = 'Bearer ' + body['access_token']
 
-				//TODO
+				var appInfo = {}
+				appInfo.headers['authorization'] = authorization
+				appInfo.headers['x-app-id'] = appID
+				appInfo.headers['x-app-key'] = appKey
+				//TODO add site info when in production
+				// appInfo.headers['x-app-site'] = 
+				sails.controllers.firmwares.init(appInfo, res)
 			});
 		});
 	}
