@@ -59,4 +59,4 @@ angular.module('StarterPack.AppShared')
             }
         }
     }
-  }])
+  }]);

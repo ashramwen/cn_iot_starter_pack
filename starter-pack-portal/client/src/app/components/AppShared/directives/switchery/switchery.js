@@ -1,8 +1,9 @@
 angular.module('StarterPack.AppShared').directive('switchery',['$timeout', function($timeout){
     return {
-        restrict: 'A',
+        restrict: 'E',
         scope: {
-            on: '=?switchery'
+            ngModel: '=?',
+            reverse: '=?'
         },
         templateUrl: 'app/components/AppShared/directives/switchery/switchery.template.html',
         replace: true,

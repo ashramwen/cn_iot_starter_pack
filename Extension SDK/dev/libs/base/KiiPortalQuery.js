@@ -44,6 +44,26 @@
             return query;
         };
 
+        KiiPortalQuery.prototype.setDict = function(dictVal){
+            if(dictVal){
+                if(dictVal.limit){
+                    this.setLimit(dictVal.limit);
+                }
+
+                if(dictVal.paginationKey){
+                    this.setPaginationKey(dictVal.paginationKey);
+                }
+
+                if(dictVal.orderBy){
+                    if(dictVal.desc){
+                        this.sortByDesc(dictVal.orderBy);
+                    }else {
+                        this.sortByAsc(dictVal.orderBy);
+                    }
+                }
+            }
+        };
+
         
         /**
          * abstract
@@ -108,7 +128,10 @@
                 executeCallbacks = {
                     success: function(response) {
                         var result, resultSet, _i, _len, _ref;
-
+                        if(response.data.nextPaginationKey){
+                            query.setPaginationKey(response.data.nextPaginationKey);
+                        }
+                        
                         resultSet = [];
                         _ref = response.data.results;
                         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -119,13 +142,13 @@
                         if (callbacks != null && callbacks.success) {
                             callbacks.success(query, resultSet);
                         }
-                        resolve(query ,resultSet);
+                        resolve({nextQuery:query ,resultSet: resultSet});
                     },
                     failure: function(error) {
                         if (callbacks != null && callbacks.failure) {
                             callbacks.failure(error);
                         }
-                        reject(query, error);
+                        reject({query:query, error:error});
                     }
                 };
 

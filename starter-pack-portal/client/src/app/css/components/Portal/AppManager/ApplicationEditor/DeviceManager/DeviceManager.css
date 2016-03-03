@@ -1,4 +1,13 @@
-.app-portal-devicemanager {
-  /*
- * TODO
- **/ }
+.app-portal-devicemanager .sub-table > tbody > tr > td {
+  padding: 5px 5px; }
+
+.app-portal-devicemanager .tab-pane-footer {
+  padding-top: 10px; }
+  .app-portal-devicemanager .tab-pane-footer .btn .fa {
+    margin-right: 5px; }
+
+.app-portal-devicemanager .detail-content {
+  border-top: 1px  #CCC solid;
+  border-bottom: 1px  #CCC solid;
+  box-shadow: inset 0px 11px 8px -11px #CCC,  inset 0px -11px 8px -12px #CCC;
+  padding: 8px; }

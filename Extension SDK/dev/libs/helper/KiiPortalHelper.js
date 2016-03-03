@@ -270,7 +270,7 @@
             this.setKiiHeaders();
             this._disableCacheURL();
 
-            var settings ={
+            var settings = {
                 headers: this._headers,
                 method: this._method,
                 data: this._data,

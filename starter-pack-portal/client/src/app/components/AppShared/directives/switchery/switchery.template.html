@@ -1,4 +1,4 @@
-<div class="switchery pull-right" ng-class="{'on':on}" ng-click="switch()">
+<div class="switchery pull-right" ng-class="{'on':reverse?!on: on}" ng-click="switch()">
   <div class="selector">
     <div class="option">{{yesText}}</div>
     <div class="option">{{noText}}</div>

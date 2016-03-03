@@ -275,7 +275,7 @@
             this.setKiiHeaders();
             this._disableCacheURL();
 
-            var settings ={
+            var settings = {
                 headers: this._headers,
                 method: this._method,
                 data: this._data,
@@ -857,6 +857,26 @@
             return query;
         };
 
+        KiiPortalQuery.prototype.setDict = function(dictVal){
+            if(dictVal){
+                if(dictVal.limit){
+                    this.setLimit(dictVal.limit);
+                }
+
+                if(dictVal.paginationKey){
+                    this.setPaginationKey(dictVal.paginationKey);
+                }
+
+                if(dictVal.orderBy){
+                    if(dictVal.desc){
+                        this.sortByDesc(dictVal.orderBy);
+                    }else {
+                        this.sortByAsc(dictVal.orderBy);
+                    }
+                }
+            }
+        };
+
         
         /**
          * abstract
@@ -921,7 +941,10 @@
                 executeCallbacks = {
                     success: function(response) {
                         var result, resultSet, _i, _len, _ref;
-
+                        if(response.data.nextPaginationKey){
+                            query.setPaginationKey(response.data.nextPaginationKey);
+                        }
+                        
                         resultSet = [];
                         _ref = response.data.results;
                         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -932,13 +955,13 @@
                         if (callbacks != null && callbacks.success) {
                             callbacks.success(query, resultSet);
                         }
-                        resolve(query ,resultSet);
+                        resolve({nextQuery:query ,resultSet: resultSet});
                     },
                     failure: function(error) {
                         if (callbacks != null && callbacks.failure) {
                             callbacks.failure(error);
                         }
-                        reject(query, error);
+                        reject({query:query, error:error});
                     }
                 };
 
@@ -991,6 +1014,10 @@
             this.setTokenType = function(tokenType){
                 _this._tokenType = tokenType;
             };
+        }
+
+        KiiPortalAdmin.getCurrentApp = function(){
+            return this._currentApp;
         }
 
         KiiPortalAdmin.setCurrentAdminContext = function(context){
@@ -1106,6 +1133,7 @@
                         var adminCallbacks = {
                             success: function(adminContext) {
                                 app.setAdminContext(adminContext);
+                                KiiPortalAdmin._currentApp = app;
                                 if(callbacks){
                                     callbacks.success.call(callbacks, app);
                                 }
@@ -1698,8 +1726,13 @@
         /* =================================== end of tag ========================================================== */
 
         /* =================================== things related ====================================================== */
-        KiiPortalApp.prototype.refreshThings = function(callbacks){
-            return KiiThing._withApp(this);
+
+        KiiPortalApp.prototype.queryThings = function(callbacks, queryClause, dictVal){
+            return KiiThingAdmin._withApp(this, callbacks, queryClause, dictVal);
+        };
+
+        KiiPortalApp.prototype.nextThings = function(callbacks, nextQuery){
+            return KiiThingAdmin.nextThings = KiiThingAdmin._nextWithApp(this, callbacks, nextQuery);
         };
 
         KiiPortalApp.prototype._setThings = function(things){
@@ -3126,12 +3159,12 @@
     /**
      * Thing request
      */
-    root.KiiThingQuery = (function(_super){
+    root.KiiThingAdminQuery = (function(_super){
 
-        __inherits(KiiThingQuery, _super);
-        KiiThingQuery.prototype.constructor = KiiThingQuery;
+        __inherits(KiiThingAdminQuery, _super);
+        KiiThingAdminQuery.prototype.constructor = KiiThingAdminQuery;
 
-        function KiiThingQuery(query){
+        function KiiThingAdminQuery(query){
             /*
             var _this = this;
             __each(KiiPortalFirmware.prototype, function(value, key){
@@ -3143,7 +3176,7 @@
             */
         };
 
-        KiiThingQuery.queryName = 'thingQuery';
+        KiiThingAdminQuery.queryName = 'thingQuery';
 
         /**
          * override
@@ -3151,7 +3184,7 @@
          * @param  {[type]} spec   [description]
          * @return {[type]}        [description]
          */
-        KiiThingQuery._getRequest = function(kiiApp, spec){
+        KiiThingAdminQuery._getRequest = function(kiiApp, spec){
             spec.headers = spec.headers || {};
             spec.headers["Content-Type"] = "application/vnd.kii.thingqueryrequest+json";
 
@@ -3163,7 +3196,7 @@
          * @param  {[type]} kiiApp [description]
          * @return {[type]}        [description]
          */
-        KiiThingQuery._generatePath = function(kiiApp){
+        KiiThingAdminQuery._generatePath = function(kiiApp){
             return _super._generatePath.call(this, kiiApp) + '/things';
         };
 
@@ -3172,29 +3205,45 @@
          * @param  {[type]} data [description]
          * @return {[type]}      [description]
          */
-        KiiThingQuery._instantiate = function(data){
-            return new KiiThing(data);
+        KiiThingAdminQuery._instantiate = function(data){
+            return new KiiThingAdmin(data);
         };
 
-        return KiiThingQuery;
+        return KiiThingAdminQuery;
     })(KiiPortalQuery);
 
-    KiiThing._withApp = function(kiiApp, callbacks, order){
+    KiiThingAdmin.query = function(kiiApp, callbacks, queryClause, dictVal){
         return new Promise(function(resolve, reject){
             var query;
-            query = KiiThingQuery.queryWithClause();
-            if(order){
-                var orderBy, desc;
 
-                desc = order.desc;
-                orderBy = order.by;
+            query = KiiThingAdminQuery.queryWithClause(queryClause);
+            query.setDict(dictVal);
 
-                if(desc){
-                    query.sortByDesc(orderBy);
-                }else {
-                    query.sortByAsc(orderBy);
+            var queryCallbacks = {
+                success: function(query, things){
+                    __each(things, function(thing){
+                        thing._kiiApp = kiiApp;
+                    });
+
+                    if(callbacks && callbacks.success){
+                        callbacks.success.apply(callbacks.success, arguments);
+                    }
+                    resolve({query: query, things: things});
+                },
+                failure: function(query, error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure.apply(callbacks.failure, arguments);
+                    }
+                    reject({query: query, error: error});
                 }
-            }
+            };
+
+            return KiiThingAdminQuery.executeQuery(kiiApp, query, queryCallbacks);
+        });
+    };
+
+    KiiThingAdmin._withApp = function(kiiApp, callbacks){
+        return new Promise(function(resolve, reject){
 
             var queryCallbacks = {
                 success: function(query, things){
@@ -3203,17 +3252,61 @@
                     if(callbacks && callbacks.success){
                         callbacks.success.apply(callbacks.success, arguments);
                     }
-                    resolve(query, things);
+                    resolve({query: query, things: things});
                 },
                 failure: function(query, error){
                     if(callbacks && callbacks.failure){
                         callbacks.failure.apply(callbacks.failure, arguments);
                     }
-                    reject(query, error);
+                    reject({query: query, error: error});
                 }
             };
 
-            return KiiThingQuery.executeQuery(kiiApp, query, queryCallbacks);
+            KiiThingAdmin.query(kiiApp, queryCallbacks, null);
+        });
+    };
+
+    KiiThingAdmin.prototype.save = function(callbacks){
+        var _this = this;
+        return new Promise(function(resolve, reject){
+            var spec, request, data, kiiApp;
+
+            var ThingKeys = [
+                '_globalThingID', '_vendorThingID', '_vendor', '_disabled', '_created',
+                '_Iot', '_productName', '_thingID', '_firmwareVersion', '_thingType'
+            ];
+
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+
+            data = {
+                _created: _this.getCreated(),
+                _disabled: _this.getDisabled(),
+                _layoutPosition: "STANDALONE",
+                _thingID: _this.getThingID(),
+                _thingType: _this.fields._thingType,
+                _vendorThingID: _this.getVendorThingID()
+            };
+
+            __each(_this.fields, function(value, key){
+                data[key] = value;
+            });
+
+            spec = {
+                data: data,
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/vnd.kii.ThingUpdateRequest+json',
+                },
+                url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
+            };
+
+            var request = new KiiPortalRequest(kiiApp, spec);
+
+            request.execute().then(function(response){
+                resolve(response);
+            }, function(error){
+                reject(error);
+            });
         });
     };
 

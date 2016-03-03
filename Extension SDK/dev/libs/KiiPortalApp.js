@@ -552,8 +552,13 @@
         /* =================================== end of tag ========================================================== */
 
         /* =================================== things related ====================================================== */
-        KiiPortalApp.prototype.refreshThings = function(callbacks){
-            return KiiThing._withApp(this);
+
+        KiiPortalApp.prototype.queryThings = function(callbacks, queryClause, dictVal){
+            return KiiThingAdmin._withApp(this, callbacks, queryClause, dictVal);
+        };
+
+        KiiPortalApp.prototype.nextThings = function(callbacks, nextQuery){
+            return KiiThingAdmin.nextThings = KiiThingAdmin._nextWithApp(this, callbacks, nextQuery);
         };
 
         KiiPortalApp.prototype._setThings = function(things){

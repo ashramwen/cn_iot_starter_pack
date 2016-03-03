@@ -1,6 +1,29 @@
 @import 'src/app/components/AppShared/scss/global.scss';
 .app-portal-devicemanager{
-/*
- * TODO
- **/
+    .sub-table{
+        & > tbody{
+            & > tr{
+                & > td{
+                    padding: 5px 5px;
+                }
+            }
+        }
+    }
+    .tab-pane-footer{
+        padding-top: 10px;
+        .btn{
+            .fa{
+                margin-right: 5px;
+            }
+        }
+    }
+
+    .detail-content{
+        border-top: 1px  #CCC solid;
+        border-bottom: 1px  #CCC solid;
+        box-shadow: 
+            inset 0px 11px 8px -11px #CCC, 
+            inset 0px -11px 8px -12px #CCC;
+        padding: 8px;
+    }
 }

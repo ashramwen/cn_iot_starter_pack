@@ -1,6 +1,133 @@
-<div class="app-portal-devicemanager">
-  <!-- Sub State -->
-  <div ui-view>
-  </div>
-  <!-- End of Sub State-->
+<div class="app-portal-devicemanager" ng-init="init()">
+  <table st-table="firmwares" class="table table-striped">
+    <thead>
+    <tr>
+      <th><input type="checkbox" /></th>
+      <th>_deviceID</th>
+      <th>_vendorThingID</th>
+      <th>Model</th>
+      <th>Firmware Version</th>
+      <th>_online</th>
+      <th>_disabled</th>
+      <th>_created</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat-start="device in myDevices" ng-click="device._onEdit = !device._onEdit">
+      <td><input type="checkbox" /></td>
+      <td>{{device.getThingID()}}</td>
+      <td>{{device.getVendorThingID()}}</td>
+      <td>{{device._productionName}}</td>
+      <td>{{device._firmwareVersion}}</td>
+      <td>{{device._online}}</td>
+      <td>{{device._disabled}}</td>
+      <td>{{getTime(device._created)}}</td>
+    </tr>
+    <tr ng-repeat-end>
+      <td colspan="8" style="padding:0px;">
+        <div class="detail-content" uib-collapse="!device._onEdit">
+          <uib-tabset>
+            <uib-tab heading="General">
+              <table class="sub-table">
+                <tr>
+                  <td>_thingType</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._thingType"></text-limit>
+                  </td>
+                  <td>_vendor</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._vendor"></text-limit>
+                  </td>
+                </tr>
+                <tr>
+                  <td>_lot</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._lot"></text-limit>
+                  </td>
+                  <td>_productName</td>
+                    <td>
+                      <text-limit max="100" ng-model="device.fields._productName"></text-limit>
+                    </td>
+                </tr>
+                <tr>
+                  <td>_firmwareVersion</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._firmwareVersion"></text-limit>
+                  </td>
+                  <td>_disabled</td>
+                  <td>
+                    <switchery ng-model="device._disabled" yes-text="Yes" no-text="No"></switchery>
+                  </td>
+                </tr>
+              </table>
+            </uib-tab>
+            <uib-tab heading="Additional">
+              <table class="sub-table">
+                <tr>
+                  <td>_stringField1</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._stringField1"></text-limit>
+                  </td>
+                  <td>_numberField1</td>
+                  <td>
+                    <text-limit type="number" max="100" ng-model="device.fields._numberField1"></text-limit>
+                  </td>
+                </tr>
+                <tr>
+                  <td>_stringField2</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._stringField2"></text-limit>
+                  </td>
+                  <td>_numberField2</td>
+                  <td>
+                    <text-limit type="number" max="100" ng-model="device.fields._numberField2"></text-limit>
+                  </td>
+                </tr>
+                <tr>
+                  <td>_stringField3</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._stringField3"></text-limit>
+                  </td>
+                  <td>_numberField3</td>
+                  <td>
+                    <text-limit type="number" max="100" ng-model="device.fields._numberField3"></text-limit>
+                  </td>
+                </tr>
+                <tr>
+                  <td>_stringField4</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._stringField4"></text-limit>
+                  </td>
+                  <td>_numberField4</td>
+                  <td>
+                    <text-limit type="number" max="100" ng-model="device.fields._numberField4"></text-limit>
+                  </td>
+                </tr>
+                <tr>
+                  <td>_stringField5</td>
+                  <td>
+                    <text-limit max="100" ng-model="device.fields._stringField5"></text-limit>
+                  </td>
+                  <td>_numberField5</td>
+                  <td>
+                    <text-limit type="number" max="100" ng-model="device.fields._numberField5"></text-limit>
+                  </td>
+                </tr>
+              </table>
+            </uib-tab>
+            <uib-tab heading="Custom" select="getCustomFields(device)">
+              <div ng-jsoneditor ng-model="device.customFieldEditor.customFields" options="device.customFieldEditor.options" style="height:300px; width:100%;"></div>
+            </uib-tab>
+          </uib-tabset>
+          <div class="tab-pane-footer clearfix">
+            <div class="clearfix pull-right">
+              <button class="btn btn-danger" ng-click="deleteDevice(device)"><span class="fa fa-remove"></span>Delete</button>
+              <button class="btn btn-success" ng-click="updateDevice(device)"><span class="fa fa-cloud-upload"></span>Update</button>
+            </div>
+          </div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
 </div>

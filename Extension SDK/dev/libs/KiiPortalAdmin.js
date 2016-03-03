@@ -41,6 +41,10 @@
             };
         }
 
+        KiiPortalAdmin.getCurrentApp = function(){
+            return this._currentApp;
+        }
+
         KiiPortalAdmin.setCurrentAdminContext = function(context){
             KiiPortalAdmin._currentAdminContext = context;
         };
@@ -154,6 +158,7 @@
                         var adminCallbacks = {
                             success: function(adminContext) {
                                 app.setAdminContext(adminContext);
+                                KiiPortalAdmin._currentApp = app;
                                 if(callbacks){
                                     callbacks.success.call(callbacks, app);
                                 }
