@@ -75,7 +75,7 @@
 
             spec.headers = spec.headers || {};
 
-            return new KiiPortalRequest(kiiApp, spec);
+            return new KiiObjectRequest(kiiApp, spec);
         };
 
         /**

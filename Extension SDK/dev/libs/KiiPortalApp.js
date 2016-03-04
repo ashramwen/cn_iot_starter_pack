@@ -211,7 +211,7 @@
             settings.success = callbacks.success;
             settings.failure = callbacks.failure;
 
-            return __ajax(settings);
+            return KiiPortalRequest(settings);
         }
 
 
@@ -254,7 +254,7 @@
                     }
                 };
 
-                __ajax(settings).then(createAppCallbacks.success, createAppCallbacks.failure);
+                KiiPortalRequest(settings).then(createAppCallbacks.success, createAppCallbacks.failure);
             });
         };
 
@@ -276,9 +276,9 @@
 
                 setting = {
                     method: 'GET',
-                    url: root._apis.APP + '/' +appID,
+                    url: root._apis.APP + '/' + appID,
                     headers: {
-                        'Authorization': tokenType + ' ' +accessToken
+                        'Authorization': tokenType + ' ' + accessToken
                     }
                 };
 
@@ -286,12 +286,18 @@
                     success: function(response){
                         var appData = response.data.app;
                         KiiPortalApp.fromJson(_this, appData);
+                        _this._putSecret(appData);
+                        if(callbacks){
+                            callbacks.success.call(callbacks, _this);
+                        }
+                        resolve(_this);
 
+                        /*
                         setting = {
                             method: 'GET',
-                            url: root._apis.APP + '/' +appID + '/secret',
+                            url: root._apis.APP + '/' + appID + '/secret',
                             headers: {
-                                'Authorization': tokenType + ' ' +accessToken
+                                'Authorization': tokenType + ' ' + accessToken
                             }
                         };
 
@@ -313,8 +319,8 @@
                             }
                         };
 
-                        __ajax(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
-
+                        KiiPortalRequest(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
+                        */
                     },
                     failure: function(response){
                         if(callbacks){
@@ -324,7 +330,7 @@
                     }
                 };
 
-                __ajax(setting).then(getAppCallbacks.success, getAppCallbacks.failure);
+                KiiPortalRequest(setting).then(getAppCallbacks.success, getAppCallbacks.failure);
             });
         };
 
@@ -374,7 +380,7 @@
                         reject(response);
                     }
                 };
-                __ajax(setting).then(refreshAppsCallbacks.success, refreshAppsCallbacks.failure);
+                KiiPortalRequest(setting).then(refreshAppsCallbacks.success, refreshAppsCallbacks.failure);
             });
         };
 

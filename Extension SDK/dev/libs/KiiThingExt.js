@@ -30,7 +30,7 @@
             spec.headers = spec.headers || {};
             spec.headers["Content-Type"] = "application/vnd.kii.thingqueryrequest+json";
 
-            return new KiiPortalRequest(kiiApp, spec);
+            return new KiiObjectRequest(kiiApp, spec);
         };
 
         /**
@@ -132,7 +132,7 @@
                 url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
             };
 
-            var request = new KiiPortalRequest(kiiApp, spec);
+            var request = new KiiObjectRequest(kiiApp, spec);
 
             request.execute().then(function(response){
                 resolve(response);
