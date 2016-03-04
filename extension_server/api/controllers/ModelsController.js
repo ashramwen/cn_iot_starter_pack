@@ -49,6 +49,10 @@ module.exports = {
 				res.badRequest(err)
 				return
 			}
+			if (found == undefined) {
+				res.ok([])
+				return
+			}
 			res.ok(found)
 		})
 	},
