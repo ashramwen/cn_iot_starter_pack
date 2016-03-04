@@ -26,4 +26,17 @@
             inset 0px -11px 8px -12px #CCC;
         padding: 8px;
     }
+
+    .load-more{
+        width: 100%;
+        text-align: center;
+        height: 34px;
+        line-height: 34px;
+        border: #ddd 1px dashed;
+        cursor: pointer;
+
+        &:hover{
+            border: #ccc 1px dashed;
+        }
+    }
 }

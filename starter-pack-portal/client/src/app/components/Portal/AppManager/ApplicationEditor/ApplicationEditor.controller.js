@@ -30,7 +30,8 @@ angular.module('StarterPack.Portal.AppManager')
                     $scope.turnOffMenu();
                     $scope.$apply();
                     AppUtils.whenLoaded();
-                }, function(){
+                }, function(error){
+                    console('timeout!');
                     AppUtils.whenLoaded();
                 });
             }

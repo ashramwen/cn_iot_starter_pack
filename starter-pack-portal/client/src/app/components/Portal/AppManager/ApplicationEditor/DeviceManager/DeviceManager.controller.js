@@ -10,29 +10,31 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
         $scope.$watch('appReady', function(ready){
             if(!ready) return;
             AppUtils.doLoading();
-            $scope.myApp.queryThings({}, {limit: 5}).then(function(result){
+            $scope.myApp.queryThings({}, null, {limit: 5}).then(function(result){
 
                 $scope.myDevices = result.things;
+                $scope.nextQuery = result.query;
 
-                _.each(result.things, function(thing){
-                    thing.customFieldEditor = {
-                        customFields:{},
-                        options: {
-                            mode: 'code'
-                        }
-                    };
-                });
+                $scope.initDevices($scope.myDevices);
 
                 $scope.$apply();
-
-                console.log('things',result.things);
-                console.log('query', result.query);
 
                 AppUtils.whenLoaded();
             }, function(error){
                 console.log(error);
                 AppUtils.whenLoaded();
             });;
+        });
+    };
+
+    $scope.initDevices = function(devices){
+        _.each(devices, function(thing){
+            thing.customFieldEditor = {
+                customFields:{},
+                options: {
+                    mode: 'code'
+                }
+            };
         });
     };
 
@@ -81,6 +83,24 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
             console.log(response);
         });
     };
+
+    $scope.loadMore = function(){
+        AppUtils.doLoading();
+        $scope.myApp.nextThings(null, $scope.nextQuery).then(function(response){
+            $scope.nextQuery = response.query;
+            var devices = response.things;
+            $scope.initDevices(devices);
+
+            $scope.myDevices = $scope.myApp.getThings();
+
+            $scope.$apply();
+            AppUtils.whenLoaded();
+        }, function(){
+            AppUtils.whenLoaded();
+        });
+
+                
+    }
 
 
   }]);

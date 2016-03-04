@@ -63,9 +63,7 @@
 
             var queryCallbacks = {
                 success: function(query, things){
-                    __each(things, function(thing){
-                        thing._kiiApp = kiiApp;
-                    });
+                    kiiApp._setThings(things);
 
                     if(callbacks && callbacks.success){
                         callbacks.success.apply(callbacks.success, arguments);
@@ -84,27 +82,19 @@
         });
     };
 
-    KiiThingAdmin._withApp = function(kiiApp, callbacks){
+    KiiThingAdmin._nextWithApp = function(kiiApp, callbacks, nextQuery){
         return new Promise(function(resolve, reject){
-
             var queryCallbacks = {
                 success: function(query, things){
-                    kiiApp._setThings(things);
-
-                    if(callbacks && callbacks.success){
-                        callbacks.success.apply(callbacks.success, arguments);
-                    }
-                    resolve({query: query, things: things});
+                    kiiApp.addThings(things);
+                    resolve({query:query, things: kiiApp.getThings()});
                 },
                 failure: function(query, error){
-                    if(callbacks && callbacks.failure){
-                        callbacks.failure.apply(callbacks.failure, arguments);
-                    }
-                    reject({query: query, error: error});
+                    reject({query:query, error: error});
                 }
             };
 
-            KiiThingAdmin.query(kiiApp, queryCallbacks, null);
+            KiiThingAdminQuery.executeQuery(kiiApp, nextQuery, queryCallbacks);
         });
     };
 

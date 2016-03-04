@@ -554,7 +554,7 @@
         /* =================================== things related ====================================================== */
 
         KiiPortalApp.prototype.queryThings = function(callbacks, queryClause, dictVal){
-            return KiiThingAdmin._withApp(this, callbacks, queryClause, dictVal);
+            return KiiThingAdmin.query(this, callbacks, queryClause, dictVal);
         };
 
         KiiPortalApp.prototype.nextThings = function(callbacks, nextQuery){
@@ -567,6 +567,11 @@
 
         KiiPortalApp.prototype.getThings = function(things){
             return this._things;
+        };
+
+        KiiPortalApp.prototype.addThings = function(things){
+            this._things = this._things || [];
+            this._things = this._things.concat(things);
         };
 
         /* =================================== end of things ======================================================= */
