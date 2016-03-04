@@ -111,7 +111,29 @@ module.exports = {
 					} 
 					if (response.statusCode == 200) {
 						returnedBody['admin_token'] = JSON.parse(body)['access_token']
-						res.ok(returnedBody)
+
+						var options = {
+							method: 'GET',
+							url: 'https://' + sails.portalServerHost + '/v2ext/apps/' + appID + '/secret',
+							headers: {
+								authorization: authorization
+							}
+						};
+
+						sails.request(options, function(error, response, body) {
+							if (error) {
+								res.serverError()
+								return
+							}
+							if (response.statusCode == 200) {
+								returnedBody.app['client_id'] = JSON.parse(body)['client_id']
+								returnedBody.app['client_secret'] = JSON.parse(body)['client_secret']
+								res.ok(returnedBody)
+							} else {
+								res.unauthorized()
+							}
+						});
+						
 					} else {
 						res.unauthorized()
 					}
