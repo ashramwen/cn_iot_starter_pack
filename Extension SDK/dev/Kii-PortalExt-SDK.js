@@ -42,7 +42,7 @@
      * extension server url
      * @type {String}
      */
-    root._extensionUrl = 'http://localhost:1336';
+    root._extensionUrl = 'http://localhost:1337';
 
     root._extApis = {
         MODEL: '/models'
@@ -55,8 +55,8 @@
      */
     root._baseUrl = 'https://kii-yubari.herokuapp.com';
     root._apis = {
-        AUTHENTIC: root._baseUrl + '/oauth/token',
-        APP: root._baseUrl + '/v2ext/apps'
+        AUTHENTIC: root._extensionUrl + '/login',
+        APP: root._extensionUrl + '/apps'
     };
 
     var DevelopmentSettings = {
