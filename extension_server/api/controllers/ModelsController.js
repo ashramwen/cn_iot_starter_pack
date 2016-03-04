@@ -62,6 +62,21 @@ module.exports = {
 				res.badRequest(err)
 				return
 			}
+			if (found == undefined) {
+				var newModel = {
+					body: {
+						modelID: modelID,
+						initialSchema: {
+							properties: properties
+						}
+					},
+					headers: {
+						'x-app-id': appID
+					}
+				}
+				sails.controllers.models.create(newModel, res)
+				return
+			}
 			var version = found.schemas.length + 1
 			var schema = {
 				appID: appID,
@@ -83,7 +98,6 @@ module.exports = {
 	findSchema: function (req, res) {
 		var modelID = req.param('modelID')
 		var version = req.param('versionNumber')
-
 		if (version == 'latest') {
 			Schemas.findOne({where: {
 				appID: req.headers['x-app-id'], 
