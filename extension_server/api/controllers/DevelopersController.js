@@ -86,6 +86,7 @@ module.exports = {
 				res.serverError()
 				return
 			}
+
 			if (response.statusCode == 200) {
 				var returnedBody = JSON.parse(body)
 				var siteName = returnedBody.app['site_name']
@@ -96,17 +97,11 @@ module.exports = {
 
 				var options = {
 					method: 'POST',
-					url: 'https://' + sails.config.kiiSite.qa/*sails.config.kiiSite[siteName]*/ + '/api/oauth2/token',
+					url: 'https://' + sails.portalServerHost + '/v2ext/apps/' + appID + '/token',
 					headers: {
 						'content-type': 'application/json',
-						'x-kii-appkey': appKey,
-						'x-kii-appid': appID
-					},
-					body: {
-						client_id: clientID,
-						client_secret: clientSecret
-					},
-					json: true
+						authorization: authorization
+					}
 				};
 
 				sails.request(options, function(error, response, body) {
@@ -115,7 +110,7 @@ module.exports = {
 						return
 					} 
 					if (response.statusCode == 200) {
-						returnedBody['admin_token'] = body['access_token']
+						returnedBody['admin_token'] = JSON.parse(body)['access_token']
 						res.ok(returnedBody)
 					} else {
 						res.unauthorized()
