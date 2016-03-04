@@ -246,75 +246,6 @@
         });
     };
 
-    root.KiiPortalRequest = (function(){
-        function KiiPortalRequest(kiiApp, spec){
-            this._appID = kiiApp.getAppID();
-            this._appKey = kiiApp.getAppKey();
-            this._token = kiiApp.getAdminContext()._token;
-            this._url = spec.url;
-            this._data = spec.data;
-            this._method = spec.method;
-            this._headers = {};
-            this._extHeaders = spec.headers;
-        }
-
-
-        KiiPortalRequest.prototype.getAppID = function(){
-            return this._appID;
-        };
-
-        KiiPortalRequest.prototype.getAppKey = function(){
-            return this._appKey;
-        };
-
-        KiiPortalRequest.prototype.getToken = function(){
-            return 'Bearer ' + this._token;
-        };
-
-        KiiPortalRequest.prototype.execute = function(callbacks){
-            this.setKiiHeaders();
-            this._disableCacheURL();
-
-            var settings = {
-                headers: this._headers,
-                method: this._method,
-                data: this._data,
-                url: this._url
-            };
-
-            callbacks = callbacks || {};
-            settings.success = callbacks.success;
-            settings.failure = callbacks.failure;
-
-            return __ajax(settings);
-        };
-
-        KiiPortalRequest.prototype._disableCacheURL = function(){
-            if (this._url.indexOf('?') !== -1) {
-                this._url += "&disable_cache=";
-            } else {
-                this._url += "?disable_cache=";
-            }
-            this._url += new Date().getTime();
-        };
-
-        KiiPortalRequest.prototype.setKiiHeaders = function() {
-            this._headers = {
-                "x-kii-appid": this.getAppID(),
-                "x-kii-appkey": this.getAppKey(),
-                "x-kii-sdk": KiiSDKClientInfo.getSDKClientInfo(),
-                "Authorization": this.getToken()
-            };
-            __extends(this._headers, this._extHeaders);
-        };
-
-        return KiiPortalRequest;
-    })();
-
-
-
-
-
 
     /** Bucket Name constants.
      * Note: Buckets with following name here is initialized in creating application process.
@@ -367,14 +298,85 @@
     root._baseUrl = 'https://kii-yubari.herokuapp.com';
     root._apis = {
         AUTHENTIC: root._extensionUrl + '/login',
-        APP: root._extensionUrl + '/apps'
+        APP: root._extensionUrl + '/apps',
+        MODEL: root._extensionUrl + '/models'
     };
 
     var DevelopmentSettings = {
         SERVER_ADDRESS: 'https://qa21.internal.kii.com/api'
     };
 
-        /**
+        
+
+    root.KiiObjectRequest = (function(){
+        function KiiObjectRequest(kiiApp, spec){
+            this._appID = kiiApp.getAppID();
+            this._appKey = kiiApp.getAppKey();
+            this._token = kiiApp.getAdminContext()._token;
+            this._url = spec.url;
+            this._data = spec.data;
+            this._method = spec.method;
+            this._headers = {};
+            this._extHeaders = spec.headers;
+        }
+
+
+        KiiObjectRequest.prototype.getAppID = function(){
+            return this._appID;
+        };
+
+        KiiObjectRequest.prototype.getAppKey = function(){
+            return this._appKey;
+        };
+
+        KiiObjectRequest.prototype.getToken = function(){
+            return 'Bearer ' + this._token;
+        };
+
+        KiiObjectRequest.prototype.execute = function(callbacks){
+            this.setKiiHeaders();
+            this._disableCacheURL();
+
+            var settings = {
+                headers: this._headers,
+                method: this._method,
+                data: this._data,
+                url: this._url
+            };
+
+            callbacks = callbacks || {};
+            settings.success = callbacks.success;
+            settings.failure = callbacks.failure;
+
+            return __ajax(settings);
+        };
+
+        KiiObjectRequest.prototype._disableCacheURL = function(){
+            if (this._url.indexOf('?') !== -1) {
+                this._url += "&disable_cache=";
+            } else {
+                this._url += "?disable_cache=";
+            }
+            this._url += new Date().getTime();
+        };
+
+        KiiObjectRequest.prototype.setKiiHeaders = function() {
+            this._headers = {
+                "x-kii-appid": this.getAppID(),
+                "x-kii-appkey": this.getAppKey(),
+                "x-kii-sdk": KiiSDKClientInfo.getSDKClientInfo(),
+                "Authorization": this.getToken()
+            };
+            __extends(this._headers, this._extHeaders);
+        };
+
+        return KiiObjectRequest;
+    })();
+
+
+
+
+    /**
      * abstract class
      */
     root.KiiPortalObject = function(KiiObject, KiiObjectAdmin){
@@ -888,7 +890,7 @@
 
             spec.headers = spec.headers || {};
 
-            return new KiiPortalRequest(kiiApp, spec);
+            return new KiiObjectRequest(kiiApp, spec);
         };
 
         /**
@@ -971,7 +973,22 @@
 
         return KiiPortalQuery;
     })(KiiQuery);
+    
+    root.KiiPortalRequest = (function(){
 
+        function KiiPortalRequest(spec, kiiApp){
+            if(kiiApp){
+                spec.headers = spec.headers || {};
+                spec.headers['x-app-id'] = kiiApp.getAppID();
+                spec.headers['x-app-key'] = kiiApp.getAppKey();
+                spec.headers['Authorization'] = kiiApp.getAdmin().getTokenType() + ' ' + kiiApp.getAdmin().getAccessToken();
+                spec.headers['x-app-site'] = kiiApp.getSite();
+            }
+            return __ajax(spec);
+        }
+        
+        return KiiPortalRequest;
+    })();
 
     
     root.KiiPortalAdmin = (function(){
@@ -1018,7 +1035,7 @@
 
         KiiPortalAdmin.getCurrentApp = function(){
             return this._currentApp;
-        }
+        };
 
         KiiPortalAdmin.setCurrentAdminContext = function(context){
             KiiPortalAdmin._currentAdminContext = context;
@@ -1113,7 +1130,7 @@
                         'grant_type': 'password'
                     }
                 };
-                __ajax(setting).then(loginCallbacks.success, loginCallbacks.failure);
+                KiiPortalRequest(setting).then(loginCallbacks.success, loginCallbacks.failure);
 
             });
         };
@@ -1385,7 +1402,7 @@
             settings.success = callbacks.success;
             settings.failure = callbacks.failure;
 
-            return __ajax(settings);
+            return KiiPortalRequest(settings);
         }
 
 
@@ -1428,7 +1445,7 @@
                     }
                 };
 
-                __ajax(settings).then(createAppCallbacks.success, createAppCallbacks.failure);
+                KiiPortalRequest(settings).then(createAppCallbacks.success, createAppCallbacks.failure);
             });
         };
 
@@ -1450,9 +1467,9 @@
 
                 setting = {
                     method: 'GET',
-                    url: root._apis.APP + '/' +appID,
+                    url: root._apis.APP + '/' + appID,
                     headers: {
-                        'Authorization': tokenType + ' ' +accessToken
+                        'Authorization': tokenType + ' ' + accessToken
                     }
                 };
 
@@ -1460,12 +1477,18 @@
                     success: function(response){
                         var appData = response.data.app;
                         KiiPortalApp.fromJson(_this, appData);
+                        _this._putSecret(appData);
+                        if(callbacks){
+                            callbacks.success.call(callbacks, _this);
+                        }
+                        resolve(_this);
 
+                        /*
                         setting = {
                             method: 'GET',
-                            url: root._apis.APP + '/' +appID + '/secret',
+                            url: root._apis.APP + '/' + appID + '/secret',
                             headers: {
-                                'Authorization': tokenType + ' ' +accessToken
+                                'Authorization': tokenType + ' ' + accessToken
                             }
                         };
 
@@ -1487,8 +1510,8 @@
                             }
                         };
 
-                        __ajax(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
-
+                        KiiPortalRequest(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
+                        */
                     },
                     failure: function(response){
                         if(callbacks){
@@ -1498,7 +1521,7 @@
                     }
                 };
 
-                __ajax(setting).then(getAppCallbacks.success, getAppCallbacks.failure);
+                KiiPortalRequest(setting).then(getAppCallbacks.success, getAppCallbacks.failure);
             });
         };
 
@@ -1548,7 +1571,7 @@
                         reject(response);
                     }
                 };
-                __ajax(setting).then(refreshAppsCallbacks.success, refreshAppsCallbacks.failure);
+                KiiPortalRequest(setting).then(refreshAppsCallbacks.success, refreshAppsCallbacks.failure);
             });
         };
 
@@ -2550,7 +2573,7 @@
             this._imageUrl = null;
             this._firmwares = [];
             this._firmwareNamespace = null;
-            this._portalSchema = null;
+            this._portalSchemas = null;
 
 
             this.getImageUrl = function(){
@@ -2587,12 +2610,11 @@
                 return _this.get('firmwareNamespace');
             };
 
-            this.getPortalSchema = function(){
-                return _this._portalSchema;
+            this.getPortalSchemas = function(){
+                return _this._portalSchemas;
             };
-            this.setPortalSchema = function(schema){
-                _this._portalSchema = schema;
-                _this.set('portalSchema', schema);
+            this.setPortalSchemas = function(schemas){
+                _this._portalSchemas = schemas;
             };
 
         }
@@ -2915,27 +2937,8 @@
             });
         };
 
-        KiiPortalModel.prototype.initSchema = function(schema){
-            this._portalSchema = new KiiPortalSchema(schema);
-        }
-
-        KiiPortalModel.prototype.savePortalSchema = function(callbacks){
-            _.each(this._portalSchema.properties, function(property){
-
-            });
-        };
-
-        KiiPortalModel.prototype.refreshPortalSchema = function(callbacks){
-
-            var _this = this;
-            return new Promise(function(resolve, reject){
-                _this._portalSchema = new KiiPortalSchema();
-
-                /**
-                 * TODO
-                 */
-                resolve(this._portalSchema);
-            });
+        KiiPortalModel.prototype.refreshPortalSchemas = function(callbacks){
+            return KiiPortalSchema._withModel(this, callbacks);
         };
 
         /**
@@ -2952,20 +2955,49 @@
 
     root.KiiPortalSchema = (function(){
 
-        function KiiPortalSchema(schema){
+        function KiiPortalSchema(schema, kiiApp){
             var _this = this;
+            this._modelId = null;
+            this._versionNumber = null;
             this.properties = [];
+            this._kiiApp = kiiApp;
+
 
             this.getProperties = function(){
                 return _this.properties;
             };
-            
+
+            this.getKiiApp = function(){
+                return _this.kiiApp;
+            }
+
+            this.getModelId = function(){
+                return _this._modelId;
+            };
+
+            this.setModelId = function(modelId){
+                _this._modelId = modelId;
+            }
+
+            this.getVersionNumber = function(){
+                return _this._versionNumber;
+            };
+
+            this.setVersionNumber = function(versionNumber){
+                _this._versionNumber = versionNumber;
+            };
+
+            this.init(schema);
+        }
+
+        KiiPortalSchema.prototype.init = function(schema){
             if(schema){
+                this.setModelId(schema.modelId);
                 __each(schema.properties, function(property){
                     _this.properties.push(new KiiPortalSchemaProperty(property));
-                });    
+                });
             }
-        }
+        };
 
         KiiPortalSchema.prototype.createProperty = function(){
             var property = new KiiPortalSchemaProperty;
@@ -2979,6 +3011,121 @@
 
         KiiPortalSchema.prototype.removeProperty = function(property){
             this.properties.splice(this.properties.indexOf(property), 1);
+        };
+
+        KiiPortalSchema._withModel = function(model, callbacks){
+            var tokenType, accessToken, setting, kiiApp;
+            kiiApp = model.getKiiApp();
+
+            return new Promise(function(resolve, reject){
+                setting = {
+                    method: 'GET',
+                    url: root._apis.MODEL + '/' + model.getUUID() + '/schemas',
+                    success: function(response){
+                        schemaData = response.data;
+                        var schemas = [];
+
+                        __each(schemaData, function(schema){
+                            schemas.push(KiiPortalSchema.factory(schema, model.getKiiApp()));
+                        });
+
+                        model.setPortalSchemas(schemas);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(schemas);
+                        }
+                        resolve(schemas);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+
+                KiiPortalRequest(setting, kiiApp);
+            });
+        };
+
+        KiiPortalSchema.prototype.refresh = function(property){
+            var setting = {
+                method: 'GET',
+                url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this.getVersionNumber(),
+                headers: {
+                    'Authorization': tokenType + ' ' + accessToken
+                }
+            }
+        };
+
+        KiiPortalSchema.prototype.save = function(callbacks){
+            var versionNumber, createFlag, setting, _this, tokenType, accessToken;
+            tokenType = this.getKiiApp().getAdmin.getTokenType();
+            accessToken = this.getKiiApp().getAdmin().getAccessToken();
+
+            _this = this;
+            versionNumber = this.getVersionNumber();
+
+            if(!versionNumber){
+                createFlag = true;
+            }
+
+            return new Pormise(function(resolve, reject){
+                if(createFlag){
+                    setting = {
+                        method: 'POST',
+                        url: root._apis.MODEL + '/' + this.getModelId() + '/schemas',
+                        headers: {
+                            'Authorization': tokenType + ' ' + accessToken
+                        },
+                        success: function(response){
+                            _this.init(response.data);
+                            if(callbacks && callbacks.success){
+                                callbacks.success(this);
+                            }
+                            resolve(this);
+                        },
+                        failure: function(error){
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(error);
+                                reject(error);
+                            }
+                        }
+                    };
+                }else{
+                    setting = {
+                        method: 'POST',
+                        url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this,
+                        headers: {
+                            'Authorization': tokenType + ' ' + accessToken
+                        },
+                        success: function(response){
+                            _this.init(response.data);
+                            if(callbacks && callbacks.success){
+                                callbacks.success(this);
+                            }
+                            resolve(this);
+                        },
+                        failure: function(error){
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(error);
+                                reject(error);
+                            }
+                        }
+                    };
+                }
+
+                KiiPortalRequest(setting);
+            });
+        };
+
+        KiiPortalSchema.create = function(modelId, kiiApp){
+            var schema = KiiPortalSchema.factory();
+            schema.setModelId(modelId, kiiApp);
+            return schema;
+        };
+
+        KiiPortalSchema.factory = function(schema, kiiApp){
+            return new KiiPortalSchema(schema, kiiApp);
         };
 
         return KiiPortalSchema;
@@ -3193,7 +3340,7 @@
             spec.headers = spec.headers || {};
             spec.headers["Content-Type"] = "application/vnd.kii.thingqueryrequest+json";
 
-            return new KiiPortalRequest(kiiApp, spec);
+            return new KiiObjectRequest(kiiApp, spec);
         };
 
         /**
@@ -3295,7 +3442,7 @@
                 url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
             };
 
-            var request = new KiiPortalRequest(kiiApp, spec);
+            var request = new KiiObjectRequest(kiiApp, spec);
 
             request.execute().then(function(response){
                 resolve(response);

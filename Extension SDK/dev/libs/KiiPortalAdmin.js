@@ -43,7 +43,7 @@
 
         KiiPortalAdmin.getCurrentApp = function(){
             return this._currentApp;
-        }
+        };
 
         KiiPortalAdmin.setCurrentAdminContext = function(context){
             KiiPortalAdmin._currentAdminContext = context;
@@ -138,7 +138,7 @@
                         'grant_type': 'password'
                     }
                 };
-                __ajax(setting).then(loginCallbacks.success, loginCallbacks.failure);
+                KiiPortalRequest(setting).then(loginCallbacks.success, loginCallbacks.failure);
 
             });
         };

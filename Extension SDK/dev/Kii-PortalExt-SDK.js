@@ -56,7 +56,8 @@
     root._baseUrl = 'https://kii-yubari.herokuapp.com';
     root._apis = {
         AUTHENTIC: root._extensionUrl + '/login',
-        APP: root._extensionUrl + '/apps'
+        APP: root._extensionUrl + '/apps',
+        MODEL: root._extensionUrl + '/models'
     };
 
     var DevelopmentSettings = {

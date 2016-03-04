@@ -15,38 +15,52 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         $scope.$watch('modelsReady', function(ready){
             if(ready){
                 $scope.initModel();
-
-                // get schema
-                AppUtils.doLoading();
-                $scope.myModel.refreshPortalSchema().then(function(){
-                    $scope.schemaProperties = $scope.myModel.getPortalSchema();
-                    $scope.$apply();
-                    AppUtils.whenLoaded();
-                }, function(erro){
-                    AppUtils.whenLoaded();
-                });
-
-
-                AppUtils.doLoading();
-
-                // get firmware namespace list
-                $scope.myApp.refreshFirmwareNamespaces().then(function(){
-                    AppUtils.whenLoaded();
-                    $scope.firmwareNamespaces = $scope.myApp.getFirmwareNamespaces();
-
-                    // get model's firmware namespace
-                    $scope.modelInfo.selectedNamespace = _.find($scope.firmwareNamespaces, function(firmwareNamespace){
-                        return firmwareNamespace.getName() == $scope.myModel.getFirmwareNamespace();
-                    });
-                    if($scope.modelInfo.selectedNamespace)
-                        $scope.initModelFirmwarenamespace($scope.myModel, $scope.modelInfo.selectedNamespace);
-
-                    $scope.$apply();
-                    
-                }, function(){
-                    AppUtils.whenLoaded();
-                });
+                $scope.loadSchema();
+                $scope.loadFirmwares();
             }
+        });
+    };
+
+    /**
+     * load schemas
+     * @return {[type]} [description]
+     */
+    $scope.loadSchema = function(){
+        AppUtils.doLoading();
+        $scope.myModel.refreshPortalSchemas().then(function(){
+            
+            console.log($scope.myModel.getPortalSchemas());
+            //$scope.schemaProperties = $scope.myModel.getPortalSchemas();
+            $scope.$apply();
+            AppUtils.whenLoaded();
+        }, function(erro){
+            AppUtils.whenLoaded();
+        });
+    };
+
+    /**
+     * load firmwares
+     * @return {[type]} [description]
+     */
+    $scope.loadFirmwares = function(){
+        AppUtils.doLoading();
+
+        // get firmware namespace list
+        $scope.myApp.refreshFirmwareNamespaces().then(function(){
+            AppUtils.whenLoaded();
+            $scope.firmwareNamespaces = $scope.myApp.getFirmwareNamespaces();
+
+            // get model's firmware namespace
+            $scope.modelInfo.selectedNamespace = _.find($scope.firmwareNamespaces, function(firmwareNamespace){
+                return firmwareNamespace.getName() == $scope.myModel.getFirmwareNamespace();
+            });
+            if($scope.modelInfo.selectedNamespace)
+                $scope.initModelFirmwarenamespace($scope.myModel, $scope.modelInfo.selectedNamespace);
+
+            $scope.$apply();
+            
+        }, function(){
+            AppUtils.whenLoaded();
         });
     };
 
