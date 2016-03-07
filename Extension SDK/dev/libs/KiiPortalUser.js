@@ -48,7 +48,7 @@ root.KiiPortalUser = (function(_super) {
      */
     KiiPortalUser._instantiate = function(data) {
         if (data != null) {
-            var user = new root.KiiUser();
+            var user = new root.KiiUserAdmin();
             user._info = {
                 'userID': data.userID,
                 'internalUserID': data.internalUserID,
