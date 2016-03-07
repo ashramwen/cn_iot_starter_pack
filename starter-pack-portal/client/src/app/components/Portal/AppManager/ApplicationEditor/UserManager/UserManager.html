@@ -1,6 +1,32 @@
-<div class="app-portal-usermanager">
-  <!-- Sub State -->
-  <div ui-view>
-  </div>
-  <!-- End of Sub State-->
+<div class="app-portal-usermanager" ng-init="init()">
+	<table st-table="firmwares" class="table table-striped">
+    <thead>
+    <tr>
+      <th><input type="checkbox" /></th>
+      <th>loginName</th>
+      <th>Password</th>
+      <th>displayName</th>
+      <th>emailAddress</th>
+      <th>phoneNumber</th>
+      <th>country</th>
+      <th>_disabled</th>
+      <th>createdAt</th>
+      <th>modifiedAt</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="user in users" ng-click="user._onEdit = !user._onEdit">
+      <td><input type="checkbox" /></td>
+      <td>{{user.loginName}}</td>
+      <td>***</td>
+      <td>{{user.displayName}}</td>
+      <td>{{user.emailAddress}}</td>
+      <td>{{user.phoneNumber}}</td>
+      <td>{{user.country}}</td>
+      <td>{{user._disabled}}</td>
+      <td>{{user.createdAt}}</td>
+      <td>{{user.modifiedAt}}</td>
+    </tr>
+    </tbody>
+  </table>
 </div>

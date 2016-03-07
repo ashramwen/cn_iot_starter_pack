@@ -557,6 +557,20 @@
 
         /* =================================== end of tag ========================================================== */
 
+        /* =================================== user related ======================================================== */
+        KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.query(this, callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype._setUsers = function(users){
+            this._users = users;
+        };
+
+        KiiPortalApp.prototype.getUsers = function(users){
+            return this._users;
+        };
+        /* =================================== end of tag ========================================================== */
+
+
         /* =================================== things related ====================================================== */
 
         KiiPortalApp.prototype.queryThings = function(callbacks, queryClause, dictVal){
