@@ -3329,7 +3329,7 @@ root.KiiPortalUser = (function(_super) {
     __inherits(KiiPortalUser, _super);
     KiiPortalUser.prototype.constructor = KiiPortalUser;
 
-    function KiiPortalUser(query) {
+    function KiiPortalUser() {
         /*
         var _this = this;
         __each(KiiPortalFirmware.prototype, function(value, key){
@@ -3371,7 +3371,29 @@ root.KiiPortalUser = (function(_super) {
      * @return {[type]}      [description]
      */
     KiiPortalUser._instantiate = function(data) {
-        return data;
+        if (data != null) {
+            var user = new root.KiiUser();
+            user._info = {
+                'userID': data.userID,
+                'internalUserID': data.internalUserID,
+                'loginName': data.loginName,
+                'displayName': data.displayName,
+                'country': data.country,
+                'emailAddress': data.emailAddress,
+                'emailAddressVerified': data.emailAddressVerified,
+                'phoneNumber': data.phoneNumber,
+                'phoneNumberVerified': data.phoneNumberVerified,
+                'disabled': data.disabled,
+                'createdAt': data.createdAt,
+                'modifiedAt': data.modifiedAt,
+                'passwordChangedAt': data.passwordChangedAt,
+                '_disabled': data._disabled,
+                '_hasPassword': data._hasPassword
+            };
+            return user;
+        } else {
+            return null;
+        }
     };
 
     return KiiPortalUser;

@@ -22,4 +22,12 @@ angular.module('StarterPack.AppShared')
 
         return arr;
     };
-  });
+  })
+  .filter('dateOnly', ['$filter', function($filter) {
+    return function(input) {
+        var angularDateFilter = $filter('date');
+        return function(theDate) {
+           return angularDateFilter(theDate, 'yyyy-MM-dd');
+        }
+    };
+  }]);

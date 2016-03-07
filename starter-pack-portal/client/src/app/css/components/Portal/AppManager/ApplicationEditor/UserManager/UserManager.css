@@ -1,4 +1,23 @@
-.app-portal-usermanager {
-  /*
- * TODO
- **/ }
+.app-portal-usermanager .sub-table > tbody > tr > td {
+  padding: 5px 5px; }
+
+.app-portal-usermanager .tab-pane-footer {
+  padding-top: 10px; }
+  .app-portal-usermanager .tab-pane-footer .btn .fa {
+    margin-right: 5px; }
+
+.app-portal-usermanager .detail-content {
+  border-top: 1px  #CCC solid;
+  border-bottom: 1px  #CCC solid;
+  box-shadow: inset 0px 11px 8px -11px #CCC,  inset 0px -11px 8px -12px #CCC;
+  padding: 8px; }
+
+.app-portal-usermanager .load-more {
+  width: 100%;
+  text-align: center;
+  height: 34px;
+  line-height: 34px;
+  border: #ddd 1px dashed;
+  cursor: pointer; }
+  .app-portal-usermanager .load-more:hover {
+    border: #ccc 1px dashed; }

@@ -2,30 +2,90 @@
 	<table st-table="firmwares" class="table table-striped">
     <thead>
     <tr>
-      <th><input type="checkbox" /></th>
-      <th>loginName</th>
+      <th></th>
+      <th>Login</th>
       <th>Password</th>
-      <th>displayName</th>
-      <th>emailAddress</th>
-      <th>phoneNumber</th>
-      <th>country</th>
-      <th>_disabled</th>
-      <th>createdAt</th>
-      <th>modifiedAt</th>
+      <th>Display Name</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Country</th>
+      <th>Status</th>
+      <th>Created</th>
+      <th>Modified</th>
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="user in users" ng-click="user._onEdit = !user._onEdit">
-      <td><input type="checkbox" /></td>
-      <td>{{user.loginName}}</td>
-      <td>***</td>
-      <td>{{user.displayName}}</td>
-      <td>{{user.emailAddress}}</td>
-      <td>{{user.phoneNumber}}</td>
-      <td>{{user.country}}</td>
-      <td>{{user._disabled}}</td>
-      <td>{{user.createdAt}}</td>
-      <td>{{user.modifiedAt}}</td>
+    <tr ng-repeat-start="user in users track by user._info.userID" ng-click="toggleEdit(user)">
+      <td><input type="checkbox" ng-model="user._onEdit" ng-click="toggleEdit(user)"/></td>
+      <td>{{::user._info.loginName}}</td>
+      <td>********</td>
+      <td>{{::user._info.displayName}}</td>
+      <td>{{::user._info.emailAddress}}</td>
+      <td>{{::user._info.phoneNumber}}</td>
+      <td>{{::user._info.country}}</td>
+      <td>{{::user._info._disabled?'Suspended':'Active'}}</td>
+      <td>{{::user._info.createdAt|dateOnly}}</td>
+      <td>{{::user._info.modifiedAt|dateOnly}}</td>
+    </tr>
+    <tr ng-repeat-end>
+      <td colspan="10" style="padding:0px;">
+        <div class="detail-content" uib-collapse="!user._onEdit">
+          <uib-tabset>
+            <uib-tab heading="Account Details">
+              <div class="row">
+                <form action="" class="form-horizontal" role="form">
+                  <div class="form-group">
+                    <label for="user_userID" class="col-sm-2 control-label"><span class="i18n i18n-en">User ID</span></label>
+                    <div class="col-sm-5"><input class="form-control" id="user_userID" readonly value="{{::user._field.userID}}"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="user_status" class="col-sm-2 control-label"><span class="i18n i18n-en">Status</span></label>
+                    <div class="col-sm-5"><input class="form-control" id="user_status" readonly value="{{::user._field._disabled?'Suspended':'Active'}}"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="user_loginName" class="col-sm-2 control-label"><span class="i18n i18n-en">Login Name</span></label>
+                    <div class="col-sm-5"><input class="form-control" id="user_loginName" ng-model="user._field.loginName"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="user_displayName" class="col-sm-2 control-label"><span class="i18n i18n-en">Display Name</span></label>
+                    <div class="col-sm-5"><input class="form-control" id="user_displayName" ng-model="user._field.displayName"></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="user_emailAddress" class="col-sm-2 control-label"><span class="i18n i18n-en">Email</span></label>
+                    <div class="col-sm-5"> <input class="form-control" id="user_emailAddress" ng-model="user._field.emailAddress"></div>
+                    <div class="col-sm-2 hide"> <label class="control-label success"><span class="i18n i18n-en">Verified</span></label></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="user_phoneNumber" class="col-sm-2 control-label"><span class="i18n i18n-en">Phone</span></label>
+                    <div class="col-sm-5"> <input class="form-control" id="user_phoneNumber" ng-model="user._field.phoneNumber"></div>
+                    <div class="col-sm-2 hide"> <label class="control-label success"><span class="i18n i18n-en">Verified</span></label></div>
+                  </div>
+                  <div class="form-group">
+                    <label for="user_country" class="col-sm-2 control-label"><span class="i18n i18n-en">Country</span></label>
+                    <div class="col-sm-5">
+                      <select class="form-control input" id="users-user-add-country" ng-model="user._field.country" ng-options="c.code as c.name for c in countryList">
+                        <option value="" disabled>-- Select a country --</option>
+                      </select>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </uib-tab>
+            <uib-tab heading="Attribute">
+              
+            </uib-tab>
+            <uib-tab heading="Groups" select="getCustomFields(device)">
+              
+            </uib-tab>
+          </uib-tabset>
+          <div class="tab-pane-footer clearfix">
+            <div class="clearfix pull-right">
+              <button class="btn btn-danger" ng-click="deleteDevice(device)"><span class="fa fa-remove"></span>Delete</button>
+              <button class="btn btn-success" ng-click="updateDevice(device)"><span class="fa fa-cloud-upload"></span>Update</button>
+            </div>
+          </div>
+        </div>
+      </td>
     </tr>
     </tbody>
   </table>
