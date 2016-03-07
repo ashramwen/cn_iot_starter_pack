@@ -561,10 +561,12 @@
         KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
             return KiiPortalUser.query(this, callbacks, queryClause, dictVal);
         };
+        KiiPortalApp.prototype.addUser = function(data){
+            return KiiPortalUser.addUser(this, data);
+        };
         KiiPortalApp.prototype._setUsers = function(users){
             this._users = users;
         };
-
         KiiPortalApp.prototype.getUsers = function(users){
             return this._users;
         };

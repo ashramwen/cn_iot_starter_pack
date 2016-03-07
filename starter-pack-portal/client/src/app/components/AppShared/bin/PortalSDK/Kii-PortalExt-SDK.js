@@ -1752,10 +1752,12 @@
         KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
             return KiiPortalUser.query(this, callbacks, queryClause, dictVal);
         };
+        KiiPortalApp.prototype.addUser = function(data){
+            return KiiPortalUser.addUser(this, data);
+        };
         KiiPortalApp.prototype._setUsers = function(users){
             this._users = users;
         };
-
         KiiPortalApp.prototype.getUsers = function(users){
             return this._users;
         };
@@ -3429,6 +3431,50 @@ KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
         };
 
         return KiiPortalUser.executeQuery(kiiApp, query, queryCallbacks);
+    });
+};
+
+KiiPortalUser.addUser = function(kiiApp, data) {
+    var _this = this;
+    return new Promise(function(resolve, reject) {
+        var spec, request, _data, kiiApp;
+
+        var userKeys = [
+            'loginName', 'password', 'displayName', 'emailAddress', 'phoneNumber',
+            'country', 'phoneNumberVerified', 'emailAddressVerified', 'createdAt', 'modifiedAt'
+        ];
+
+        kiiApp = KiiPortalAdmin.getCurrentApp();
+
+        _data = {
+            'loginName': data.loginName,
+            'password': data.password,
+            'displayName': data.displayName,
+            'emailAddress': data.emailAddress,
+            'phoneNumber': data.phoneNumber,
+            'country': data.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+
+        spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/users'
+        };
+
+        var request = new KiiObjectRequest(kiiApp, spec);
+
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
     });
 };    /**
      * Thing request
