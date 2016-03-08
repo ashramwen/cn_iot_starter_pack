@@ -57,8 +57,8 @@ root.KiiPortalUserQuery = (function(_super) {
     return KiiPortalUserQuery;
 })(KiiPortalQuery);
 
-root.KiiPortalUser = (function(KiiUserAdmin) {
-    __inherits(KiiPortalUser, KiiUserAdmin);
+root.KiiPortalUser = (function(_super) {
+    __inherits(KiiPortalUser, _super);
     KiiPortalUser.prototype.constructor = KiiPortalUser;
 
     function KiiPortalUser(data) {
