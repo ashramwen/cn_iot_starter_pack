@@ -84,7 +84,6 @@ KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
 
         var queryCallbacks = {
             success: function(query, users) {
-                kiiApp._setUsers(users);
                 if (callbacks && callbacks.success) {
                     callbacks.success.apply(callbacks.success, arguments);
                 }

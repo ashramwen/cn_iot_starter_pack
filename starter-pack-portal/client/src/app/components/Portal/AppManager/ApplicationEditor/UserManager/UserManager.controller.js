@@ -38,11 +38,31 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             $scope.isExpanded = !1;
         };
 
+        $scope.loadMore = function(query) {
+            var _option = {
+                limit: 5,
+                paginationKey: query._paginationKey
+            };
+            AppUtils.doLoading();
+            $scope.myApp.queryUsers({}, null, _option).then(function(result) {
+                console.log(result.query);
+                $scope.query = result.query;
+                $scope.users = $scope.users.concat(result.users);
+                $scope.$apply();
+                AppUtils.whenLoaded();
+            }, function(error) {
+                console.log(error);
+                AppUtils.whenLoaded();
+            });
+        }
+
         function queryUsers() {
             AppUtils.doLoading();
             $scope.myApp.queryUsers({}, null, {
                 limit: 5
             }).then(function(result) {
+                console.log(result.query);
+                $scope.query = result.query;
                 $scope.users = result.users;
                 $scope.$apply();
                 AppUtils.whenLoaded();
