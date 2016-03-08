@@ -1,11 +1,11 @@
 /**
  * class user request
  */
-root.KiiPortalUser = (function(_super) {
-    __inherits(KiiPortalUser, _super);
-    KiiPortalUser.prototype.constructor = KiiPortalUser;
+root.KiiPortalUserQuery = (function(_super) {
+    __inherits(KiiPortalUserQuery, _super);
+    KiiPortalUserQuery.prototype.constructor = KiiPortalUserQuery;
 
-    function KiiPortalUser() {
+    function KiiPortalUserQuery() {
         /*
         var _this = this;
         __each(KiiPortalFirmware.prototype, function(value, key){
@@ -17,7 +17,7 @@ root.KiiPortalUser = (function(_super) {
         */
     };
 
-    KiiPortalUser.queryName = 'userQuery';
+    KiiPortalUserQuery.queryName = 'userQuery';
 
     /**
      * override
@@ -25,7 +25,7 @@ root.KiiPortalUser = (function(_super) {
      * @param  {[type]} spec   [description]
      * @return {[type]}        [description]
      */
-    KiiPortalUser._getRequest = function(kiiApp, spec) {
+    KiiPortalUserQuery._getRequest = function(kiiApp, spec) {
         spec.headers = spec.headers || {};
         spec.headers['Content-Type'] = 'application/vnd.kii.userqueryrequest+json';
 
@@ -37,7 +37,7 @@ root.KiiPortalUser = (function(_super) {
      * @param  {[type]} kiiApp [description]
      * @return {[type]}        [description]
      */
-    KiiPortalUser._generatePath = function(kiiApp) {
+    KiiPortalUserQuery._generatePath = function(kiiApp) {
         return _super._generatePath.call(this, kiiApp) + '/users';
     };
 
@@ -46,40 +46,49 @@ root.KiiPortalUser = (function(_super) {
      * @param  {[type]} data [description]
      * @return {[type]}      [description]
      */
-    KiiPortalUser._instantiate = function(data) {
-        if (data != null) {
-            var user = new root.KiiUserAdmin();
-            user._info = {
-                'userID': data.userID,
-                'internalUserID': data.internalUserID,
-                'loginName': data.loginName,
-                'displayName': data.displayName,
-                'country': data.country,
-                'emailAddress': data.emailAddress,
-                'emailAddressVerified': data.emailAddressVerified,
-                'phoneNumber': data.phoneNumber,
-                'phoneNumberVerified': data.phoneNumberVerified,
-                'disabled': data.disabled,
-                'createdAt': data.createdAt,
-                'modifiedAt': data.modifiedAt,
-                'passwordChangedAt': data.passwordChangedAt,
-                '_disabled': data._disabled,
-                '_hasPassword': data._hasPassword
-            };
-            return user;
+    KiiPortalUserQuery._instantiate = function(data) {
+        if (data !== null) {
+            return new KiiPortalUser(data);
         } else {
             return null;
         }
     };
 
-    return KiiPortalUser;
+    return KiiPortalUserQuery;
 })(KiiPortalQuery);
+
+root.KiiPortalUser = (function(KiiUserAdmin) {
+    __inherits(KiiPortalUser, KiiUserAdmin);
+    KiiPortalUser.prototype.constructor = KiiPortalUser;
+
+    function KiiPortalUser(data) {
+        var _this = this;
+        __bindMethod(_this);
+        this._info = {};
+        this._info.userID = data.userID;
+        this._info.internalUserID = data.internalUserID;
+        this._info.loginName = data.loginName;
+        this._info.displayName = data.displayName;
+        this._info.country = data.country;
+        this._info.emailAddress = data.emailAddress;
+        this._info.emailAddressVerified = data.emailAddressVerified;
+        this._info.phoneNumber = data.phoneNumber;
+        this._info.phoneNumberVerified = data.phoneNumberVerified;
+        this._info.disabled = data.disabled;
+        this._info.createdAt = data.createdAt;
+        this._info.modifiedAt = data.modifiedAt;
+        this._info.passwordChangedAt = data.passwordChangedAt;
+        this._info._disabled = data._disabled;
+        this._info._hasPassword = data._hasPassword;
+    };
+    return KiiPortalUser;
+})(KiiUserAdmin);
 
 KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
     return new Promise(function(resolve, reject) {
         var query;
 
-        query = KiiPortalUser.queryWithClause(queryClause);
+        query = KiiPortalUserQuery.queryWithClause(queryClause);
         query.setDict(dictVal);
 
         var queryCallbacks = {
@@ -103,7 +112,7 @@ KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
             }
         };
 
-        return KiiPortalUser.executeQuery(kiiApp, query, queryCallbacks);
+        return KiiPortalUserQuery.executeQuery(kiiApp, query, queryCallbacks);
     });
 };
 

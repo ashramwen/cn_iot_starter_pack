@@ -21,3 +21,9 @@
   cursor: pointer; }
   .app-portal-usermanager .load-more:hover {
     border: #ccc 1px dashed; }
+
+.app-portal-usermanager .panel-bottom {
+  margin-top: 10px; }
+
+.app-portal-usermanager .sm {
+  width: 100% !important; }

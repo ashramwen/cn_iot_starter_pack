@@ -45,7 +45,6 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             };
             AppUtils.doLoading();
             $scope.myApp.queryUsers({}, null, _option).then(function(result) {
-                console.log(result.query);
                 $scope.query = result.query;
                 $scope.users = $scope.users.concat(result.users);
                 $scope.$apply();
@@ -61,7 +60,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             $scope.myApp.queryUsers({}, null, {
                 limit: 5
             }).then(function(result) {
-                console.log(result.query);
+                console.log(result.users);
                 $scope.query = result.query;
                 $scope.users = result.users;
                 $scope.$apply();
