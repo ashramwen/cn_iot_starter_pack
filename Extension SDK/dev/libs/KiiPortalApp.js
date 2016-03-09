@@ -564,6 +564,18 @@
         KiiPortalApp.prototype.addUser = function(data){
             return KiiPortalUser.addUser(this, data);
         };
+        KiiPortalApp.prototype.updateUser = function(data){
+            return KiiPortalUser.updateUser(this, data);
+        };
+        KiiPortalApp.prototype.suspendUser = function(data){
+            return KiiPortalUser.suspendUser(this, data);
+        };
+        KiiPortalApp.prototype.resetPasswordBySms = function(data){
+            return KiiPortalUser.resetPasswordBySms(this, data);
+        };
+        KiiPortalApp.prototype.resetPasswordByEmail = function(data){
+            return KiiPortalUser.resetPasswordByEmail(this, data);
+        };
         /* =================================== end of tag ========================================================== */
 
 

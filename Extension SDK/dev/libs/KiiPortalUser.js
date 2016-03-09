@@ -131,7 +131,138 @@ KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
 };
 
 KiiPortalUser.addUser = function(kiiApp, data) {
-    var _this = this;
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'loginName': data.loginName,
+            'password': data.password,
+            'displayName': data.displayName,
+            'emailAddress': data.emailAddress,
+            'phoneNumber': data.phoneNumber,
+            'country': data.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            extraUrl: '/users'
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.updateUser = function(kiiApp, data) {
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'loginName': data.loginName,
+            'password': data.password,
+            'displayName': data.displayName,
+            'emailAddress': data.emailAddress,
+            'phoneNumber': data.phoneNumber,
+            'country': data.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            extraUrl: '/users'
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.suspendUser = function(kiiApp, data) {
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'loginName': data.loginName,
+            'password': data.password,
+            'displayName': data.displayName,
+            'emailAddress': data.emailAddress,
+            'phoneNumber': data.phoneNumber,
+            'country': data.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            extraUrl: '/users'
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.resetPasswordBySms = function(kiiApp, data) {
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'loginName': data.loginName,
+            'password': data.password,
+            'displayName': data.displayName,
+            'emailAddress': data.emailAddress,
+            'phoneNumber': data.phoneNumber,
+            'country': data.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            extraUrl: '/users'
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.resetPasswordByEmail = function(kiiApp, data) {
     return new Promise(function(resolve, reject) {
         var _data = {
             'loginName': data.loginName,
