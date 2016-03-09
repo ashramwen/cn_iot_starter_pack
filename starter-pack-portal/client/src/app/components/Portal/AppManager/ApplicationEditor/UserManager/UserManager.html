@@ -63,15 +63,15 @@
     <tbody>
       <tr ng-repeat-start="user in users track by user._info.userID" ng-click="toggleEdit(user)">
         <td><input type="checkbox" ng-model="user._onEdit" ng-click="toggleEdit(user)"/></td>
-        <td>{{::user._info.loginName}}</td>
+        <td>{{user._info.loginName}}</td>
         <td>********</td>
-        <td>{{::user._info.displayName}}</td>
-        <td>{{::user._info.emailAddress}}</td>
-        <td>{{::user._info.phoneNumber}}</td>
-        <td>{{::user._info.country}}</td>
-        <td>{{::user._info._disabled?'Suspended':'Active'}}</td>
-        <td>{{::user._info.createdAt|dateOnly}}</td>
-        <td>{{::user._info.modifiedAt|dateOnly}}</td>
+        <td>{{user._info.displayName}}</td>
+        <td>{{user._info.emailAddress}}</td>
+        <td>{{user._info.phoneNumber}}</td>
+        <td>{{user._info.country}}</td>
+        <td>{{user._info._disabled?'Suspended':'Active'}}</td>
+        <td>{{user._info.createdAt|dateOnly}}</td>
+        <td>{{user._info.modifiedAt|dateOnly}}</td>
       </tr>
       <tr ng-repeat-end>
         <td colspan="10" style="padding:0px;">
@@ -81,35 +81,35 @@
                 <div class="row">
                   <form action="" class="form-horizontal" role="form">
                     <div class="form-group">
-                      <label for="user_userID" class="col-sm-2 control-label"><span class="i18n i18n-en">User ID</span></label>
-                      <div class="col-sm-5"><input class="form-control" id="user_userID" readonly value="{{::user._field.userID}}"></div>
+                      <label class="col-sm-2 control-label">User ID</label>
+                      <div class="col-sm-5"><input class="form-control" readonly value="{{::user._field.userID}}"></div>
                     </div>
                     <div class="form-group">
-                      <label for="user_status" class="col-sm-2 control-label"><span class="i18n i18n-en">Status</span></label>
-                      <div class="col-sm-5"><input class="form-control" id="user_status" readonly value="{{::user._field._disabled?'Suspended':'Active'}}"></div>
+                      <label class="col-sm-2 control-label">Status</label>
+                      <div class="col-sm-5"><input class="form-control" readonly value="{{::user._field._disabled?'Suspended':'Active'}}"></div>
                     </div>
                     <div class="form-group">
-                      <label for="user_loginName" class="col-sm-2 control-label"><span class="i18n i18n-en">Login Name</span></label>
-                      <div class="col-sm-5"><input class="form-control" id="user_loginName" ng-model="user._field.loginName"></div>
+                      <label class="col-sm-2 control-label">Login Name</label>
+                      <div class="col-sm-5"><input class="form-control" ng-model="user._field.loginName"></div>
                     </div>
                     <div class="form-group">
-                      <label for="user_displayName" class="col-sm-2 control-label"><span class="i18n i18n-en">Display Name</span></label>
-                      <div class="col-sm-5"><input class="form-control" id="user_displayName" ng-model="user._field.displayName"></div>
+                      <label class="col-sm-2 control-label">Display Name</label>
+                      <div class="col-sm-5"><input class="form-control" ng-model="user._field.displayName"></div>
                     </div>
                     <div class="form-group">
-                      <label for="user_emailAddress" class="col-sm-2 control-label"><span class="i18n i18n-en">Email</span></label>
-                      <div class="col-sm-5"> <input class="form-control" id="user_emailAddress" ng-model="user._field.emailAddress"></div>
-                      <div class="col-sm-2 hide"> <label class="control-label success"><span class="i18n i18n-en">Verified</span></label></div>
+                      <label class="col-sm-2 control-label">Email</label>
+                      <div class="col-sm-5"> <input class="form-control" ng-model="user._field.emailAddress"></div>
+                      <div class="col-sm-2 hide"> <label class="control-label success">Verified</label></div>
                     </div>
                     <div class="form-group">
-                      <label for="user_phoneNumber" class="col-sm-2 control-label"><span class="i18n i18n-en">Phone</span></label>
-                      <div class="col-sm-5"> <input class="form-control" id="user_phoneNumber" ng-model="user._field.phoneNumber"></div>
-                      <div class="col-sm-2 hide"> <label class="control-label success"><span class="i18n i18n-en">Verified</span></label></div>
+                      <label class="col-sm-2 control-label">Phone</label>
+                      <div class="col-sm-5"> <input class="form-control" ng-model="user._field.phoneNumber"></div>
+                      <div class="col-sm-2 hide"> <label class="control-label success">Verified</label></div>
                     </div>
                     <div class="form-group">
-                      <label for="user_country" class="col-sm-2 control-label"><span class="i18n i18n-en">Country</span></label>
+                      <label class="col-sm-2 control-label">Country</label>
                       <div class="col-sm-5">
-                        <select class="form-control" id="users-user-add-country" ng-model="user._field.country" ng-options="c.code as c.name for c in countryList">
+                        <select class="form-control" ng-model="user._field.country" ng-options="c.code as c.name for c in countryList">
                           <option value="" disabled>Select a country</option>
                         </select>
                       </div>
@@ -131,7 +131,7 @@
                 <button class="btn btn-primary" ng-click="deleteUser(user)"><span class="fa fa-mobile"></span>Reset Password (Sms)</button>
                 <button class="btn btn-warning" ng-click="deleteUser(user)"><span class="fa fa-ban"></span>Suspend</button>
                 <button class="btn btn-danger" ng-click="deleteUser(user)"><span class="fa fa-trash-o"></span>Delete</button>
-                <button class="btn btn-success" ng-click="updateUser(user)"><span class="fa fa-cloud-upload"></span>Update</button>
+                <button class="btn btn-success" ng-click="updateUser(user, $index)"><span class="fa fa-cloud-upload"></span>Update</button>
               </div>
             </div>
           </div>

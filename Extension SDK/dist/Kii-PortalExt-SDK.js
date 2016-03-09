@@ -1748,22 +1748,25 @@
 
         /* =================================== user related ======================================================== */
         KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.query(this, callbacks, queryClause, dictVal);
+            return KiiPortalUser.queryUsers(this, callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype.queryUserByID = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.queryUserByID(this, callbacks, queryClause, dictVal);
         };
         KiiPortalApp.prototype.addUser = function(data){
             return KiiPortalUser.addUser(this, data);
         };
-        KiiPortalApp.prototype.updateUser = function(data){
-            return KiiPortalUser.updateUser(this, data);
+        KiiPortalApp.prototype.updateUser = function(userID, data){
+            return KiiPortalUser.updateUser(this, userID, data);
         };
-        KiiPortalApp.prototype.suspendUser = function(data){
-            return KiiPortalUser.suspendUser(this, data);
+        KiiPortalApp.prototype.suspendUser = function(userID, data){
+            return KiiPortalUser.suspendUser(this, userID, data);
         };
-        KiiPortalApp.prototype.resetPasswordBySms = function(data){
-            return KiiPortalUser.resetPasswordBySms(this, data);
+        KiiPortalApp.prototype.resetPasswordBySms = function(userID, data){
+            return KiiPortalUser.resetPasswordBySms(this, userID, data);
         };
-        KiiPortalApp.prototype.resetPasswordByEmail = function(data){
-            return KiiPortalUser.resetPasswordByEmail(this, data);
+        KiiPortalApp.prototype.resetPasswordByEmail = function(userID, data){
+            return KiiPortalUser.resetPasswordByEmail(this, userID, data);
         };
         /* =================================== end of tag ========================================================== */
 
@@ -3382,16 +3385,23 @@ root.KiiPortalUserRequest = (function(_super) {
     __inherits(KiiPortalUserRequest, _super);
     KiiPortalUserRequest.prototype.constructor = KiiPortalUserRequest;
 
-    function KiiPortalUserRequest(kiiApp, spec){
+    function KiiPortalUserRequest(kiiApp, spec) {
         KiiPortalUserRequest.prototype = new _super(kiiApp, spec);
+        var _spec = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+        __extends(_spec, spec);
         this._appID = kiiApp.getAppID();
         this._appKey = kiiApp.getAppKey();
         this._token = kiiApp.getAdminContext()._token;
         this._url = Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + spec.extraUrl;
-        this._data = spec.data;
-        this._method = spec.method;
+        this._data = _spec.data;
+        this._method = _spec.method;
         this._headers = {};
-        this._extHeaders = spec.headers;
+        this._extHeaders = _spec.headers;
     }
 
     // KiiPortalUserRequest.prototype.execute = function(callbacks){
@@ -3428,7 +3438,7 @@ root.KiiPortalUser = (function(_super) {
     return KiiPortalUser;
 })(KiiUserAdmin);
 
-KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
+KiiPortalUser.queryUsers = function(kiiApp, callbacks, queryClause, dictVal) {
     return new Promise(function(resolve, reject) {
         var query;
 
@@ -3457,6 +3467,21 @@ KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
         };
 
         return KiiPortalUserQuery.executeQuery(kiiApp, query, queryCallbacks);
+    });
+};
+
+KiiPortalUser.queryUserByID = function(kiiApp, userID) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            extraUrl: '/users/' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(new KiiPortalUser(response.data));
+        }, function(error) {
+            reject(error);
+        });
     });
 };
 
@@ -3493,28 +3518,15 @@ KiiPortalUser.addUser = function(kiiApp, data) {
     });
 };
 
-KiiPortalUser.updateUser = function(kiiApp, data) {
+KiiPortalUser.updateUser = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
-        var _data = {
-            'loginName': data.loginName,
-            'password': data.password,
-            'displayName': data.displayName,
-            'emailAddress': data.emailAddress,
-            'phoneNumber': data.phoneNumber,
-            'country': data.country,
-            'phoneNumberVerified': null,
-            'emailAddressVerified': null,
-            'createdAt': null,
-            'modifiedAt': null
-        };
-
         var spec = {
-            data: _data,
+            data: data,
             method: 'POST',
             headers: {
-                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+                'Content-Type': 'application/vnd.kii.UserUpdateRequest+json',
             },
-            extraUrl: '/users'
+            extraUrl: '/users/' + userID
         };
 
         var request = new KiiPortalUserRequest(kiiApp, spec);
@@ -3526,7 +3538,7 @@ KiiPortalUser.updateUser = function(kiiApp, data) {
     });
 };
 
-KiiPortalUser.suspendUser = function(kiiApp, data) {
+KiiPortalUser.suspendUser = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
         var _data = {
             'loginName': data.loginName,
@@ -3547,7 +3559,7 @@ KiiPortalUser.suspendUser = function(kiiApp, data) {
             headers: {
                 'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
             },
-            extraUrl: '/users'
+            extraUrl: '/users/' + userID
         };
 
         var request = new KiiPortalUserRequest(kiiApp, spec);
@@ -3559,7 +3571,7 @@ KiiPortalUser.suspendUser = function(kiiApp, data) {
     });
 };
 
-KiiPortalUser.resetPasswordBySms = function(kiiApp, data) {
+KiiPortalUser.resetPasswordBySms = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
         var _data = {
             'loginName': data.loginName,
@@ -3580,7 +3592,7 @@ KiiPortalUser.resetPasswordBySms = function(kiiApp, data) {
             headers: {
                 'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
             },
-            extraUrl: '/users'
+            extraUrl: '/users/' + userID
         };
 
         var request = new KiiPortalUserRequest(kiiApp, spec);
@@ -3592,7 +3604,7 @@ KiiPortalUser.resetPasswordBySms = function(kiiApp, data) {
     });
 };
 
-KiiPortalUser.resetPasswordByEmail = function(kiiApp, data) {
+KiiPortalUser.resetPasswordByEmail = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
         var _data = {
             'loginName': data.loginName,
@@ -3613,7 +3625,7 @@ KiiPortalUser.resetPasswordByEmail = function(kiiApp, data) {
             headers: {
                 'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
             },
-            extraUrl: '/users'
+            extraUrl: '/users/' + userID
         };
 
         var request = new KiiPortalUserRequest(kiiApp, spec);

@@ -559,22 +559,25 @@
 
         /* =================================== user related ======================================================== */
         KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.query(this, callbacks, queryClause, dictVal);
+            return KiiPortalUser.queryUsers(this, callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype.queryUserByID = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.queryUserByID(this, callbacks, queryClause, dictVal);
         };
         KiiPortalApp.prototype.addUser = function(data){
             return KiiPortalUser.addUser(this, data);
         };
-        KiiPortalApp.prototype.updateUser = function(data){
-            return KiiPortalUser.updateUser(this, data);
+        KiiPortalApp.prototype.updateUser = function(userID, data){
+            return KiiPortalUser.updateUser(this, userID, data);
         };
-        KiiPortalApp.prototype.suspendUser = function(data){
-            return KiiPortalUser.suspendUser(this, data);
+        KiiPortalApp.prototype.suspendUser = function(userID, data){
+            return KiiPortalUser.suspendUser(this, userID, data);
         };
-        KiiPortalApp.prototype.resetPasswordBySms = function(data){
-            return KiiPortalUser.resetPasswordBySms(this, data);
+        KiiPortalApp.prototype.resetPasswordBySms = function(userID, data){
+            return KiiPortalUser.resetPasswordBySms(this, userID, data);
         };
-        KiiPortalApp.prototype.resetPasswordByEmail = function(data){
-            return KiiPortalUser.resetPasswordByEmail(this, data);
+        KiiPortalApp.prototype.resetPasswordByEmail = function(userID, data){
+            return KiiPortalUser.resetPasswordByEmail(this, userID, data);
         };
         /* =================================== end of tag ========================================================== */
 
