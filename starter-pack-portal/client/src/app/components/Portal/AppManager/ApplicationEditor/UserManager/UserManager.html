@@ -10,7 +10,7 @@
       <form action="" class="form-inline clearfix" role="form">
         <div class="form-group col-md-2">
           <label class="sr-only" for="new_loginName">Login</label>
-          <input type="email" class="form-control" id="new_loginName" placeholder="Login name" ng-model="newUser.loginName" />
+          <input type="text" class="form-control" id="new_loginName" placeholder="Login name" ng-model="newUser.loginName" />
         </div>
         <div class="form-group col-md-2">
           <label class="sr-only" for="new_password">Password</label>
@@ -18,19 +18,19 @@
         </div>
         <div class="form-group col-md-2">
           <label class="sr-only" for="new_displayName">Display name</label>
-          <input type="password" class="form-control" id="new_displayName" placeholder="Display name" ng-model="newUser.displayName" />
+          <input type="text" class="form-control" id="new_displayName" placeholder="Display name" ng-model="newUser.displayName" />
         </div>
         <div class="form-group col-md-2">
           <label class="sr-only" for="new_emailAddress">Email</label>
-          <input type="password" class="form-control" id="new_emailAddress" placeholder="Email" ng-model="newUser.emailAddress" />
+          <input type="text" class="form-control" id="new_emailAddress" placeholder="Email" ng-model="newUser.emailAddress" />
         </div>
         <div class="form-group col-md-2">
           <label class="sr-only" for="new_phoneNumber">Phone</label>
-          <input type="password" class="form-control" id="new_phoneNumber" placeholder="Phone" ng-model="newUser.phoneNumber" />
+          <input type="text" class="form-control" id="new_phoneNumber" placeholder="Phone" ng-model="newUser.phoneNumber" />
         </div>
         <div class="form-group col-md-2">
           <label class="sr-only" for="new_country">Country</label>
-          <select class="form-control sm" id="new_country" ng-model="unewUser.country" ng-options="c.code as c.name for c in countryList">
+          <select class="form-control sm" id="new_country" ng-model="newUser.country" ng-options="c.code as c.name for c in countryList">
             <option value="" disabled>Select a country</option>
           </select>
         </div>

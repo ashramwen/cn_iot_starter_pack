@@ -1753,12 +1753,6 @@
         KiiPortalApp.prototype.addUser = function(data){
             return KiiPortalUser.addUser(this, data);
         };
-        KiiPortalApp.prototype._setUsers = function(users){
-            this._users = users;
-        };
-        KiiPortalApp.prototype.getUsers = function(users){
-            return this._users;
-        };
         /* =================================== end of tag ========================================================== */
 
 
@@ -3325,21 +3319,12 @@
 /**
  * class user request
  */
+
 root.KiiPortalUserQuery = (function(_super) {
     __inherits(KiiPortalUserQuery, _super);
     KiiPortalUserQuery.prototype.constructor = KiiPortalUserQuery;
 
-    function KiiPortalUserQuery() {
-        /*
-        var _this = this;
-        __each(KiiPortalFirmware.prototype, function(value, key){
-            if(__isFunction(value))
-                _this[key] = __bind(value, _this);
-        });
-
-        return this._clone(query);
-        */
-    };
+    function KiiPortalUserQuery() {}
 
     KiiPortalUserQuery.queryName = 'userQuery';
 
@@ -3380,6 +3365,30 @@ root.KiiPortalUserQuery = (function(_super) {
 
     return KiiPortalUserQuery;
 })(KiiPortalQuery);
+
+root.KiiPortalUserRequest = (function(_super) {
+    // var _this = this;
+    __inherits(KiiPortalUserRequest, _super);
+    KiiPortalUserRequest.prototype.constructor = KiiPortalUserRequest;
+
+    function KiiPortalUserRequest(kiiApp, spec){
+        // KiiPortalUserRequest.prototype = new _super(kiiApp, spec);
+        this._appID = kiiApp.getAppID();
+        this._appKey = kiiApp.getAppKey();
+        this._token = kiiApp.getAdminContext()._token;
+        this._url = Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + spec.extraUrl;
+        this._data = spec.data;
+        this._method = spec.method;
+        this._headers = {};
+        this._extHeaders = spec.headers;
+    }
+
+    // KiiPortalUserRequest.prototype.execute = function(callbacks){
+    //     _super.prototype.execute.call(this, callbacks);
+    // };
+
+    return KiiPortalUserRequest;
+})(KiiObjectRequest);
 
 root.KiiPortalUser = (function(_super) {
     __inherits(KiiPortalUser, _super);
@@ -3443,16 +3452,7 @@ KiiPortalUser.query = function(kiiApp, callbacks, queryClause, dictVal) {
 KiiPortalUser.addUser = function(kiiApp, data) {
     var _this = this;
     return new Promise(function(resolve, reject) {
-        var spec, request, _data, kiiApp;
-
-        var userKeys = [
-            'loginName', 'password', 'displayName', 'emailAddress', 'phoneNumber',
-            'country', 'phoneNumberVerified', 'emailAddressVerified', 'createdAt', 'modifiedAt'
-        ];
-
-        kiiApp = KiiPortalAdmin.getCurrentApp();
-
-        _data = {
+        var _data = {
             'loginName': data.loginName,
             'password': data.password,
             'displayName': data.displayName,
@@ -3465,17 +3465,16 @@ KiiPortalUser.addUser = function(kiiApp, data) {
             'modifiedAt': null
         };
 
-        spec = {
+        var spec = {
             data: _data,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
             },
-            url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/users'
+            extraUrl: '/users'
         };
 
-        var request = new KiiObjectRequest(kiiApp, spec);
-
+        var request = new KiiPortalUserRequest(kiiApp, spec);
         request.execute().then(function(response) {
             resolve(response);
         }, function(error) {

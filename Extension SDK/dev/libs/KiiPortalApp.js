@@ -564,12 +564,6 @@
         KiiPortalApp.prototype.addUser = function(data){
             return KiiPortalUser.addUser(this, data);
         };
-        KiiPortalApp.prototype._setUsers = function(users){
-            this._users = users;
-        };
-        KiiPortalApp.prototype.getUsers = function(users){
-            return this._users;
-        };
         /* =================================== end of tag ========================================================== */
 
 
