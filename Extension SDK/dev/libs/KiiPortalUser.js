@@ -49,12 +49,11 @@ root.KiiPortalUserQuery = (function(_super) {
 })(KiiPortalQuery);
 
 root.KiiPortalUserRequest = (function(_super) {
-    // var _this = this;
     __inherits(KiiPortalUserRequest, _super);
     KiiPortalUserRequest.prototype.constructor = KiiPortalUserRequest;
 
     function KiiPortalUserRequest(kiiApp, spec){
-        // KiiPortalUserRequest.prototype = new _super(kiiApp, spec);
+        KiiPortalUserRequest.prototype = new _super(kiiApp, spec);
         this._appID = kiiApp.getAppID();
         this._appKey = kiiApp.getAppKey();
         this._token = kiiApp.getAdminContext()._token;
