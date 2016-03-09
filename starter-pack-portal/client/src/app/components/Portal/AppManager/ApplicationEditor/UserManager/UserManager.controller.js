@@ -53,7 +53,6 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 if (user._info[name] !== user._field[name])
                     _data[name] = user._field[name];
             }
-            _data._disabled = user._field._disabled;
             AppUtils.doLoading();
             $scope.myApp.updateUser(user._info.userID, _data).then(function(result) {
                 $scope.myApp.queryUserByID(user._info.userID).then(function(result) {
