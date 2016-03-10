@@ -30,4 +30,10 @@ angular.module('StarterPack.AppShared')
            return angularDateFilter(theDate, 'yyyy-MM-dd');
         }
     };
+  }])
+  .filter('country', ['country', function(country) {
+    return function(input) {
+        var result = _.findWhere(country, {'code': input});
+        return result ? result.name : '';
+    };
   }]);

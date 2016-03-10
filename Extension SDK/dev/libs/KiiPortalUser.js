@@ -205,28 +205,15 @@ KiiPortalUser.updateUser = function(kiiApp, userID, data) {
     });
 };
 
-KiiPortalUser.suspendUser = function(kiiApp, userID, data) {
+KiiPortalUser.toggleUserStatus = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
-        var _data = {
-            'loginName': data.loginName,
-            'password': data.password,
-            'displayName': data.displayName,
-            'emailAddress': data.emailAddress,
-            'phoneNumber': data.phoneNumber,
-            'country': data.country,
-            'phoneNumberVerified': null,
-            'emailAddressVerified': null,
-            'createdAt': null,
-            'modifiedAt': null
-        };
-
         var spec = {
-            data: _data,
-            method: 'POST',
+            data: data,
+            method: 'PUT',
             headers: {
-                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+                'Content-Type': 'application/vnd.kii.UserStatusUpdateRequest+json',
             },
-            extraUrl: '/users/' + userID
+            extraUrl: '/users/' + userID + '/status'
         };
 
         var request = new KiiPortalUserRequest(kiiApp, spec);

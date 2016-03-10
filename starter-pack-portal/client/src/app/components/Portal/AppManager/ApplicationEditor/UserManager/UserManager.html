@@ -1,145 +1,286 @@
 <div class="app-portal-usermanager" ng-init="init()">
-  <div class="panel">
-    <div class="panel-heading clearfix">
-      <div class="col-sm-1"><button type="button" class="btn btn-default"><span class="fa fa-refresh"></span></button></div>
-      <div class="col-sm-2">
-        <button class="btn btn-primary" ng-click="isExpanded = !0"><span class="fa fa-user-plus"></span> Add user</button>
-      </div>
+    <div class="alert alert-success h4 hidden" role="alert">
+        User
+        <strong>
+            abc1
+        </strong>
+        updated successfully.
     </div>
-    <div class="panel-body" uib-collapse="!isExpanded">
-      <form action="" class="form-inline clearfix" role="form">
-        <div class="form-group col-md-2">
-          <label class="sr-only" for="new_loginName">Login</label>
-          <input type="text" class="form-control" id="new_loginName" placeholder="Login name" ng-model="newUser.loginName" />
-        </div>
-        <div class="form-group col-md-2">
-          <label class="sr-only" for="new_password">Password</label>
-          <input type="password" class="form-control" id="new_password" placeholder="Password" ng-model="newUser.password" />
-        </div>
-        <div class="form-group col-md-2">
-          <label class="sr-only" for="new_displayName">Display name</label>
-          <input type="text" class="form-control" id="new_displayName" placeholder="Display name" ng-model="newUser.displayName" />
-        </div>
-        <div class="form-group col-md-2">
-          <label class="sr-only" for="new_emailAddress">Email</label>
-          <input type="text" class="form-control" id="new_emailAddress" placeholder="Email" ng-model="newUser.emailAddress" />
-        </div>
-        <div class="form-group col-md-2">
-          <label class="sr-only" for="new_phoneNumber">Phone</label>
-          <input type="text" class="form-control" id="new_phoneNumber" placeholder="Phone" ng-model="newUser.phoneNumber" />
-        </div>
-        <div class="form-group col-md-2">
-          <label class="sr-only" for="new_country">Country</label>
-          <select class="form-control sm" id="new_country" ng-model="newUser.country" ng-options="c.code as c.name for c in countryList">
-            <option value="" disabled>Select a country</option>
-          </select>
-        </div>
-      </form>
-        <div class="panel-bottom pull-left col-md-9">
-          <div class="text-danger">1</div>
-          <div class="text-danger">2</div>
-        </div>
-        <div class="panel-bottom pull-right col-md-3">
-          <button class="btn btn-danger" ng-click="cancelAddUser(newUser)"><span class="fa fa-remove"></span> Cancel</button>
-          <button class="btn btn-success" ng-click="addUser(newUser)"><span class="fa fa-user-plus"></span> Save</button>
-        </div>
-    </div>
-  </div>
-	<table st-table="firmwares" class="table table-striped">
-    <thead>
-      <tr>
-        <th></th>
-        <th>Login</th>
-        <th>Password</th>
-        <th>Display Name</th>
-        <th>Email</th>
-        <th>Phone</th>
-        <th>Country</th>
-        <th>Status</th>
-        <th>Created</th>
-        <th>Modified</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat-start="user in users track by user._info.userID" ng-click="toggleEdit(user)">
-        <td><input type="checkbox" ng-model="user._onEdit" ng-click="toggleEdit(user)"/></td>
-        <td>{{user._info.loginName}}</td>
-        <td>********</td>
-        <td>{{user._info.displayName}}</td>
-        <td>{{user._info.emailAddress}}</td>
-        <td>{{user._info.phoneNumber}}</td>
-        <td>{{user._info.country}}</td>
-        <td>{{user._info._disabled?'Suspended':'Active'}}</td>
-        <td>{{user._info.createdAt|dateOnly}}</td>
-        <td>{{user._info.modifiedAt|dateOnly}}</td>
-      </tr>
-      <tr ng-repeat-end>
-        <td colspan="10" style="padding:0px;">
-          <div class="detail-content" uib-collapse="!user._onEdit">
-            <uib-tabset>
-              <uib-tab heading="Account Details">
-                <div class="row">
-                  <form action="" class="form-horizontal" role="form">
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label">User ID</label>
-                      <div class="col-sm-5"><input class="form-control" readonly value="{{::user._field.userID}}"></div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label">Status</label>
-                      <div class="col-sm-5"><input class="form-control" readonly value="{{::user._field._disabled?'Suspended':'Active'}}"></div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label">Login Name</label>
-                      <div class="col-sm-5"><input class="form-control" ng-model="user._field.loginName"></div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label">Display Name</label>
-                      <div class="col-sm-5"><input class="form-control" ng-model="user._field.displayName"></div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label">Email</label>
-                      <div class="col-sm-5"> <input class="form-control" ng-model="user._field.emailAddress"></div>
-                      <div class="col-sm-2 hide"> <label class="control-label success">Verified</label></div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label">Phone</label>
-                      <div class="col-sm-5"> <input class="form-control" ng-model="user._field.phoneNumber"></div>
-                      <div class="col-sm-2 hide"> <label class="control-label success">Verified</label></div>
-                    </div>
-                    <div class="form-group">
-                      <label class="col-sm-2 control-label">Country</label>
-                      <div class="col-sm-5">
-                        <select class="form-control" ng-model="user._field.country" ng-options="c.code as c.name for c in countryList">
-                          <option value="" disabled>Select a country</option>
-                        </select>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </uib-tab>
-              <uib-tab heading="Attribute">
-                
-              </uib-tab>
-              <uib-tab heading="Groups" select="getCustomFields(device)">
-                
-              </uib-tab>
-            </uib-tabset>
-            <div class="tab-pane-footer clearfix">
-              <div class="clearfix pull-right">
-                <button class="btn btn-info" ng-click="cancel(user)"><span class="fa fa-remove"></span>Cancel</button>
-                <button class="btn btn-primary" ng-click="deleteUser(user)"><span class="fa fa-envelope"></span>Reset Password (Email)</button>
-                <button class="btn btn-primary" ng-click="deleteUser(user)"><span class="fa fa-mobile"></span>Reset Password (Sms)</button>
-                <button class="btn btn-warning" ng-click="deleteUser(user)"><span class="fa fa-ban"></span>Suspend</button>
-                <button class="btn btn-danger" ng-click="deleteUser(user)"><span class="fa fa-trash-o"></span>Delete</button>
-                <button class="btn btn-success" ng-click="updateUser(user, $index)"><span class="fa fa-cloud-upload"></span>Update</button>
-              </div>
+    <div class="panel">
+        <div class="panel-heading clearfix">
+            <div class="col-sm-1">
+                <button type="button" class="btn btn-default" ng-click="init()">
+                    <span class="fa fa-refresh">
+                    </span>
+                </button>
             </div>
-          </div>
-        </td>
-      </tr>
-      <tr ng-if="query._paginationKey">
-        <td colspan="10" class="load-more" ng-click="loadMore(query)">Load more users</td>
-      </tr>
-    </tbody>
-  </table>
+            <div class="col-sm-2">
+                <button class="btn btn-primary" ng-click="isExpanded = !0">
+                    <span class="fa fa-user-plus">
+                    </span>
+                    Add user
+                </button>
+            </div>
+        </div>
+        <div class="panel-body" uib-collapse="!isExpanded">
+            <form action="" class="form-inline clearfix" role="form">
+                <div class="form-group col-md-2">
+                    <label class="sr-only" for="new_loginName">
+                        Login
+                    </label>
+                    <input type="text" class="form-control" id="new_loginName" placeholder="Login name" ng-model="newUser.loginName" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label class="sr-only" for="new_password">
+                        Password
+                    </label>
+                    <input type="password" class="form-control" id="new_password" placeholder="Password" ng-model="newUser.password" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label class="sr-only" for="new_displayName">
+                        Display name
+                    </label>
+                    <input type="text" class="form-control" id="new_displayName" placeholder="Display name" ng-model="newUser.displayName" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label class="sr-only" for="new_emailAddress">
+                        Email
+                    </label>
+                    <input type="text" class="form-control" id="new_emailAddress" placeholder="Email" ng-model="newUser.emailAddress" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label class="sr-only" for="new_phoneNumber">
+                        Phone
+                    </label>
+                    <input type="text" class="form-control" id="new_phoneNumber" placeholder="Phone" ng-model="newUser.phoneNumber" />
+                </div>
+                <div class="form-group col-md-2">
+                    <label class="sr-only" for="new_country">
+                        Country
+                    </label>
+                    <select class="form-control sm" id="new_country" ng-model="newUser.country" ng-options="c.code as c.name for c in countryList">
+                        <option value="" disabled>
+                            Select a country
+                        </option>
+                    </select>
+                </div>
+            </form>
+            <div class="panel-bottom pull-left col-md-9">
+                <div class="text-danger">
+                    1
+                </div>
+                <div class="text-danger">
+                    2
+                </div>
+            </div>
+            <div class="panel-bottom pull-right col-md-2">
+                <button class="btn btn-danger" ng-click="cancelAddUser(newUser)">
+                    <span class="fa fa-remove">
+                    </span>
+                    Cancel
+                </button>
+                <button class="btn btn-success" ng-click="addUser(newUser)">
+                    <span class="fa fa-user-plus">
+                    </span>
+                    Save
+                </button>
+            </div>
+        </div>
+    </div>
+    <table st-table="firmwares" class="table table-striped">
+        <thead>
+            <tr>
+                <th>
+                </th>
+                <th>
+                    Login
+                </th>
+                <th>
+                    Password
+                </th>
+                <th>
+                    Display Name
+                </th>
+                <th>
+                    Email
+                </th>
+                <th>
+                    Phone
+                </th>
+                <th>
+                    Country
+                </th>
+                <th>
+                    Status
+                </th>
+                <th>
+                    Created
+                </th>
+                <th>
+                    Modified
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat-start="user in users track by user._info.userID" ng-click="toggleEdit(user)">
+                <td>
+                    <input type="checkbox" ng-model="user._onEdit" ng-click="toggleEdit(user)"/>
+                </td>
+                <td>
+                    {{user._info.loginName}}
+                </td>
+                <td>
+                    ********
+                </td>
+                <td>
+                    {{user._info.displayName}}
+                </td>
+                <td>
+                    {{user._info.emailAddress}}
+                </td>
+                <td>
+                    {{user._info.phoneNumber}}
+                </td>
+                <td>
+                    {{user._info.country|country}}
+                </td>
+                <td>
+                    {{user._info._disabled?'Suspended':'Active'}}
+                </td>
+                <td>
+                    {{user._info.createdAt|dateOnly}}
+                </td>
+                <td>
+                    {{user._info.modifiedAt|dateOnly}}
+                </td>
+            </tr>
+            <tr ng-repeat-end>
+                <td colspan="10" style="padding:0px;">
+                    <div class="detail-content" uib-collapse="!user._onEdit">
+                        <uib-tabset>
+                            <uib-tab heading="Account Details">
+                                <div class="row">
+                                    <form action="" class="form-horizontal" role="form">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">
+                                                User ID
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <input class="form-control" readonly value="{{::user._field.userID}}"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">
+                                                Status
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <input class="form-control" readonly value="{{::user._field._disabled?'Suspended':'Active'}}"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">
+                                                Login Name
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <input class="form-control" ng-model="user._field.loginName"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">
+                                                Display Name
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <input class="form-control" ng-model="user._field.displayName"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">
+                                                Email
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <input class="form-control" ng-model="user._field.emailAddress"/>
+                                            </div>
+                                            <div class="col-sm-2 hide">
+                                                <label class="control-label success">
+                                                    Verified
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">
+                                                Phone
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <input class="form-control" ng-model="user._field.phoneNumber"/>
+                                            </div>
+                                            <div class="col-sm-2 hide">
+                                                <label class="control-label success">
+                                                    Verified
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">
+                                                Country
+                                            </label>
+                                            <div class="col-sm-5">
+                                                <select class="form-control" ng-model="user._field.country" ng-options="c.code as c.name for c in countryList">
+                                                    <option value="" disabled>
+                                                        Select a country
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </uib-tab>
+                            <uib-tab heading="Attribute">
+                            </uib-tab>
+                            <uib-tab heading="Groups" select="getCustomFields(device)">
+                            </uib-tab>
+                        </uib-tabset>
+                        <div class="tab-pane-footer clearfix">
+                            <div class="clearfix pull-right">
+                                <button class="btn btn-info" ng-click="cancel(user)">
+                                    <span class="fa fa-remove">
+                                    </span>
+                                    Cancel
+                                </button>
+                                <button class="btn btn-primary" ng-click="resetUser(user)">
+                                    <span class="fa fa-envelope">
+                                    </span>
+                                    Reset Password (Email)
+                                </button>
+                                <button class="btn btn-primary" ng-click="resetUser(user)">
+                                    <span class="fa fa-mobile">
+                                    </span>
+                                    Reset Password (Sms)
+                                </button>
+                                <button class="btn btn-warning" ng-click="suspendUser(user)">
+                                    <span class="fa fa-ban">
+                                    </span>
+                                    Suspend
+                                </button>
+                                <button class="btn btn-danger" ng-click="deleteUser(user)">
+                                    <span class="fa fa-trash-o">
+                                    </span>
+                                    Delete
+                                </button>
+                                <button class="btn btn-success" ng-click="updateUser(user, $index)">
+                                    <span class="fa fa-cloud-upload">
+                                    </span>
+                                    Update
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr ng-if="query._paginationKey">
+                <td colspan="10" class="load-more" ng-click="loadMore(query)">
+                    Load more users
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>

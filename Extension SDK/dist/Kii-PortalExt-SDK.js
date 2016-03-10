@@ -216,14 +216,15 @@
                         var response, status, data;
 
                         status = xmlhttp.statusText;
-                        try{
-                            data = JSON.parse(xmlhttp.responseText);
-                        }catch(e){
-                            console.log(e);
-                            reject(e);
-                            return;
+                        if(xmlhttp.status !== 204) {
+                            try{
+                                data = JSON.parse(xmlhttp.responseText);
+                            }catch(e){
+                                console.log(e);
+                                reject(e);
+                                return;
+                            }
                         }
-                        
                         response = {status: status, data: data};
                         if (success) {
                             success(response);
@@ -1759,8 +1760,8 @@
         KiiPortalApp.prototype.updateUser = function(userID, data){
             return KiiPortalUser.updateUser(this, userID, data);
         };
-        KiiPortalApp.prototype.suspendUser = function(userID, data){
-            return KiiPortalUser.suspendUser(this, userID, data);
+        KiiPortalApp.prototype.toggleUserStatus = function(userID, data){
+            return KiiPortalUser.toggleUserStatus(this, userID, data);
         };
         KiiPortalApp.prototype.resetPasswordBySms = function(userID, data){
             return KiiPortalUser.resetPasswordBySms(this, userID, data);
@@ -3538,28 +3539,15 @@ KiiPortalUser.updateUser = function(kiiApp, userID, data) {
     });
 };
 
-KiiPortalUser.suspendUser = function(kiiApp, userID, data) {
+KiiPortalUser.toggleUserStatus = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
-        var _data = {
-            'loginName': data.loginName,
-            'password': data.password,
-            'displayName': data.displayName,
-            'emailAddress': data.emailAddress,
-            'phoneNumber': data.phoneNumber,
-            'country': data.country,
-            'phoneNumberVerified': null,
-            'emailAddressVerified': null,
-            'createdAt': null,
-            'modifiedAt': null
-        };
-
         var spec = {
-            data: _data,
-            method: 'POST',
+            data: data,
+            method: 'PUT',
             headers: {
-                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+                'Content-Type': 'application/vnd.kii.UserStatusUpdateRequest+json',
             },
-            extraUrl: '/users/' + userID
+            extraUrl: '/users/' + userID + '/status'
         };
 
         var request = new KiiPortalUserRequest(kiiApp, spec);

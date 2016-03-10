@@ -16,7 +16,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             $scope.myApp.addUser(user).then(function(result) {
                 queryUsers();
                 AppUtils.whenLoaded();
-            }, _ajaxError);
+            }, ajaxError);
         };
 
         $scope.cancelAddUser = function() {
@@ -35,8 +35,8 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 $scope.users = $scope.users.concat(result.users);
                 $scope.$apply();
                 AppUtils.whenLoaded();
-            }, _ajaxError);
-        }
+            }, ajaxError);
+        };
 
         $scope.toggleEdit = function(user) {
             if (user._onEdit) {
@@ -45,6 +45,19 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 user._field = angular.copy(user._info);
             }
             user._onEdit = !user._onEdit;
+        };
+
+        $scope.toggleUserStatus = function(user, index) {
+            var _data = {
+                'disabled': !user._info._disabled
+            };
+            AppUtils.doLoading();
+            $scope.myApp.toggleUserStatus(user._info.userID, _data).then(function(result) {
+                user._info._disabled = !user._info._disabled;
+                $scope.toggleEdit(user);
+                $scope.$apply();
+                AppUtils.whenLoaded();
+            }, ajaxError);
         };
 
         $scope.updateUser = function(user, index) {
@@ -57,11 +70,18 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             $scope.myApp.updateUser(user._info.userID, _data).then(function(result) {
                 $scope.myApp.queryUserByID(user._info.userID).then(function(result) {
                     user._info = result._info;
+                    $scope.toggleEdit(user);
                     $scope.$apply();
                     AppUtils.whenLoaded();
-                }, _ajaxError);
-            }, _ajaxError);
+                }, ajaxError);
+            }, ajaxError);
         };
+
+        function ajaxError(error, callback) {
+            console.log(error);
+            AppUtils.whenLoaded();
+            (callback && typeof(callback) === "function") && callback();
+        }
 
         function queryUsers() {
             AppUtils.doLoading();
@@ -72,7 +92,11 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 $scope.users = result.users;
                 $scope.$apply();
                 AppUtils.whenLoaded();
-            }, _ajaxError);
+            }, ajaxError);
+        }
+
+        function toogleStatus(user, status) {
+            // user._info.
         }
 
         function User() {
@@ -82,10 +106,5 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             this.emailAddress = '';
             this.phoneNumber = '';
             this.country = '';
-        }
-
-        function _ajaxError(error) {
-            console.log(error);
-            AppUtils.whenLoaded();
         }
     }]);

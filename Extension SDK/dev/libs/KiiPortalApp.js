@@ -570,8 +570,8 @@
         KiiPortalApp.prototype.updateUser = function(userID, data){
             return KiiPortalUser.updateUser(this, userID, data);
         };
-        KiiPortalApp.prototype.suspendUser = function(userID, data){
-            return KiiPortalUser.suspendUser(this, userID, data);
+        KiiPortalApp.prototype.toggleUserStatus = function(userID, data){
+            return KiiPortalUser.toggleUserStatus(this, userID, data);
         };
         KiiPortalApp.prototype.resetPasswordBySms = function(userID, data){
             return KiiPortalUser.resetPasswordBySms(this, userID, data);
