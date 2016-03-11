@@ -1,0 +1,17 @@
+<div class="panel-bottom pull-left col-md-9">
+    <div class="text-danger" ng-if="s1">
+        A login name, email or phone must be provided
+    </div>
+    <div class="text-danger" ng-if="s2">
+        Password is too short (must be at least 4 characters).
+    </div>
+    <div class="text-danger" ng-if="s3">
+        Login name must be between three and 64 characters
+    </div>
+    <div class="text-danger" ng-if="s4">
+        Phone numbers must begin with a '+' and be at least 10 digits long.
+    </div>
+    <div class="text-danger" ng-if="s5">
+        Invalid email address.
+    </div>
+</div>

@@ -23,7 +23,7 @@
             </div>
         </div>
         <div class="panel-body" uib-collapse="!isExpanded">
-            <form action="" class="form-inline clearfix" role="form">
+            <form name="newUserForm" action="" class="form-inline clearfix" role="form">
                 <div class="form-group col-md-2">
                     <label class="sr-only" for="new_loginName">
                         Login
@@ -65,13 +65,7 @@
                     </select>
                 </div>
             </form>
-            <div class="panel-bottom pull-left col-md-9">
-                <div class="text-danger">
-                    1
-                </div>
-                <div class="text-danger">
-                    2
-                </div>
+            <div validate-message user="newUser" ng-if="newUser._submit">
             </div>
             <div class="panel-bottom pull-right col-md-2">
                 <button class="btn btn-danger" ng-click="cancelAddUser(newUser)">
@@ -232,6 +226,12 @@
                                             </div>
                                         </div>
                                     </form>
+                                </div>
+                                <div class="row">
+                                    <div class="panel-bottom pull-left col-md-1">
+                                    </div>
+                                    <div validate-message>
+                                    </div>
                                 </div>
                             </uib-tab>
                             <uib-tab heading="Attribute">
