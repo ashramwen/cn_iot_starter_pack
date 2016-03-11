@@ -573,11 +573,8 @@
         KiiPortalApp.prototype.toggleUserStatus = function(userID, data){
             return KiiPortalUser.toggleUserStatus(this, userID, data);
         };
-        KiiPortalApp.prototype.resetPasswordBySms = function(userID, data){
-            return KiiPortalUser.resetPasswordBySms(this, userID, data);
-        };
-        KiiPortalApp.prototype.resetPasswordByEmail = function(userID, data){
-            return KiiPortalUser.resetPasswordByEmail(this, userID, data);
+        KiiPortalApp.prototype.resetPassword = function(userID, data){
+            return KiiPortalUser.resetPassword(this, userID, data);
         };
         /* =================================== end of tag ========================================================== */
 

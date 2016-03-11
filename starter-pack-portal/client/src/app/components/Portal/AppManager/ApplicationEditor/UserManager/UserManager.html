@@ -174,7 +174,7 @@
                                                 Status
                                             </label>
                                             <div class="col-sm-5">
-                                                <input class="form-control" readonly value="{{::user._field._disabled?'Suspended':'Active'}}"/>
+                                                <input class="form-control" readonly value="{{user._field._disabled?'Suspended':'Active'}}"/>
                                             </div>
                                         </div>
                                         <div class="form-group">
@@ -241,25 +241,25 @@
                         </uib-tabset>
                         <div class="tab-pane-footer clearfix">
                             <div class="clearfix pull-right">
-                                <button class="btn btn-info" ng-click="cancel(user)">
+                                <button class="btn btn-info" ng-click="toggleEdit(user)">
                                     <span class="fa fa-remove">
                                     </span>
                                     Cancel
                                 </button>
-                                <button class="btn btn-primary" ng-click="resetUser(user)">
+                                <button class="btn btn-primary" ng-click="resetUserPassword(user, 'EMAIL')">
                                     <span class="fa fa-envelope">
                                     </span>
                                     Reset Password (Email)
                                 </button>
-                                <button class="btn btn-primary" ng-click="resetUser(user)">
+                                <button class="btn btn-primary" ng-click="resetUserPassword(user, 'SMS')">
                                     <span class="fa fa-mobile">
                                     </span>
                                     Reset Password (Sms)
                                 </button>
-                                <button class="btn btn-warning" ng-click="suspendUser(user)">
+                                <button class="btn btn-warning" ng-click="toggleUserStatus(user)">
                                     <span class="fa fa-ban">
                                     </span>
-                                    Suspend
+                                    {{user._field._disabled?'Activate':'Suspend'}}
                                 </button>
                                 <button class="btn btn-danger" ng-click="deleteUser(user)">
                                     <span class="fa fa-trash-o">

@@ -1763,11 +1763,8 @@
         KiiPortalApp.prototype.toggleUserStatus = function(userID, data){
             return KiiPortalUser.toggleUserStatus(this, userID, data);
         };
-        KiiPortalApp.prototype.resetPasswordBySms = function(userID, data){
-            return KiiPortalUser.resetPasswordBySms(this, userID, data);
-        };
-        KiiPortalApp.prototype.resetPasswordByEmail = function(userID, data){
-            return KiiPortalUser.resetPasswordByEmail(this, userID, data);
+        KiiPortalApp.prototype.resetPassword = function(userID, data){
+            return KiiPortalUser.resetPassword(this, userID, data);
         };
         /* =================================== end of tag ========================================================== */
 
@@ -3559,28 +3556,19 @@ KiiPortalUser.toggleUserStatus = function(kiiApp, userID, data) {
     });
 };
 
-KiiPortalUser.resetPasswordBySms = function(kiiApp, userID, data) {
+KiiPortalUser.resetPassword = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
         var _data = {
-            'loginName': data.loginName,
-            'password': data.password,
-            'displayName': data.displayName,
-            'emailAddress': data.emailAddress,
-            'phoneNumber': data.phoneNumber,
-            'country': data.country,
-            'phoneNumberVerified': null,
-            'emailAddressVerified': null,
-            'createdAt': null,
-            'modifiedAt': null
+            'notificationMethod': data
         };
 
         var spec = {
             data: _data,
             method: 'POST',
             headers: {
-                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+                'Content-Type': 'application/vnd.kii.ResetPasswordRequest+json',
             },
-            extraUrl: '/users/' + userID
+            extraUrl: '/users/' + userID + '/password/request-reset'
         };
 
         var request = new KiiPortalUserRequest(kiiApp, spec);
@@ -3591,39 +3579,7 @@ KiiPortalUser.resetPasswordBySms = function(kiiApp, userID, data) {
         });
     });
 };
-
-KiiPortalUser.resetPasswordByEmail = function(kiiApp, userID, data) {
-    return new Promise(function(resolve, reject) {
-        var _data = {
-            'loginName': data.loginName,
-            'password': data.password,
-            'displayName': data.displayName,
-            'emailAddress': data.emailAddress,
-            'phoneNumber': data.phoneNumber,
-            'country': data.country,
-            'phoneNumberVerified': null,
-            'emailAddressVerified': null,
-            'createdAt': null,
-            'modifiedAt': null
-        };
-
-        var spec = {
-            data: _data,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
-            },
-            extraUrl: '/users/' + userID
-        };
-
-        var request = new KiiPortalUserRequest(kiiApp, spec);
-        request.execute().then(function(response) {
-            resolve(response);
-        }, function(error) {
-            reject(error);
-        });
-    });
-};    /**
+    /**
      * Thing request
      */
     root.KiiThingAdminQuery = (function(_super){

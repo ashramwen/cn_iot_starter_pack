@@ -47,6 +47,13 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             user._onEdit = !user._onEdit;
         };
 
+        $scope.resetUserPassword = function(user, type) {
+            AppUtils.doLoading();
+            $scope.myApp.resetPassword(user._info.userID, type).then(function(result) {
+                AppUtils.whenLoaded();
+            }, ajaxError);
+        };
+
         $scope.toggleUserStatus = function(user, index) {
             var _data = {
                 'disabled': !user._info._disabled
