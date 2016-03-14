@@ -1,5 +1,5 @@
 angular.module('StarterPack.Portal.AppManager.UserManager')
-    .directive('validateMessage', [function() {
+    .directive('validateMessage', ['userValidateService', function(userValidateService) {
         return {
             restrict: 'EA',
             replace: true,
