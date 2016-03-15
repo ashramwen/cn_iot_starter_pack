@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.UserManager')
-    .controller('UserManagerController', ['$scope', '$rootScope', '$state', '$filter', 'AppUtils', 'country', function($scope, $rootScope, $state, $filter, AppUtils, country) {
+    .controller('UserManagerController', ['$scope', '$rootScope', '$state', '$filter', 'AppUtils', 'country', 'userValidateService', function($scope, $rootScope, $state, $filter, AppUtils, country, userValidateService) {
         $scope.newUser = new User();
         $scope.init = function() {
             $scope.$watch('appReady', function(ready) {
@@ -12,9 +12,12 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.addUser = function(user) {
+            user._status = userValidateService.validate(user);
+            if (!user._status.isPass()) return;
             AppUtils.doLoading();
             $scope.myApp.addUser(user).then(function(result) {
                 queryUsers();
+                $scope.cancelAddUser();
                 AppUtils.whenLoaded();
             }, ajaxError);
         };
@@ -41,6 +44,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         $scope.toggleEdit = function(user) {
             if (user._onEdit) {
                 delete user._field;
+                delete user._status;
             } else {
                 user._field = angular.copy(user._info);
             }
@@ -68,6 +72,8 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.updateUser = function(user, index) {
+            user._status = userValidateService.validateUpdate(user._field);
+            if (!user._status.isPass()) return;
             var _data = {};
             for (var name in $scope.newUser) {
                 if (user._info[name] !== user._field[name])

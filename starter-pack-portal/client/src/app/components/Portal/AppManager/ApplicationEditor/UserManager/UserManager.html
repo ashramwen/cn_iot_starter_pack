@@ -65,7 +65,7 @@
                     </select>
                 </div>
             </form>
-            <div validate-message user="newUser" ng-if="newUser._onSubmit">
+            <div validate-message status="newUser._status">
             </div>
             <div class="panel-bottom pull-right col-md-2">
                 <button class="btn btn-danger" ng-click="cancelAddUser(newUser)">
@@ -230,8 +230,7 @@
                                 <div class="row">
                                     <div class="panel-bottom pull-left col-md-1">
                                     </div>
-                                    <div validate-message>
-                                    </div>
+                                    <div validate-message status="user._status"></div>
                                 </div>
                             </uib-tab>
                             <uib-tab heading="Attribute">

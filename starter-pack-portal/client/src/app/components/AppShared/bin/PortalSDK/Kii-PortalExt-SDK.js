@@ -3763,6 +3763,7 @@ KiiPortalUser.addUser = function(kiiApp, data) {
             'createdAt': null,
             'modifiedAt': null
         };
+        if (!_data.country) delete _data.country;
 
         var spec = {
             data: _data,
@@ -3844,8 +3845,7 @@ KiiPortalUser.resetPassword = function(kiiApp, userID, data) {
             reject(error);
         });
     });
-};
-    /**
+};    /**
      * Thing request
      */
     root.KiiThingAdminQuery = (function(_super){
