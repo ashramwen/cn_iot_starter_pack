@@ -1,10 +1,73 @@
 <div class="app-portal-usermanager" ng-init="init()">
     <div class="alert alert-success h4 hidden" role="alert">
-        User
-        <strong>
-            abc1
-        </strong>
-        updated successfully.
+        <div>
+            Created user
+            <strong>
+                {{message.user}}
+            </strong>
+            successfully.
+        </div>
+        <div>
+            User
+            <strong>
+                {{message.user}}
+            </strong>
+            updated successfully.
+        </div>
+        <div>
+            User
+            <strong>
+                {{message.user}}
+            </strong>
+            suspended
+        </div>
+        <div>
+            User
+            <strong>
+                {{message.user}}
+            </strong>
+            activated
+        </div>
+        <div>
+            Password reset email sent for user
+            <strong>
+                {{message.user}}
+            </strong>
+            .
+        </div>
+        <div>
+            Password reset SMS sent for user
+            <strong>
+                {{message.user}}
+            </strong>
+            .
+        </div>
+        <div>
+            User
+            <strong>
+                {{message.user}}
+            </strong>
+            deleted.
+        </div>
+    </div>
+    <div class="alert alert-warning h4" role="alert" ng-if="confirmDelete">
+        <span>
+            Are you sure you want to delete this user
+            <strong>
+                {{message.user}}
+            </strong>
+            ?
+        </span>
+        <button class="btn btn-info" ng-click="cancelDelete()">
+            <span class="fa fa-remove">
+            </span>
+            Cancel
+        </button>
+        <button class="btn btn-danger" ng-click="deleteUser()">
+            <span class="fa fa-trash-o">
+            </span>
+            Delete
+        </button>
     </div>
     <div class="panel">
         <div class="panel-heading clearfix">
@@ -15,7 +78,7 @@
                 </button>
             </div>
             <div class="col-sm-2">
-                <button class="btn btn-primary" ng-click="isExpanded = !0">
+                <button class="btn btn-primary" ng-click="isExpanded = !0;cleanMessage();">
                     <span class="fa fa-user-plus">
                     </span>
                     Add user
@@ -230,7 +293,8 @@
                                 <div class="row">
                                     <div class="panel-bottom pull-left col-md-1">
                                     </div>
-                                    <div validate-message status="user._status"></div>
+                                    <div validate-message status="user._status">
+                                    </div>
                                 </div>
                             </uib-tab>
                             <uib-tab heading="Attribute">
@@ -260,7 +324,7 @@
                                     </span>
                                     {{user._field._disabled?'Activate':'Suspend'}}
                                 </button>
-                                <button class="btn btn-danger" ng-click="deleteUser(user)">
+                                <button class="btn btn-danger" ng-click="confirmDeleteUser(user)">
                                     <span class="fa fa-trash-o">
                                     </span>
                                     Delete

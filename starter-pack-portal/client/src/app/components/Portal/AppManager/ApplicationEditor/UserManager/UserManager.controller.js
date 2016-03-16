@@ -2,8 +2,20 @@
 
 angular.module('StarterPack.Portal.AppManager.UserManager')
     .controller('UserManagerController', ['$scope', '$rootScope', '$state', '$filter', 'AppUtils', 'country', 'userValidateService', function($scope, $rootScope, $state, $filter, AppUtils, country, userValidateService) {
+        $scope.MessageType = {
+            Created: 1,
+            Updated: 2,
+            Suspend: 3,
+            Activated: 4,
+            SendSms: 5,
+            SendEmail: 6,
+            Deleted: 7,
+            ConfirmDelete: 8
+        };
         $scope.newUser = new User();
+        $scope.message = {};
         $scope.init = function() {
+            cleanMessage();
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
                 $scope.countryList = country;
@@ -12,6 +24,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.addUser = function(user) {
+            cleanMessage();
             user._status = userValidateService.validate(user);
             if (!user._status.isPass()) return;
             AppUtils.doLoading();
@@ -23,11 +36,24 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.cancelAddUser = function() {
+            cleanMessage();
             $scope.newUser = new User();
             $scope.isExpanded = !1;
         };
 
+        $scope.cancelAddUser = function() {
+            cleanMessage();
+            $scope.confirmDelete = !1;
+        };
+
+        $scope.confirmDeleteUser = function(user) {
+            cleanMessage();
+            $scope.message.user = user.loginName;
+            $scope.confirmDelete = !0;
+        };
+
         $scope.loadMore = function(query) {
+            cleanMessage();
             var _option = {
                 limit: 5,
                 paginationKey: query._paginationKey
@@ -42,6 +68,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.toggleEdit = function(user) {
+            cleanMessage();
             if (user._onEdit) {
                 delete user._field;
                 delete user._status;
@@ -52,6 +79,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.resetUserPassword = function(user, type) {
+            cleanMessage();
             AppUtils.doLoading();
             $scope.myApp.resetPassword(user._info.userID, type).then(function(result) {
                 AppUtils.whenLoaded();
@@ -59,6 +87,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.toggleUserStatus = function(user, index) {
+            cleanMessage();
             var _data = {
                 'disabled': !user._info._disabled
             };
@@ -72,6 +101,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
         };
 
         $scope.updateUser = function(user, index) {
+            cleanMessage();
             user._status = userValidateService.validateUpdate(user._field);
             if (!user._status.isPass()) return;
             var _data = {};
@@ -94,6 +124,10 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             console.log(error);
             AppUtils.whenLoaded();
             (callback && typeof(callback) === "function") && callback();
+        }
+
+        function cleanMessage() {
+            $scope.message = {};
         }
 
         function queryUsers() {
