@@ -567,6 +567,9 @@
         KiiPortalApp.prototype.addUser = function(data){
             return KiiPortalUser.addUser(this, data);
         };
+        KiiPortalApp.prototype.deleteUser = function(userID){
+            return KiiPortalUser.deleteUser(this, userID);
+        };
         KiiPortalApp.prototype.updateUser = function(userID, data){
             return KiiPortalUser.updateUser(this, userID, data);
         };

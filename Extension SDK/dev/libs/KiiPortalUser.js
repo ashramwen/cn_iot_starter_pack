@@ -206,6 +206,22 @@ KiiPortalUser.updateUser = function(kiiApp, userID, data) {
     });
 };
 
+KiiPortalUser.deleteUser = function(kiiApp, userID, data) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            method: 'DELETE',
+            extraUrl: '/users/' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
 KiiPortalUser.toggleUserStatus = function(kiiApp, userID, data) {
     return new Promise(function(resolve, reject) {
         var spec = {

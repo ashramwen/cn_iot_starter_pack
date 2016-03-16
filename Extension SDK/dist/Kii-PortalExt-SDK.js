@@ -2023,6 +2023,9 @@
         KiiPortalApp.prototype.addUser = function(data){
             return KiiPortalUser.addUser(this, data);
         };
+        KiiPortalApp.prototype.deleteUser = function(userID){
+            return KiiPortalUser.deleteUser(this, userID);
+        };
         KiiPortalApp.prototype.updateUser = function(userID, data){
             return KiiPortalUser.updateUser(this, userID, data);
         };
@@ -3791,6 +3794,22 @@ KiiPortalUser.updateUser = function(kiiApp, userID, data) {
             headers: {
                 'Content-Type': 'application/vnd.kii.UserUpdateRequest+json',
             },
+            extraUrl: '/users/' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.deleteUser = function(kiiApp, userID, data) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            method: 'DELETE',
             extraUrl: '/users/' + userID
         };
 

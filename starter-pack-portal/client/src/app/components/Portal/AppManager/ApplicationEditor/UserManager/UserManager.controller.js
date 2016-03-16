@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.UserManager')
-    .controller('UserManagerController', ['$scope', '$rootScope', '$state', '$filter', 'AppUtils', 'country', 'userValidateService', function($scope, $rootScope, $state, $filter, AppUtils, country, userValidateService) {
-        $scope.MessageType = {
+    .controller('UserManagerController', ['$scope', '$rootScope', '$state', '$filter', '$document', 'AppUtils', 'country', 'userValidateService', function($scope, $rootScope, $state, $filter, $document, AppUtils, country, userValidateService) {
+        var MessageType = {
             Created: 1,
             Updated: 2,
             Suspend: 3,
@@ -12,8 +12,10 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             Deleted: 7,
             ConfirmDelete: 8
         };
+
         $scope.newUser = new User();
         $scope.message = {};
+
         $scope.init = function() {
             cleanMessage();
             $scope.$watch('appReady', function(ready) {
@@ -43,13 +45,34 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
 
         $scope.cancelAddUser = function() {
             cleanMessage();
-            $scope.confirmDelete = !1;
         };
 
-        $scope.confirmDeleteUser = function(user) {
+        $scope.confirmDeleteUser = function(user, index) {
             cleanMessage();
-            $scope.message.user = user.loginName;
-            $scope.confirmDelete = !0;
+            $document[0].body.scrollTop = 0;
+            $scope.message = {
+                'user': user._info.loginName,
+                'userID': user._info.userID,
+                'index': index,
+                'status': MessageType.ConfirmDelete
+            };
+        };
+
+        $scope.deleteUser = function() {
+            var userID = $scope.message.userID;
+            var index = $scope.message.index;
+            cleanMessage();
+            AppUtils.doLoading();
+            $scope.myApp.deleteUser(userID).then(function(result) {
+                $scope.message = {
+                    'status': MessageType.Deleted
+                };
+                if ($scope.users[index]._info.userID === userID) {
+                    $scope.users.splice(index, 1);
+                    $scope.$apply();
+                }
+                AppUtils.whenLoaded();
+            }, ajaxError);
         };
 
         $scope.loadMore = function(query) {
@@ -140,10 +163,6 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 $scope.$apply();
                 AppUtils.whenLoaded();
             }, ajaxError);
-        }
-
-        function toogleStatus(user, status) {
-            // user._info.
         }
 
         function User() {
