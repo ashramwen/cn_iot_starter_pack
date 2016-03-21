@@ -28,7 +28,7 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
     $scope.loadSchema = function(){
         AppUtils.doLoading();
         $scope.myModel.refreshPortalSchemas().then(function(){
-            $scope.mySchemas = myModel.getPortalSchemas();
+            $scope.mySchemas = $scope.myModel.getPortalSchemas();
             //$scope.schemaProperties = $scope.myModel.getPortalSchemas();
             $scope.$apply();
             AppUtils.whenLoaded();
