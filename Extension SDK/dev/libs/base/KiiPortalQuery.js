@@ -128,10 +128,8 @@
                 executeCallbacks = {
                     success: function(response) {
                         var result, resultSet, _i, _len, _ref;
-                        if(response.data.nextPaginationKey){
-                            query.setPaginationKey(response.data.nextPaginationKey);
-                        }
-                        
+                        query.setPaginationKey(response.data.nextPaginationKey);
+
                         resultSet = [];
                         _ref = response.data.results;
                         for (_i = 0, _len = _ref.length; _i < _len; _i++) {

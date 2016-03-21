@@ -211,14 +211,15 @@
                         var response, status, data;
 
                         status = xmlhttp.statusText;
-                        try{
-                            data = JSON.parse(xmlhttp.responseText);
-                        }catch(e){
-                            console.log(e);
-                            reject(e);
-                            return;
+                        if(xmlhttp.status !== 204) {
+                            try{
+                                data = JSON.parse(xmlhttp.responseText);
+                            }catch(e){
+                                console.log(e);
+                                reject(e);
+                                return;
+                            }
                         }
-                        
                         response = {status: status, data: data};
                         if (success) {
                             success(response);

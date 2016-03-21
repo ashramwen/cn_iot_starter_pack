@@ -216,14 +216,15 @@
                         var response, status, data;
 
                         status = xmlhttp.statusText;
-                        try{
-                            data = JSON.parse(xmlhttp.responseText);
-                        }catch(e){
-                            console.log(e);
-                            reject(e);
-                            return;
+                        if(xmlhttp.status !== 204) {
+                            try{
+                                data = JSON.parse(xmlhttp.responseText);
+                            }catch(e){
+                                console.log(e);
+                                reject(e);
+                                return;
+                            }
                         }
-                        
                         response = {status: status, data: data};
                         if (success) {
                             success(response);
@@ -943,10 +944,8 @@
                 executeCallbacks = {
                     success: function(response) {
                         var result, resultSet, _i, _len, _ref;
-                        if(response.data.nextPaginationKey){
-                            query.setPaginationKey(response.data.nextPaginationKey);
-                        }
-                        
+                        query.setPaginationKey(response.data.nextPaginationKey);
+
                         resultSet = [];
                         _ref = response.data.results;
                         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
@@ -988,7 +987,273 @@
         }
         
         return KiiPortalRequest;
-    })();
+    })();root.KiiPortalUtilities = (function() {
+  function KiiPortalUtilities() {}
+
+  KiiPortalUtilities.MAX_DATE_IN_MILLIS = 100000000 * 24 * 60 * 60 * 1000;
+
+  KiiPortalUtilities.MIN_DATE_IN_MILLIS = -100000000 * 24 * 60 * 60 * 1000;
+
+  KiiPortalUtilities._validateEmail = function(value) {
+    var pattern;
+    value = KiiPortalUtilities._trim(value);
+    pattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,6}$/i;
+    if ((typeof value).toLowerCase() !== "string") {
+      root.Kii.logger("Not string");
+      return false;
+    } else if (value.match(pattern)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._validatePhoneNumber = function(value) {
+    var pattern;
+    value = KiiPortalUtilities._trim(value);
+    pattern = /^[\\+]?[0-9]{10,}$/i;
+    if ((typeof value).toLowerCase() !== "string") {
+      root.Kii.logger("Not string");
+      return false;
+    } else if (value.match(pattern)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._isGlobalPhoneNumber = function(value) {
+    var pattern;
+    value = KiiPortalUtilities._trim(value);
+    pattern = /^[\\+]{1}[0-9]{2}/;
+    if ((typeof value).toLowerCase() !== "string") {
+      root.Kii.logger("Not string");
+      return false;
+    } else if (value.match(pattern)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._validateLocalPhone = function(value) {
+    var pattern;
+    value = KiiPortalUtilities._trim(value);
+    pattern = /^\d+$/;
+    if ((typeof value).toLowerCase() !== "string") {
+      root.Kii.logger("Not string");
+      return false;
+    } else if (value.match(pattern)) {
+      return true;
+    } else {
+      root.Kii.logger("Invalid format");
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._assertLocalPhoneIsValid = function(value) {
+    if (!KiiPortalUtilities._validateLocalPhone(value)) {
+      throw new root.InvalidLocalPhoneNumberException;
+    }
+  };
+
+  KiiPortalUtilities._validateCountryCode = function(value) {
+    var pattern;
+    value = KiiPortalUtilities._trim(value);
+    pattern = /^[a-z]{2}$/i;
+    if ((typeof value).toLowerCase() !== "string") {
+      root.Kii.logger("Not string");
+      return false;
+    } else if (value.match(pattern)) {
+      root.Kii.logger("Is true");
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._assertCountryCodeIsValid = function(value) {
+    if (!KiiPortalUtilities._validateCountryCode(value)) {
+      throw new root.InvalidCountryException;
+    }
+  };
+
+  KiiPortalUtilities._validatePassword = function(value) {
+    var pattern;
+    root.Kii.logger("Validating password: " + value);
+    pattern = /^[\x20-\x7E]{4,50}$/;
+    if ((typeof value).toLowerCase() !== "string") {
+      root.Kii.logger("not string");
+      return false;
+    } else if (value.match(pattern)) {
+      root.Kii.logger("matched");
+      return true;
+    } else {
+      root.Kii.logger("other exception");
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._assertPasswordIsValid = function(value) {
+    if (!KiiPortalUtilities._validatePassword(value)) {
+      throw new root.InvalidPasswordException;
+    }
+  };
+
+  KiiPortalUtilities._validateUsername = function(value) {
+    var pattern;
+    pattern = /^[a-zA-Z0-9-_\\.]{3,64}$/i;
+    if ((typeof value).toLowerCase() !== "string") {
+      return false;
+    } else if (value.match(pattern)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._validateGroupID = function(value) {
+    var pattern;
+    pattern = /^[a-z0-9-_.]{1,30}$/;
+    if ((typeof value).toLowerCase() !== "string") {
+      return false;
+    } else if (value.match(pattern)) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  KiiPortalUtilities._validateDisplayName = function(value) {
+    var _ref;
+    return KiiPortalUtilities._type(value) === "string" && (1 <= (_ref = value.length) && _ref <= 50);
+  };
+
+  KiiPortalUtilities._trim = function(value) {
+    var pattern;
+    pattern = /^(\s|\u00A0)+|(\s|\u00A0)+$/g;
+    return (value || "").replace(pattern, "");
+  };
+
+  KiiPortalUtilities._safeAddTicks = function(left, right) {
+    if ((isNaN(parseInt(left, 10))) || (isNaN(parseInt(right, 10)))) {
+      throw new root.InvalidArgumentException('Parameters should be a number');
+    }
+    if ((Math.abs(left + right)) > KiiPortalUtilities.MAX_DATE_IN_MILLIS) {
+      throw new root.ArithmeticException("Addition of " + left + " and " + right + " result in long overflow");
+    }
+    return left + right;
+  };
+
+  KiiPortalUtilities._safeMultiplyTicks = function(left, right) {
+    if ((isNaN(parseInt(left, 10))) || (isNaN(parseInt(right, 10)))) {
+      throw new root.InvalidArgumentException('Parameters should be a number');
+    }
+    if ((Math.abs(left * right)) > KiiPortalUtilities.MAX_DATE_IN_MILLIS) {
+      throw new root.ArithmeticException("Multiplication of " + left + " and " + right + " result in long overflow");
+    }
+    return left * right;
+  };
+
+  KiiPortalUtilities._safeCalculateExpiresAtAsNumber = function(expirationInSeconds, baseUnixTimeInMills) {
+    var e, expirationInMillis, expiresAt;
+    expiresAt = 0;
+    try {
+      expirationInMillis = KiiPortalUtilities._safeMultiplyTicks(expirationInSeconds, 1000);
+      expiresAt = KiiPortalUtilities._safeAddTicks(baseUnixTimeInMills, expirationInMillis);
+    } catch (_error) {
+      e = _error;
+      if (e instanceof root.ArithmeticException) {
+        expiresAt = KiiPortalUtilities.MAX_DATE_IN_MILLIS;
+      } else {
+        throw e;
+      }
+    }
+    return expiresAt;
+  };
+
+  KiiPortalUtilities._safeCalculateExpiresAtAsDate = function(expirationInSeconds, baseUnixTimeInMills) {
+    var e, expirationInMillis, expiresAt;
+    expiresAt = 0;
+    try {
+      expirationInMillis = KiiPortalUtilities._safeMultiplyTicks(expirationInSeconds, 1000);
+      expiresAt = KiiPortalUtilities._safeAddTicks(baseUnixTimeInMills, expirationInMillis);
+    } catch (_error) {
+      e = _error;
+      if (e instanceof root.ArithmeticException) {
+        expiresAt = KiiPortalUtilities.MAX_DATE_IN_MILLIS;
+      } else {
+        throw e;
+      }
+    }
+    return new Date(expiresAt);
+  };
+
+  KiiPortalUtilities._isJSONType = function(contentType) {
+    var pattern;
+    pattern = /\+?json(;.*)?$/i;
+    return contentType.match(pattern);
+  };
+
+  KiiPortalUtilities._type = function(obj) {
+    var classToType;
+    if (obj === void 0 || obj === null) {
+      return String(obj);
+    }
+    classToType = {
+      '[object Boolean]': 'boolean',
+      '[object Number]': 'number',
+      '[object String]': 'string',
+      '[object Function]': 'function',
+      '[object Array]': 'array',
+      '[object Date]': 'date',
+      '[object RegExp]': 'regexp',
+      '[object Object]': 'object'
+    };
+    return classToType[Object.prototype.toString.call(obj)];
+  };
+
+  KiiPortalUtilities._disableCacheURL = function(url) {
+    if (url.indexOf('?') !== -1) {
+      url += "&disable_cache=";
+    } else {
+      url += "?disable_cache=";
+    }
+    url += new Date().getTime();
+    return url;
+  };
+
+  KiiPortalUtilities._validateServerCodeEntryName = function(value) {
+    var pattern;
+    pattern = /^[a-zA-Z][_a-zA-Z0-9]*$/i;
+    return KiiPortalUtilities._type(value) === "string" && value.match(pattern);
+  };
+
+  KiiPortalUtilities._validateServerCodeEntryArgument = function(value) {
+    return KiiPortalUtilities._type(value) === "null" || (KiiPortalUtilities._type(value) === "object" && Object.keys(value).length > 0);
+  };
+
+  KiiPortalUtilities._validateServerCodeEnryVersion = function(value) {
+    return KiiPortalUtilities._type(value) === 'string' && value !== "";
+  };
+
+  KiiPortalUtilities._isNonEmptyString = function(s) {
+    if (typeof s !== "string") {
+      return false;
+    }
+    return s.length > 0;
+  };
+
+  KiiPortalUtilities._Error = function(message, target) {
+    var e;
+    e = Error(message);
+    e.target = target;
+    return e;
+  };
+
+  return KiiPortalUtilities;
+
+})();
 
     
     root.KiiPortalAdmin = (function(){
@@ -1747,6 +2012,31 @@
 
 
         /* =================================== end of tag ========================================================== */
+
+        /* =================================== user related ======================================================== */
+        KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.queryUsers(this, callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype.queryUserByID = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.queryUserByID(this, callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype.addUser = function(data){
+            return KiiPortalUser.addUser(this, data);
+        };
+        KiiPortalApp.prototype.deleteUser = function(userID){
+            return KiiPortalUser.deleteUser(this, userID);
+        };
+        KiiPortalApp.prototype.updateUser = function(userID, data){
+            return KiiPortalUser.updateUser(this, userID, data);
+        };
+        KiiPortalApp.prototype.toggleUserStatus = function(userID, data){
+            return KiiPortalUser.toggleUserStatus(this, userID, data);
+        };
+        KiiPortalApp.prototype.resetPassword = function(userID, data){
+            return KiiPortalUser.resetPassword(this, userID, data);
+        };
+        /* =================================== end of tag ========================================================== */
+
 
         /* =================================== things related ====================================================== */
 
@@ -3312,7 +3602,273 @@
         return KiiPortalTag;
     })(KiiPortalObject);
 
+/**
+ * class user request
+ */
+
+root.KiiPortalUserQuery = (function(_super) {
+    __inherits(KiiPortalUserQuery, _super);
+    KiiPortalUserQuery.prototype.constructor = KiiPortalUserQuery;
+
+    function KiiPortalUserQuery() {}
+
+    KiiPortalUserQuery.queryName = 'userQuery';
+
     /**
+     * override
+     * @param  {[type]} kiiApp [description]
+     * @param  {[type]} spec   [description]
+     * @return {[type]}        [description]
+     */
+    KiiPortalUserQuery._getRequest = function(kiiApp, spec) {
+        spec.headers = spec.headers || {};
+        spec.headers['Content-Type'] = 'application/vnd.kii.userqueryrequest+json';
+
+        return new KiiObjectRequest(kiiApp, spec);
+    };
+
+    /**
+     * override
+     * @param  {[type]} kiiApp [description]
+     * @return {[type]}        [description]
+     */
+    KiiPortalUserQuery._generatePath = function(kiiApp) {
+        return _super._generatePath.call(this, kiiApp) + '/users';
+    };
+
+    /**
+     * override
+     * @param  {[type]} data [description]
+     * @return {[type]}      [description]
+     */
+    KiiPortalUserQuery._instantiate = function(data) {
+        if (data !== null) {
+            return new KiiPortalUser(data);
+        } else {
+            return null;
+        }
+    };
+
+    return KiiPortalUserQuery;
+})(KiiPortalQuery);
+
+root.KiiPortalUserRequest = (function(_super) {
+    __inherits(KiiPortalUserRequest, _super);
+    KiiPortalUserRequest.prototype.constructor = KiiPortalUserRequest;
+
+    function KiiPortalUserRequest(kiiApp, spec) {
+        KiiPortalUserRequest.prototype = new _super(kiiApp, spec);
+        var _spec = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+        __extends(_spec, spec);
+        this._appID = kiiApp.getAppID();
+        this._appKey = kiiApp.getAppKey();
+        this._token = kiiApp.getAdminContext()._token;
+        this._url = Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + spec.extraUrl;
+        this._data = _spec.data;
+        this._method = _spec.method;
+        this._headers = {};
+        this._extHeaders = _spec.headers;
+    }
+
+    // KiiPortalUserRequest.prototype.execute = function(callbacks){
+    //     _super.prototype.execute.call(this, callbacks);
+    // };
+
+    return KiiPortalUserRequest;
+})(KiiObjectRequest);
+
+root.KiiPortalUser = (function(_super) {
+    __inherits(KiiPortalUser, _super);
+    KiiPortalUser.prototype.constructor = KiiPortalUser;
+
+    function KiiPortalUser(data) {
+        var _this = this;
+        __bindMethod(_this);
+        this._info = {};
+        this._info.userID = data.userID;
+        this._info.internalUserID = data.internalUserID;
+        this._info.loginName = data.loginName;
+        this._info.displayName = data.displayName;
+        this._info.country = data.country;
+        this._info.emailAddress = data.emailAddress;
+        this._info.emailAddressVerified = data.emailAddressVerified;
+        this._info.phoneNumber = data.phoneNumber;
+        this._info.phoneNumberVerified = data.phoneNumberVerified;
+        this._info.disabled = data.disabled;
+        this._info.createdAt = data.createdAt;
+        this._info.modifiedAt = data.modifiedAt;
+        this._info.passwordChangedAt = data.passwordChangedAt;
+        this._info._disabled = data._disabled;
+        this._info._hasPassword = data._hasPassword;
+    };
+    return KiiPortalUser;
+})(KiiUserAdmin);
+
+KiiPortalUser.queryUsers = function(kiiApp, callbacks, queryClause, dictVal) {
+    return new Promise(function(resolve, reject) {
+        var query;
+
+        query = KiiPortalUserQuery.queryWithClause(queryClause);
+        query.setDict(dictVal);
+
+        var queryCallbacks = {
+            success: function(query, users) {
+                if (callbacks && callbacks.success) {
+                    callbacks.success.apply(callbacks.success, arguments);
+                }
+                resolve({
+                    query: query,
+                    users: users
+                });
+            },
+            failure: function(query, error) {
+                if (callbacks && callbacks.failure) {
+                    callbacks.failure.apply(callbacks.failure, arguments);
+                }
+                reject({
+                    query: query,
+                    error: error
+                });
+            }
+        };
+
+        return KiiPortalUserQuery.executeQuery(kiiApp, query, queryCallbacks);
+    });
+};
+
+KiiPortalUser.queryUserByID = function(kiiApp, userID) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            extraUrl: '/users/' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(new KiiPortalUser(response.data));
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.addUser = function(kiiApp, data) {
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'loginName': data.loginName,
+            'password': data.password,
+            'displayName': data.displayName,
+            'emailAddress': data.emailAddress,
+            'phoneNumber': data.phoneNumber,
+            'country': data.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+        if (!_data.country) delete _data.country;
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            extraUrl: '/users'
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.updateUser = function(kiiApp, userID, data) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            data: data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.UserUpdateRequest+json',
+            },
+            extraUrl: '/users/' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.deleteUser = function(kiiApp, userID, data) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            method: 'DELETE',
+            extraUrl: '/users/' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.toggleUserStatus = function(kiiApp, userID, data) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            data: data,
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/vnd.kii.UserStatusUpdateRequest+json',
+            },
+            extraUrl: '/users/' + userID + '/status'
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.resetPassword = function(kiiApp, userID, data) {
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'notificationMethod': data
+        };
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.ResetPasswordRequest+json',
+            },
+            extraUrl: '/users/' + userID + '/password/request-reset'
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};    /**
      * Thing request
      */
     root.KiiThingAdminQuery = (function(_super){

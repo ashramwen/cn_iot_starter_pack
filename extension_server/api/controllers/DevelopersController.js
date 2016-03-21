@@ -11,23 +11,25 @@ module.exports = {
 			method: 'POST',
 			url: 'https://' + sails.portalServerHost + '/oauth/token',
 			headers: {
-				'content-type': 'application/json'
+				'cache-control': 'no-cache',
+				'content-type': 'multipart/form-data; boundary=---011000010111000001101001'
 			},
-			body: {
+			formData: {
 				grant_type: 'password',
 				username: username,
 				password: password
-			},
-			json: true
+			}
 		};
+		console.log(options)
 
 		sails.request(options, function(error, response, body) {
 			if (error){
-				res.serverError()
+				console.log(error)
+				res.serverError(error)
 				return
 			}
 			if (response.statusCode == 200)
-				res.ok(body);
+				res.ok(JSON.parse(body));
 			else
 				res.unauthorized(body);
 		});

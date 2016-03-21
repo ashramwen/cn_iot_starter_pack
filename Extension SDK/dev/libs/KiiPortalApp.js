@@ -557,6 +557,31 @@
 
         /* =================================== end of tag ========================================================== */
 
+        /* =================================== user related ======================================================== */
+        KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.queryUsers(this, callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype.queryUserByID = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.queryUserByID(this, callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype.addUser = function(data){
+            return KiiPortalUser.addUser(this, data);
+        };
+        KiiPortalApp.prototype.deleteUser = function(userID){
+            return KiiPortalUser.deleteUser(this, userID);
+        };
+        KiiPortalApp.prototype.updateUser = function(userID, data){
+            return KiiPortalUser.updateUser(this, userID, data);
+        };
+        KiiPortalApp.prototype.toggleUserStatus = function(userID, data){
+            return KiiPortalUser.toggleUserStatus(this, userID, data);
+        };
+        KiiPortalApp.prototype.resetPassword = function(userID, data){
+            return KiiPortalUser.resetPassword(this, userID, data);
+        };
+        /* =================================== end of tag ========================================================== */
+
+
         /* =================================== things related ====================================================== */
 
         KiiPortalApp.prototype.queryThings = function(callbacks, queryClause, dictVal){
