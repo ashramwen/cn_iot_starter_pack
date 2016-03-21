@@ -1,76 +1,116 @@
 <div class="app-portal-modelmanager-modelinfo" ng-init="init()">
   <uib-tabset>
-      <uib-tab heading="Model Info">
-        <div class="form-group">
-          <label>Model Name</label>
-          <input class="form-control" type="text" ng-model="modelInfo.modelName" />
-        </div>
-        <div class="form-group">
-          <label>Firmware Namespace</label>
-          <app-select options="firmwareNamespaces" text="_name" selected-model="modelInfo.selectedNamespace"></app-select>
-        </div>
-        <div class="form-group">
-          <button class="btn btn-success" ng-click="updateModel(modelInfo)">Update</button>
-        </div>
-        <div class="form-group">
-          <label>Model Image</label>
-          <input type="file" id="modelImage" />
-        </div>
-        <div class="form-group">
-          <img ng-src="{{modelInfo.imageUrl || 'images/bulb.jpeg' }}" width="200px">
-        </div>
-      </uib-tab>
-      <uib-tab heading="Devices">
-        
-      </uib-tab>
-      <uib-tab heading="Firmwares">
-        <table st-table="firmwares" class="table table-striped">
-          <thead>
-          <tr>
-            <th>Firmware Name</th>
-            <th>Created Date</th>
-            <th>Modified Date</th>
-            <th width="120px" align="center">Operation</th>
+    <!-- model Info -->
+    <uib-tab heading="Model Info">
+      <div class="form-group">
+        <label>Model Name</label>
+        <input class="form-control" type="text" ng-model="modelInfo.modelName" />
+      </div>
+      <div class="form-group">
+        <label>Firmware Namespace</label>
+        <app-select options="firmwareNamespaces" text="_name" selected-model="modelInfo.selectedNamespace"></app-select>
+      </div>
+      <div class="form-group">
+        <button class="btn btn-success" ng-click="updateModel(modelInfo)">Update</button>
+      </div>
+      <div class="form-group">
+        <label>Model Image</label>
+        <input type="file" id="modelImage" />
+      </div>
+      <div class="form-group">
+        <img ng-src="{{modelInfo.imageUrl || 'images/bulb.jpeg' }}" width="200px">
+      </div>
+    </uib-tab>
+    <!-- end of model info -->
+
+    <!-- devices -->
+    <uib-tab heading="Devices">
+      
+    </uib-tab>
+    <!-- end of devices -->
+
+    <!-- firmwares -->
+    <uib-tab heading="Firmwares">
+      <table st-table="firmwares" class="table table-striped">
+        <thead>
+        <tr>
+          <th>Firmware Name</th>
+          <th>Created Date</th>
+          <th>Modified Date</th>
+          <th width="120px" align="center">Operation</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="firmware in firmwares">
+          <td>{{firmware.getName()}}</td>
+          <td>{{getTime(firmware._created)}}</td>
+          <td>{{getTime(firmware._modified)}}</td>
+          <td>
+            <span class="fa fa-plus-circle" ng-if="!firmware._selected" ng-click="addFirmware(firmware)"></span>
+            <span class="fa fa-trash" ng-if="firmware._selected" ng-click="removeFirmware(firmware)"></span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </uib-tab>
+    <!-- end of firmwares -->
+
+    <!-- industrial schema -->
+    <uib-tab heading="Industrial Schema">
+      <div>
+        <button class="btn btn-success" ng-click="createSchema()">
+          <span class="fa fa-plus"></span> Add Schema
+        </button>
+      </div>
+      <table st-table="mySchemas" class="table table-striped">
+        <thead>
+          <th>Schema ID</th>
+          <td>Created Time</td>
+          <td>Updated Time</td>
+        </thead>
+        <tbody>
+          <tr ng-repeat-start="schema in mySchemas">
+            <td>{{schema.version}}</td>
+            <td>{{schema.updatedAt}}</td>
+            <td>{{schema.createdAt}}</td>
           </tr>
-          </thead>
-          <tbody>
-          <tr ng-repeat="firmware in firmwares">
-            <td>{{firmware.getName()}}</td>
-            <td>{{getTime(firmware._created)}}</td>
-            <td>{{getTime(firmware._modified)}}</td>
-            <td>
-              <span class="fa fa-plus-circle" ng-if="!firmware._selected" ng-click="addFirmware(firmware)"></span>
-              <span class="fa fa-trash" ng-if="firmware._selected" ng-click="removeFirmware(firmware)"></span>
+          <tr ng-repeat-end>
+            <td colspan="3">
+              <!-- Schema Content -->
+              <div class="form-group">
+                <button class="btn btn-success" ng-click="openCreatePropertyModal()">
+                  <span class="fa fa-plus"></span> Add Property
+                </button>
+                <button class="btn btn-success">
+                  <span class="fa fa-file-o"></span>Save Schema
+                </button>
+              </div>
+              <table st-table="schemaProperties" class="table table-striped">
+                <thead>
+                  <th>Display Name</th>
+                  <th>Key</th>
+                  <th>Type</th>
+                  <th>Unit</th>
+                  <th>Controllable</th>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="property in schemaProperties">
+                    <td>{{property.displayName}}</td>
+                    <td>{{property.key}}</td>
+                    <td>{{property.type}}</td>
+                    <td>{{property.unit}}</td>
+                    <td><span class="fa fa-check" ng-if="property.controllable"></span><span class="fa fa-close"  ng-if="!property.controllable"></span></td>
+                  </tr>
+                </tbody>
+              </table>
+              <!-- End of Schema Content -->
             </td>
           </tr>
-          </tbody>
-        </table>
-      </uib-tab>
-      <uib-tab heading="Industrial Schema">
-        <div class="form-group">
-          <button class="btn btn-success" ng-click="openCreatePropertyModal()"><span class="fa fa-plus"></span> Add Property</button>
-        </div>
-        <table st-table="schemaProperties" class="table table-striped">
-          <thead>
-            <th>Display Name</th>
-            <th>Key</th>
-            <th>Type</th>
-            <th>Unit</th>
-            <th>Controllable</th>
-          </thead>
-          <tbody>
-            <tr ng-repeat="property in schemaProperties">
-              <td>{{property.displayName}}</td>
-              <td>{{property.key}}</td>
-              <td>{{property.type}}</td>
-              <td>{{property.unit}}</td>
-              <td><span class="fa fa-check" ng-if="property.controllable"></span><span class="fa fa-close"  ng-if="!property.controllable"></span></td>
-            </tr>
-          </tbody>
-        </table>
-        <div><button class="btn btn-success">Save Schema</button></div>
-      </uib-tab>
-    </uib-tabset>
+        </tbody>
+      </table>
+    </uib-tab>
+    <!-- end of industrial schema -->
+  </uib-tabset>
 </div>
 <script type="text/ng-template" id="app.Portal.AppManager.ApplicationEditor.ModelManager.CreatSchemaProperty">
   <div class="modal-content" ng-init="init()">

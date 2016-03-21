@@ -28,8 +28,7 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
     $scope.loadSchema = function(){
         AppUtils.doLoading();
         $scope.myModel.refreshPortalSchemas().then(function(){
-            
-            console.log($scope.myModel.getPortalSchemas());
+            $scope.mySchemas = myModel.getPortalSchemas();
             //$scope.schemaProperties = $scope.myModel.getPortalSchemas();
             $scope.$apply();
             AppUtils.whenLoaded();
@@ -212,6 +211,14 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         }, function () {
             
         });
+    };
+
+    /**
+     * create schema
+     * @return {[type]} [description]
+     */
+    $scope.createSchema = function(){
+        var schema = $scope.myModel.createSchema();
     };
 
     

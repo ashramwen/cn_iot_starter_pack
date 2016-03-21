@@ -981,7 +981,7 @@
                 spec.headers = spec.headers || {};
                 spec.headers['x-app-id'] = kiiApp.getAppID();
                 spec.headers['x-app-key'] = kiiApp.getAppKey();
-                spec.headers['Authorization'] = kiiApp.getAdmin().getTokenType() + ' ' + kiiApp.getAdmin().getAccessToken();
+                spec.headers['Authorization'] = kiiApp.getAdmin().getTokenType() + ' ' + kiiApp.getAdminContext()._token;
                 spec.headers['x-app-site'] = kiiApp.getSite();
             }
             return __ajax(spec);
@@ -2826,6 +2826,10 @@
             });
         };
 
+        KiiPortalModel.prototype.createSchema = function(){
+            KiiPortalSchema.create(this);
+        }
+
         KiiPortalModel.prototype.uploadImage = function(imageFile ,callbacks){
             var _this = this;
             return new Promise(function(resolve, reject){
@@ -2958,7 +2962,7 @@
         function KiiPortalSchema(schema, kiiApp){
             var _this = this;
             this._modelId = null;
-            this._versionNumber = null;
+            this._version = null;
             this.properties = [];
             this._kiiApp = kiiApp;
 
@@ -2979,12 +2983,12 @@
                 _this._modelId = modelId;
             }
 
-            this.getVersionNumber = function(){
-                return _this._versionNumber;
+            this.getVersion = function(){
+                return _this._version;
             };
 
-            this.setVersionNumber = function(versionNumber){
-                _this._versionNumber = versionNumber;
+            this.setVersion = function(version){
+                _this._version = version;
             };
 
             this.init(schema);
@@ -3022,10 +3026,10 @@
                     method: 'GET',
                     url: root._apis.MODEL + '/' + model.getUUID() + '/schemas',
                     success: function(response){
-                        schemaData = response.data;
+                        var schemasData = response.data;
                         var schemas = [];
 
-                        __each(schemaData, function(schema){
+                        __each(schemasData, function(schema){
                             schemas.push(KiiPortalSchema.factory(schema, model.getKiiApp()));
                         });
 
@@ -3050,7 +3054,7 @@
         KiiPortalSchema.prototype.refresh = function(property){
             var setting = {
                 method: 'GET',
-                url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this.getVersionNumber(),
+                url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this.getVersion(),
                 headers: {
                     'Authorization': tokenType + ' ' + accessToken
                 }
@@ -3118,9 +3122,9 @@
             });
         };
 
-        KiiPortalSchema.create = function(modelId, kiiApp){
+        KiiPortalSchema.create = function(model){
             var schema = KiiPortalSchema.factory();
-            schema.setModelId(modelId, kiiApp);
+            schema.setModelId(model.getUUID(), model.getKiiApp());
             return schema;
         };
 
