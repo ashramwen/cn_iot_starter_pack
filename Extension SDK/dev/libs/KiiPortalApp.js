@@ -579,6 +579,12 @@
         KiiPortalApp.prototype.resetPassword = function(userID, data){
             return KiiPortalUser.resetPassword(this, userID, data);
         };
+        KiiPortalApp.prototype.groupOwner = function(userID){
+            return KiiPortalUser.groupOwner(this, userID);
+        };
+        KiiPortalApp.prototype.groupMember = function(userID){
+            return KiiPortalUser.groupMember(this, userID);
+        };
         /* =================================== end of tag ========================================================== */
 
 

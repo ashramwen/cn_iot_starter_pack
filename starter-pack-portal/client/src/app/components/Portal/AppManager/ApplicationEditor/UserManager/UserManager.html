@@ -305,8 +305,28 @@
                                 </div>
                             </uib-tab>
                             <uib-tab heading="Attribute">
+                                <div ng-jsoneditor ng-model="user._field.customAttributes" options="{'mode':'code'}" style="height:300px; width:100%;">
+                                </div>
                             </uib-tab>
-                            <uib-tab heading="Groups" select="getCustomFields(device)">
+                            <uib-tab heading="Groups" select="getGroupData(user._field)">
+                                <div class="clearfix">
+                                    <div class="col-sm-6">
+                                        <h4>
+                                            Owner
+                                        </h4>
+                                        <div ng-if="user._field.group.owner.length<1">
+                                            Not an owner of any groups.
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <h4>
+                                            Member
+                                        </h4>
+                                        <div ng-if="user._field.group.member.length<1">
+                                            Not a member of any groups.
+                                        </div>
+                                    </div>
+                                </div>
                             </uib-tab>
                         </uib-tabset>
                         <div class="tab-pane-footer clearfix">

@@ -2035,6 +2035,12 @@
         KiiPortalApp.prototype.resetPassword = function(userID, data){
             return KiiPortalUser.resetPassword(this, userID, data);
         };
+        KiiPortalApp.prototype.groupOwner = function(userID){
+            return KiiPortalUser.groupOwner(this, userID);
+        };
+        KiiPortalApp.prototype.groupMember = function(userID){
+            return KiiPortalUser.groupMember(this, userID);
+        };
         /* =================================== end of tag ========================================================== */
 
 
@@ -3689,22 +3695,23 @@ root.KiiPortalUser = (function(_super) {
     function KiiPortalUser(data) {
         var _this = this;
         __bindMethod(_this);
-        this._info = {};
-        this._info.userID = data.userID;
-        this._info.internalUserID = data.internalUserID;
-        this._info.loginName = data.loginName;
-        this._info.displayName = data.displayName;
-        this._info.country = data.country;
-        this._info.emailAddress = data.emailAddress;
-        this._info.emailAddressVerified = data.emailAddressVerified;
-        this._info.phoneNumber = data.phoneNumber;
-        this._info.phoneNumberVerified = data.phoneNumberVerified;
-        this._info.disabled = data.disabled;
-        this._info.createdAt = data.createdAt;
-        this._info.modifiedAt = data.modifiedAt;
-        this._info.passwordChangedAt = data.passwordChangedAt;
-        this._info._disabled = data._disabled;
-        this._info._hasPassword = data._hasPassword;
+        this._info = data;
+        // this._info = {};
+        // this._info.userID = data.userID;
+        // this._info.internalUserID = data.internalUserID;
+        // this._info.loginName = data.loginName;
+        // this._info.displayName = data.displayName;
+        // this._info.country = data.country;
+        // this._info.emailAddress = data.emailAddress;
+        // this._info.emailAddressVerified = data.emailAddressVerified;
+        // this._info.phoneNumber = data.phoneNumber;
+        // this._info.phoneNumberVerified = data.phoneNumberVerified;
+        // this._info.disabled = data.disabled;
+        // this._info.createdAt = data.createdAt;
+        // this._info.modifiedAt = data.modifiedAt;
+        // this._info.passwordChangedAt = data.passwordChangedAt;
+        // this._info._disabled = data._disabled;
+        // this._info._hasPassword = data._hasPassword;
     };
     return KiiPortalUser;
 })(KiiUserAdmin);
@@ -3864,6 +3871,42 @@ KiiPortalUser.resetPassword = function(kiiApp, userID, data) {
         var request = new KiiPortalUserRequest(kiiApp, spec);
         request.execute().then(function(response) {
             resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.groupOwner = function(kiiApp, userID) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            headers: {
+                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
+            },
+            extraUrl: '/groups?owner=' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response.data);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+KiiPortalUser.groupMember = function(kiiApp, userID) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            headers: {
+                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
+            },
+            extraUrl: '/groups?is_member=' + userID
+        };
+
+        var request = new KiiPortalUserRequest(kiiApp, spec);
+        request.execute().then(function(response) {
+            resolve(response.data);
         }, function(error) {
             reject(error);
         });
