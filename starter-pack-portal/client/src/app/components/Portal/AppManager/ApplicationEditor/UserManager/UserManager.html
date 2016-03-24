@@ -314,17 +314,27 @@
                                         <h4>
                                             Owner
                                         </h4>
-                                        <div ng-if="user._field.group.owner.length<1">
+                                        <span ng-if="user._field.group.owner.length<1">
                                             Not an owner of any groups.
-                                        </div>
+                                        </span>
+                                        <ul class="list-group">
+                                            <li class="list-group-item" ng-repeat="r in user._field.group.owner track by groupID">
+                                                {{r.name}}
+                                            </li>
+                                        </ul>
                                     </div>
                                     <div class="col-sm-6">
                                         <h4>
                                             Member
                                         </h4>
-                                        <div ng-if="user._field.group.member.length<1">
+                                        <span ng-if="user._field.group.member.length<1">
                                             Not a member of any groups.
-                                        </div>
+                                        </span>
+                                        <ul class="list-group">
+                                            <li class="list-group-item" ng-repeat="r in user._field.group.member track by groupID">
+                                                {{r.name}}
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
                             </uib-tab>
