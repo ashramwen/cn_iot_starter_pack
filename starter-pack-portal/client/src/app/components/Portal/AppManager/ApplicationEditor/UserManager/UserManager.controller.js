@@ -82,19 +82,9 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 'userID', 'internalUserID', 'loginName', 'displayName',
                 'country', 'emailAddress', 'emailAddressVerified', 'phoneNumber',
                 'phoneNumberVerified', 'disabled', 'createdAt', 'modifiedAt',
-                'passwordChangedAt', '_disabled', '_hasPassword',
-
-                '_onEdit', 'customFieldEditor', '$$hashKey'
+                'passwordChangedAt', '_disabled', '_hasPassword'
             ];
-            angular.extend(user._field, {
-                customAttributes: {}
-            });
-
-            _.each(user._info, function(value, key) {
-                if (existingKeys.indexOf(key) == -1 && !_.isFunction(value)) {
-                    user._field.customAttributes[key] = value;
-                }
-            });
+            user._field.customAttributes = _.omit(user._info, existingKeys);
         };
 
         $scope.getGroupData = function(user) {
