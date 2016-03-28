@@ -2015,31 +2015,10 @@
 
         /* =================================== user related ======================================================== */
         KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.queryUsers(this, callbacks, queryClause, dictVal);
+            return KiiPortalUser.queryUsers(callbacks, queryClause, dictVal);
         };
         KiiPortalApp.prototype.queryUserByID = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.queryUserByID(this, callbacks, queryClause, dictVal);
-        };
-        KiiPortalApp.prototype.addUser = function(data){
-            return KiiPortalUser.addUser(this, data);
-        };
-        KiiPortalApp.prototype.deleteUser = function(userID){
-            return KiiPortalUser.deleteUser(this, userID);
-        };
-        KiiPortalApp.prototype.updateUser = function(userID, data){
-            return KiiPortalUser.updateUser(this, userID, data);
-        };
-        KiiPortalApp.prototype.toggleUserStatus = function(userID, data){
-            return KiiPortalUser.toggleUserStatus(this, userID, data);
-        };
-        KiiPortalApp.prototype.resetPassword = function(userID, data){
-            return KiiPortalUser.resetPassword(this, userID, data);
-        };
-        KiiPortalApp.prototype.groupOwner = function(userID){
-            return KiiPortalUser.groupOwner(this, userID);
-        };
-        KiiPortalApp.prototype.groupMember = function(userID){
-            return KiiPortalUser.groupMember(this, userID);
+            return KiiPortalUser.queryUserByID(callbacks, queryClause, dictVal);
         };
         /* =================================== end of tag ========================================================== */
 
@@ -3662,7 +3641,8 @@ root.KiiPortalUserRequest = (function(_super) {
     __inherits(KiiPortalUserRequest, _super);
     KiiPortalUserRequest.prototype.constructor = KiiPortalUserRequest;
 
-    function KiiPortalUserRequest(kiiApp, spec) {
+    function KiiPortalUserRequest(spec) {
+        var kiiApp = KiiPortalAdmin.getCurrentApp();
         KiiPortalUserRequest.prototype = new _super(kiiApp, spec);
         var _spec = {
             method: 'GET',
@@ -3693,8 +3673,8 @@ root.KiiPortalUser = (function(_super) {
     KiiPortalUser.prototype.constructor = KiiPortalUser;
 
     function KiiPortalUser(data) {
-        var _this = this;
-        __bindMethod(_this);
+        // var _this = this;
+        __bindMethod(this);
         this._info = data;
         // this._info = {};
         // this._info.userID = data.userID;
@@ -3716,7 +3696,14 @@ root.KiiPortalUser = (function(_super) {
     return KiiPortalUser;
 })(KiiUserAdmin);
 
-KiiPortalUser.queryUsers = function(kiiApp, callbacks, queryClause, dictVal) {
+/**
+ * Retrieve a list of KiiPortalUser
+ * @param  {[type]} callbacks   [description]
+ * @param  {[type]} queryClause [description]
+ * @param  {[type]} dictVal     [description]
+ * @return {[type]}             [description]
+ */
+KiiPortalUser.queryUsers = function(callbacks, queryClause, dictVal) {
     return new Promise(function(resolve, reject) {
         var query;
 
@@ -3743,18 +3730,23 @@ KiiPortalUser.queryUsers = function(kiiApp, callbacks, queryClause, dictVal) {
                 });
             }
         };
-
+        var kiiApp = KiiPortalAdmin.getCurrentApp();
         return KiiPortalUserQuery.executeQuery(kiiApp, query, queryCallbacks);
     });
 };
 
-KiiPortalUser.queryUserByID = function(kiiApp, userID) {
+/**
+ * Find registered KiiPortalUser with userID
+ * @param  {[type]} userID [description]
+ * @return {[type]}        [description]
+ */
+KiiPortalUser.queryUserByID = function(userID) {
     return new Promise(function(resolve, reject) {
         var spec = {
             extraUrl: '/users/' + userID
         };
 
-        var request = new KiiPortalUserRequest(kiiApp, spec);
+        var request = new KiiPortalUserRequest(spec);
         request.execute().then(function(response) {
             resolve(new KiiPortalUser(response.data));
         }, function(error) {
@@ -3763,15 +3755,20 @@ KiiPortalUser.queryUserByID = function(kiiApp, userID) {
     });
 };
 
-KiiPortalUser.addUser = function(kiiApp, data) {
+/**
+ * Register a user
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.register = function(data) {
+    var _self = this;
     return new Promise(function(resolve, reject) {
         var _data = {
-            'loginName': data.loginName,
-            'password': data.password,
-            'displayName': data.displayName,
-            'emailAddress': data.emailAddress,
-            'phoneNumber': data.phoneNumber,
-            'country': data.country,
+            'loginName': _self._info.loginName,
+            'password': _self._info.password,
+            'displayName': _self._info.displayName,
+            'emailAddress': _self._info.emailAddress,
+            'phoneNumber': _self._info.phoneNumber,
+            'country': _self._info.country,
             'phoneNumberVerified': null,
             'emailAddressVerified': null,
             'createdAt': null,
@@ -3788,7 +3785,7 @@ KiiPortalUser.addUser = function(kiiApp, data) {
             extraUrl: '/users'
         };
 
-        var request = new KiiPortalUserRequest(kiiApp, spec);
+        var request = new KiiPortalUserRequest(spec);
         request.execute().then(function(response) {
             resolve(response);
         }, function(error) {
@@ -3797,34 +3794,19 @@ KiiPortalUser.addUser = function(kiiApp, data) {
     });
 };
 
-KiiPortalUser.updateUser = function(kiiApp, userID, data) {
-    return new Promise(function(resolve, reject) {
-        var spec = {
-            data: data,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/vnd.kii.UserUpdateRequest+json',
-            },
-            extraUrl: '/users/' + userID
-        };
-
-        var request = new KiiPortalUserRequest(kiiApp, spec);
-        request.execute().then(function(response) {
-            resolve(response);
-        }, function(error) {
-            reject(error);
-        });
-    });
-};
-
-KiiPortalUser.deleteUser = function(kiiApp, userID, data) {
+/**
+ * Delete the user from the server
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.deleteUser = function() {
+    var _self = this;
     return new Promise(function(resolve, reject) {
         var spec = {
             method: 'DELETE',
-            extraUrl: '/users/' + userID
+            extraUrl: '/users/' + _self.getID()
         };
 
-        var request = new KiiPortalUserRequest(kiiApp, spec);
+        var request = new KiiPortalUserRequest(spec);
         request.execute().then(function(response) {
             resolve(response);
         }, function(error) {
@@ -3833,18 +3815,29 @@ KiiPortalUser.deleteUser = function(kiiApp, userID, data) {
     });
 };
 
-KiiPortalUser.toggleUserStatus = function(kiiApp, userID, data) {
+/**
+ * Get the ID of the current KiiPortalUser instance
+ * @return {[type]} [description]
+ */
+KiiPortalUser.prototype.getID = function() {
+    return this._info.userID;
+};
+
+/**
+ * Retrieve a list of groups which the user is a member of
+ * @return {[type]} [description]
+ */
+KiiPortalUser.prototype.memberOfGroups = function() {
+    var _self = this;
     return new Promise(function(resolve, reject) {
         var spec = {
-            data: data,
-            method: 'PUT',
             headers: {
-                'Content-Type': 'application/vnd.kii.UserStatusUpdateRequest+json',
+                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
             },
-            extraUrl: '/users/' + userID + '/status'
+            extraUrl: '/groups?is_member=' + _self.getID()
         };
 
-        var request = new KiiPortalUserRequest(kiiApp, spec);
+        var request = new KiiPortalUserRequest(spec);
         request.execute().then(function(response) {
             resolve(response);
         }, function(error) {
@@ -3853,7 +3846,37 @@ KiiPortalUser.toggleUserStatus = function(kiiApp, userID, data) {
     });
 };
 
-KiiPortalUser.resetPassword = function(kiiApp, userID, data) {
+/**
+ * Retrieve the groups owned by this user
+ * @param  {[type]} userID [description]
+ * @return {[type]}        [description]
+ */
+KiiPortalUser.prototype.ownerOfGroups = function() {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            headers: {
+                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
+            },
+            extraUrl: '/groups?owner=' + _self.getID()
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * Resend the email/SMS verification code to the user
+ * @param  {[string]}  [EMAIL / SMS]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.resetPassword = function(data) {
+    var _self = this;
     return new Promise(function(resolve, reject) {
         var _data = {
             'notificationMethod': data
@@ -3865,10 +3888,10 @@ KiiPortalUser.resetPassword = function(kiiApp, userID, data) {
             headers: {
                 'Content-Type': 'application/vnd.kii.ResetPasswordRequest+json',
             },
-            extraUrl: '/users/' + userID + '/password/request-reset'
+            extraUrl: '/users/' + _self.getID() + '/password/request-reset'
         };
 
-        var request = new KiiPortalUserRequest(kiiApp, spec);
+        var request = new KiiPortalUserRequest(spec);
         request.execute().then(function(response) {
             resolve(response);
         }, function(error) {
@@ -3877,41 +3900,58 @@ KiiPortalUser.resetPassword = function(kiiApp, userID, data) {
     });
 };
 
-KiiPortalUser.groupOwner = function(kiiApp, userID) {
+/**
+ * toggle user active/suspended status
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.toggleUserStatus = function(data) {
+    var _self = this;
     return new Promise(function(resolve, reject) {
         var spec = {
+            data: data,
+            method: 'PUT',
             headers: {
-                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
+                'Content-Type': 'application/vnd.kii.UserStatusUpdateRequest+json',
             },
-            extraUrl: '/groups?owner=' + userID
+            extraUrl: '/users/' + _self.getID() + '/status'
         };
 
-        var request = new KiiPortalUserRequest(kiiApp, spec);
+        var request = new KiiPortalUserRequest(spec);
         request.execute().then(function(response) {
-            resolve(response.data);
+            resolve(response);
         }, function(error) {
             reject(error);
         });
     });
 };
 
-KiiPortalUser.groupMember = function(kiiApp, userID) {
+/**
+ * update user data
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.updateUser = function(data) {
+    var _self = this;
     return new Promise(function(resolve, reject) {
         var spec = {
+            data: data,
+            method: 'POST',
             headers: {
-                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
+                'Content-Type': 'application/vnd.kii.UserUpdateRequest+json',
             },
-            extraUrl: '/groups?is_member=' + userID
+            extraUrl: '/users/' + _self.getID()
         };
 
-        var request = new KiiPortalUserRequest(kiiApp, spec);
+        var request = new KiiPortalUserRequest(spec);
         request.execute().then(function(response) {
-            resolve(response.data);
+            resolve(response);
         }, function(error) {
             reject(error);
         });
     });
-};    /**
+};
+    /**
      * Thing request
      */
     root.KiiThingAdminQuery = (function(_super){
