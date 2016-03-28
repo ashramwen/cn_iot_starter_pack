@@ -70,7 +70,7 @@
         </thead>
         <tbody>
           <tr ng-repeat-start="schema in mySchemas">
-            <td>{{schema.version}}</td>
+            <td>{{schema.version || '[New Schema]'}}</td>
             <td>{{schema.updatedAt}}</td>
             <td>{{schema.createdAt}}</td>
           </tr>
@@ -78,7 +78,7 @@
             <td colspan="3">
               <!-- Schema Content -->
               <div class="form-group">
-                <button class="btn btn-success" ng-click="openCreatePropertyModal()">
+                <button class="btn btn-success" ng-click="openCreatePropertyModal(schema)">
                   <span class="fa fa-plus"></span> Add Property
                 </button>
                 <button class="btn btn-success">
@@ -115,7 +115,7 @@
 <script type="text/ng-template" id="app.Portal.AppManager.ApplicationEditor.ModelManager.CreatSchemaProperty">
   <div class="modal-content" ng-init="init()">
     <div class="modal-header">
-        <h3 class="modal-title">Create Model</h3>
+        <h3 class="modal-title">Create Schema</h3>
     </div>
     <div class="modal-body clearfix">
       <div class="col-sm-12">

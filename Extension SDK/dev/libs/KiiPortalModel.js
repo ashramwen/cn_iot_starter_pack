@@ -273,7 +273,7 @@
         };
 
         KiiPortalModel.prototype.createSchema = function(){
-            KiiPortalSchema.create(this);
+            return KiiPortalSchema.create(this);
         }
 
         KiiPortalModel.prototype.uploadImage = function(imageFile ,callbacks){
@@ -399,6 +399,32 @@
             return this.getKiiApp().getAdminContext().bucketWithName(KiiPortalModel._getBucketName() + this.getUUID());
         };
 
+        KiiPortalModel.prototype.saveSchema = function(schema, callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var saveSchemaCallbacks = {
+                    success: function(schema){
+                        var schemas = _this.getPortalSchemas();
+                        if(schemas.indexOf(schema)){
+                            schemas.push(schema);
+                        }
+                        resolve(schema);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(schema);
+                        }
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+
+                schema.save(saveSchemaCallbacks);
+            });
+        };
+
 
         return KiiPortalModel;
     })(root.KiiPortalObject);
@@ -513,7 +539,7 @@
             accessToken = this.getKiiApp().getAdmin().getAccessToken();
 
             _this = this;
-            versionNumber = this.getVersionNumber();
+            versionNumber = this.getVersion();
 
             if(!versionNumber){
                 createFlag = true;
@@ -529,10 +555,12 @@
                         },
                         success: function(response){
                             _this.init(response.data);
+
+
                             if(callbacks && callbacks.success){
-                                callbacks.success(this);
+                                callbacks.success(_this);
                             }
-                            resolve(this);
+                            resolve(_this);
                         },
                         failure: function(error){
                             if(callbacks && callbacks.failure){
@@ -544,16 +572,16 @@
                 }else{
                     setting = {
                         method: 'POST',
-                        url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this,
+                        url: root._apis.MODEL + '/' + _this.getModelId() + '/schemas/' + _this.getVersion(),
                         headers: {
                             'Authorization': tokenType + ' ' + accessToken
                         },
                         success: function(response){
                             _this.init(response.data);
                             if(callbacks && callbacks.success){
-                                callbacks.success(this);
+                                callbacks.success(_this);
                             }
-                            resolve(this);
+                            resolve(_this);
                         },
                         failure: function(error){
                             if(callbacks && callbacks.failure){
@@ -569,8 +597,8 @@
         };
 
         KiiPortalSchema.create = function(model){
-            var schema = KiiPortalSchema.factory();
-            schema.setModelId(model.getUUID(), model.getKiiApp());
+            var schema = KiiPortalSchema.factory(null, model.getKiiApp());
+            schema.setModelId(model.getUUID());
             return schema;
         };
 

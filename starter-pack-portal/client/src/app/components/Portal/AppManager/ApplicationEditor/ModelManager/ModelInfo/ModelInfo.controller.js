@@ -195,19 +195,21 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         });
     };
 
-    $scope.openCreatePropertyModal = function(){
+    $scope.openCreatePropertyModal = function(schema){
         var modalInstance = $uibModal.open({
             animation: true,
             templateUrl: 'app.Portal.AppManager.ApplicationEditor.ModelManager.CreatSchemaProperty',
             resolve: {
-                model: $scope.myModel
+                schema: function(){
+                    return schema;
+                } 
             },
             controller: 'ModelInfoController.createSchemaProperty',
             size: 'md'
         });
 
         modalInstance.result.then(function (property) {
-            $scope.schemaProperties = $scope.myModel.getPortalSchema().getProperties();
+            $scope.schemaProperties = schema.getProperties();
         }, function () {
             
         });
@@ -219,11 +221,12 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
      */
     $scope.createSchema = function(){
         var schema = $scope.myModel.createSchema();
+        $scope.mySchemas.push(schema);
     };
 
     
   }])
-  .controller('ModelInfoController.createSchemaProperty',['$scope', 'model', '$uibModalInstance', 'AppConfig', function($scope, model, $uibModalInstance, AppConfig){
+  .controller('ModelInfoController.createSchemaProperty',['$scope', 'schema', '$uibModalInstance', 'AppConfig', function($scope, schema, $uibModalInstance, AppConfig){
 
     $scope.propertyBO = {
         key: null,
@@ -246,7 +249,6 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
     });
 
     $scope.ok = function(){
-        var schema = model.getPortalSchema();
         var property = schema.createProperty();
         _.extend(property, $scope.propertyBO); 
         $uibModalInstance.close(property);
