@@ -69,7 +69,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             var index = $scope.message.index;
             cleanMessage();
             AppUtils.doLoading();
-            user.deleteUser().then(function(result) {
+            user.delete().then(function(result) {
                 $scope.message = {
                     'loginName': user._info.loginName,
                     'status': MessageType.Deleted
@@ -114,7 +114,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 paginationKey: query._paginationKey
             };
             AppUtils.doLoading();
-            $scope.myApp.queryUsers({}, null, _option).then(function(result) {
+            $scope.myApp.getUserList({}, null, _option).then(function(result) {
                 $scope.query = result.query;
                 $scope.users = $scope.users.concat(result.users);
                 $scope.$apply();
@@ -201,8 +201,8 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             }
             _.extend(_data, user._field.customAttributes);
             AppUtils.doLoading();
-            user.updateUser(_data).then(function(result) {
-                $scope.myApp.queryUserByID(user.getID()).then(function(result) {
+            user.update(_data).then(function(result) {
+                $scope.myApp.findUserByUserID(user.getID()).then(function(result) {
                     user._info = result._info;
                     $scope.message = {
                         'loginName': user._info.loginName,
@@ -227,7 +227,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
 
         function queryUsers() {
             AppUtils.doLoading();
-            $scope.myApp.queryUsers({}, null, {
+            $scope.myApp.getUserList({}, null, {
                 limit: 200
             }).then(function(result) {
                 $scope.query = result.query;

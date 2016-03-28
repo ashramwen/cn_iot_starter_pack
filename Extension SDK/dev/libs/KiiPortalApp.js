@@ -558,11 +558,11 @@
         /* =================================== end of tag ========================================================== */
 
         /* =================================== user related ======================================================== */
-        KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.queryUsers(callbacks, queryClause, dictVal);
+        KiiPortalApp.prototype.getUserList = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.getUserList(callbacks, queryClause, dictVal);
         };
-        KiiPortalApp.prototype.queryUserByID = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.queryUserByID(callbacks, queryClause, dictVal);
+        KiiPortalApp.prototype.findUserByUserID = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.findUserByUserID(callbacks, queryClause, dictVal);
         };
         /* =================================== end of tag ========================================================== */
 

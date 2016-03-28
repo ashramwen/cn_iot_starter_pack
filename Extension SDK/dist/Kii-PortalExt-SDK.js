@@ -2014,11 +2014,11 @@
         /* =================================== end of tag ========================================================== */
 
         /* =================================== user related ======================================================== */
-        KiiPortalApp.prototype.queryUsers = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.queryUsers(callbacks, queryClause, dictVal);
+        KiiPortalApp.prototype.getUserList = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.getUserList(callbacks, queryClause, dictVal);
         };
-        KiiPortalApp.prototype.queryUserByID = function(callbacks, queryClause, dictVal){
-            return KiiPortalUser.queryUserByID(callbacks, queryClause, dictVal);
+        KiiPortalApp.prototype.findUserByUserID = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.findUserByUserID(callbacks, queryClause, dictVal);
         };
         /* =================================== end of tag ========================================================== */
 
@@ -3627,10 +3627,10 @@ root.KiiPortalUserQuery = (function(_super) {
      * @return {[type]}      [description]
      */
     KiiPortalUserQuery._instantiate = function(data) {
-        if (data !== null) {
-            return new KiiPortalUser(data);
-        } else {
+        if (data === null) {
             return null;
+        } else {
+            return new KiiPortalUser(data);
         }
     };
 
@@ -3703,7 +3703,7 @@ root.KiiPortalUser = (function(_super) {
  * @param  {[type]} dictVal     [description]
  * @return {[type]}             [description]
  */
-KiiPortalUser.queryUsers = function(callbacks, queryClause, dictVal) {
+KiiPortalUser.getUserList = function(callbacks, queryClause, dictVal) {
     return new Promise(function(resolve, reject) {
         var query;
 
@@ -3740,7 +3740,7 @@ KiiPortalUser.queryUsers = function(callbacks, queryClause, dictVal) {
  * @param  {[type]} userID [description]
  * @return {[type]}        [description]
  */
-KiiPortalUser.queryUserByID = function(userID) {
+KiiPortalUser.findUserByUserID = function(userID) {
     return new Promise(function(resolve, reject) {
         var spec = {
             extraUrl: '/users/' + userID
@@ -3757,6 +3757,7 @@ KiiPortalUser.queryUserByID = function(userID) {
 
 /**
  * Register a user
+ * @param  {[type]} data [user data]
  * @return {[type]}      [description]
  */
 KiiPortalUser.prototype.register = function(data) {
@@ -3798,7 +3799,7 @@ KiiPortalUser.prototype.register = function(data) {
  * Delete the user from the server
  * @return {[type]}      [description]
  */
-KiiPortalUser.prototype.deleteUser = function() {
+KiiPortalUser.prototype.delete = function() {
     var _self = this;
     return new Promise(function(resolve, reject) {
         var spec = {
@@ -3931,7 +3932,7 @@ KiiPortalUser.prototype.toggleUserStatus = function(data) {
  * @param  {[type]} data [description]
  * @return {[type]}      [description]
  */
-KiiPortalUser.prototype.updateUser = function(data) {
+KiiPortalUser.prototype.update = function(data) {
     var _self = this;
     return new Promise(function(resolve, reject) {
         var spec = {
