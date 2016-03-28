@@ -28,9 +28,10 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
 
         $scope.addUser = function(newUser) {
             cleanMessage();
-            var _status = userValidateService.validate(newUser);
-            if (!_status.isPass()) return;
+            newUser._status = userValidateService.validate(newUser);
+            if (!newUser._status.isPass()) return;
             AppUtils.doLoading();
+            delete newUser._status;
             var user = new KiiPortalUser(newUser);
             user.register().then(function(result) {
                 // queryUsers();
@@ -113,13 +114,7 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 limit: 5,
                 paginationKey: query._paginationKey
             };
-            AppUtils.doLoading();
-            $scope.myApp.getUserList({}, null, _option).then(function(result) {
-                $scope.query = result.query;
-                $scope.users = $scope.users.concat(result.users);
-                $scope.$apply();
-                AppUtils.whenLoaded();
-            }, ajaxError);
+            queryUsers(_option, !0);
         };
 
         $scope.expandAddUser = function() {
@@ -225,13 +220,15 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             $scope.message = {};
         }
 
-        function queryUsers() {
+        function queryUsers(option, concat) {
+            var _option = {
+                'limit': 200
+            };
+            angular.extend(_option, option);
             AppUtils.doLoading();
-            $scope.myApp.getUserList({}, null, {
-                limit: 200
-            }).then(function(result) {
+            $scope.myApp.getUserList({}, null, _option).then(function(result) {
                 $scope.query = result.query;
-                $scope.users = result.users;
+                $scope.users = (concat ? $scope.users.concat(result.users) : result.users);
                 $scope.$apply();
                 AppUtils.whenLoaded();
             }, ajaxError);

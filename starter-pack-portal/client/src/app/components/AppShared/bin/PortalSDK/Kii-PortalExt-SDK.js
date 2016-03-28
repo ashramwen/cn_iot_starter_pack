@@ -1255,5 +1255,2846 @@
 
 })();
 
-    //<!-- components:js --><!-- injection:end -->
+    
+    root.KiiPortalAdmin = (function(){
+
+        function KiiPortalAdmin(){
+            var _this = this;
+            this._apps = [];
+            this._adminContenxt = null;
+            this._accessToken = null;
+            this._tokenType = null;
+
+            this.setApps = function(apps){
+                _this._apps = apps;
+            };
+
+            this.getApps = function(){
+                return _this._apps;
+            };
+
+            this.setAdminContext = function(adminContext){
+                _this._adminContenxt = adminContext;
+                KiiportalAdmin.setCurrentAdminContext(adminContext);
+            };
+            
+            this.getAdminContext = function(){
+                return _this._adminContenxt;
+            };
+
+            this.setAccessToken = function(accessToken){
+                _this._accessToken = accessToken;
+            };
+
+            this.getAccessToken = function(){
+                return _this._accessToken;
+            };
+
+            this.getTokenType = function(){
+                return _this._tokenType;
+            };
+            this.setTokenType = function(tokenType){
+                _this._tokenType = tokenType;
+            };
+        }
+
+        KiiPortalAdmin.getCurrentApp = function(){
+            return this._currentApp;
+        };
+
+        KiiPortalAdmin.setCurrentAdminContext = function(context){
+            KiiPortalAdmin._currentAdminContext = context;
+        };
+
+        KiiPortalAdmin.getCurrentAdminContext = function(){
+            return KiiPortalAdmin._currentAdminContext;
+        };
+
+        /**
+         * get admin's app by Application ID
+         * @param appID
+         * @returns {*}
+         */
+        KiiPortalAdmin.prototype.getAppByID = function(appID){
+            var apps = this.getApps();
+            var myApp = null;
+            __each(apps, function(app){
+                myApp = app.getAppID() == appID? app: myApp;
+            });
+            return myApp;
+        }
+
+        KiiPortalAdmin.prototype.refreshApps = function(){
+            return this._refreshApps();
+        };
+
+        KiiPortalAdmin.prototype._refreshApps = function(callbacks){
+            var _this = this;
+            return new Promise(function (resolve, reject){
+                var refreshAppsCallbacks = {
+                    success: function(apps){
+                        _this.setApps(apps);
+                        if(callbacks){
+                            callbacks.success.call(callbacks, apps);
+                        }
+                        resolve(apps);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure) {
+                            callbacks.failure.call(callbacks, response);
+                        }
+                        reject(response);
+                    }
+                };
+                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks);
+            });
+        };
+
+        KiiPortalAdmin.login = function(userName, password, callbacks){
+            return new Promise(function (resolve, reject) {
+                var loginCallbacks = {
+                    success: function (response) {
+                        var portalAdmin = new KiiPortalAdmin();
+                        portalAdmin.setAccessToken(response.data['access_token']);
+                        portalAdmin.setTokenType(response.data['token_type']);
+
+                        if (callbacks) {
+                            callbacks.success.call(callbacks, portalAdmin);
+                        }
+                        resolve(portalAdmin);
+                    },
+                    failure: function () {
+                        if (callbacks) {
+                            callbacks.failure.apply(callbacks, arguments);
+                        }
+                        reject.apply(reject, arguments);
+                    }
+                };
+
+                // Execute the query
+                //return _bucket.executeQuery(all_query, loginCallbacks);
+
+
+                /*
+                loginCallbacks.success({apps:[
+                    {
+                        "appID": "5f59f57d",
+                        "appKey": "78e36a49a4c8b734299253417bc91fc9",
+                        "clientID": "d97aa9b1e29dc6cdefe2c62cebc43f28",
+                        "clientSecret": "84502cac7ad0a5868c84a507864877ff5d0d2502be45b7d13aa7464a66d215f0",
+                        "site": KiiSite.CN3
+                    }
+                ]});
+                */
+                var setting = {
+                    url: root._apis.AUTHENTIC,
+                    method: 'POST',
+                    data:{
+                        username: userName,
+                        password: password,
+                        'grant_type': 'password'
+                    }
+                };
+                KiiPortalRequest(setting).then(loginCallbacks.success, loginCallbacks.failure);
+
+            });
+        };
+
+        KiiPortalAdmin.prototype._addApp = function(app){
+            this._apps.push(app);
+        };
+
+        KiiPortalAdmin.prototype.useApp = function(app, callbacks){
+            return this._useApp(app, callbacks);
+        };
+
+        KiiPortalAdmin.prototype._useApp = function(app, callbacks){
+            return new Promise(function (resolve, reject) {
+                var refreshAppCallbacks = {
+                    success: function (app) {
+                        var adminCallbacks = {
+                            success: function(adminContext) {
+                                app.setAdminContext(adminContext);
+                                KiiPortalAdmin._currentApp = app;
+                                if(callbacks){
+                                    callbacks.success.call(callbacks, app);
+                                }
+                                resolve(app);
+                            },
+                            failure: function(error, statusCode) {
+                                if(callbacks){
+                                    callbacks.failure.apply(callbacks,arguments);
+                                }
+                                reject(arguments);
+                            }
+                        };
+
+                        /**
+                         * init site with app info
+                         */
+                        Kii.initializeWithSite(app.getAppID(), app.getAppKey(), DevelopmentSettings.SERVER_ADDRESS || app.getSiteURL());
+
+                        /**
+                         * get addmin context
+                         */
+                        return Kii.authenticateAsAppAdmin(app.getClientID(), app.getClientSecret(), adminCallbacks);
+                    },
+                    failure: function (response) {
+                        reject(response);
+                    }
+                };
+                app._refresh(refreshAppCallbacks);
+            });
+        };
+
+        KiiPortalAdmin.prototype.createApp = function(){
+            return KiiPortalApp.factory(this);
+        };
+
+        return KiiPortalAdmin;
+    })();
+
+    /**
+     * class KiiPortalApp
+     */
+    root.KiiPortalApp = (function() {
+        /**
+         * constructor of class KiiPortalApp
+         * @constructor
+         */
+          function KiiPortalApp () {
+            var _this = this;
+            this._appName = null;
+            this._adminContext = null;
+            this._appID = null;
+            this._appKey = null;
+            this._clientID = null;
+            this._clientSecret = null;
+            this._site = null;
+            this._platforms = null;
+            this._country = null;
+            this._created = null;
+            this._id = null;
+            this._inactive = false;
+            this._owner = false;
+            this._plan = null;
+            this._appSites = null;
+            this._admin = null;
+            this._firmwares = [];
+            this._models = [];
+            this._tags = [];
+            this._server = null;
+
+            this.getModels = function(){
+                return _this._models;
+            };
+            this.setModels = function(models){
+                _this._models = models;
+            };
+
+            this.getFirmwareNamespaces = function(){
+                return _this._firmwareNamespaces;
+            };
+
+            this.setFirmwareNamespaces = function(firmwareNamespaces){
+                _this._firmwareNamespaces = firmwareNamespaces;
+            };
+
+            this.getSiteURL = function(){
+                switch (_this._site){
+                    case 'cn':
+                        return KiiSite.CN;
+                    case 'cn3':
+                        return KiiSite.CN3;
+                    case 'us':
+                        return KiiSite.US;
+                    case 'jp':
+                        return KiiSite.JP;
+                    default:
+                        return KiiSite.CN3;
+                }
+            };
+            this.setAdmin = function(admin){
+                _this._admin = admin;
+            };
+            this.getAdmin = function(){
+                return _this._admin;
+            };
+
+            this.setAppName = function(name){
+                _this._appName = name;
+            };
+            this.getAppName = function(){
+                return _this._appName;
+            };
+
+            this.setPlan = function(plan){
+                _this._plan = plan;
+            };
+            this.getPlan = function(){
+                return _this._plan;
+            };
+            this.setAppSites = function(appSites){
+                _this._appSites = appSites;
+            };
+            this.getAppSites = function(){
+                return _this._appSites;
+            };
+
+            this.setPlatforms = function(platforms){
+                var myPlatforms = [];
+                __each(platforms, function(platform){
+                    if(KiiPortalApp.Platform_Enum.indexOf(platform)>-1){
+                        myPlatforms.push(platform);
+                    }
+                });
+                _this._platforms = myPlatforms;
+            };
+            this.setServer = function(server){
+                _this._server =  server;
+                // TODO
+                // enum site url for api calls;
+            };
+            this.getServer = function(){
+                return _this._server;
+            };
+            this.getPlatforms = function(){
+                return _this._platforms;
+            };
+            this.setCountry = function(country){
+                _this._country = country;
+            };
+            this.getCountry = function(){
+                return _this._country;
+            };
+            this.setCreated = function(created){
+                _this._created = created;
+            };
+            this.getCreated = function(){
+                return _this._created;
+            };
+            this.setID = function(id){
+                _this._id = id;
+            };
+            this.getID = function(){
+                return _this._id;
+            };
+
+            this.setInactive = function(inactive){
+                _this._inactive = inactive;
+            };
+            this.getInactive = function(){
+                return _this._inactive;
+            };
+
+            this.setOwner = function(owner){
+                _this._owner = owner;
+            };
+            this.getOwner = function(){
+                return _this.owner;
+            };
+
+            this.setAppID = function (appID) {
+                _this._appID = appID;
+            };
+            this.getAppID = function () {
+                return _this._appID;
+            };
+
+            this.setAppKey = function (appKey) {
+                _this._appKey = appKey;
+            };
+            this.getAppKey = function (appKey) {
+                return _this._appKey;
+            };
+
+            this.setClientID = function (clientID) {
+                _this._clientID = clientID;
+            };
+            this.getClientID = function () {
+                return _this._clientID;
+            };
+
+            this.setClientSecret = function (clientSecret) {
+                _this._clientSecret = clientSecret;
+            };
+            this.getClientSecret = function () {
+                return _this._clientSecret;
+            };
+
+            this.setSite = function(site) {
+                this._site = site;
+            };
+            this.getSite = function(){
+                return this._site;
+            };
+
+            this.setAdminContext = function(adminContext){
+                _this._adminContext = adminContext;
+            };
+            this.getAdminContext = function(){
+                return _this._adminContext;
+            }
+        }
+
+        KiiPortalApp.factory = function(admin){
+            var app = new this();
+            app.setAdmin(admin);
+
+            return app;
+        };
+
+        KiiPortalApp.prototype.extRequest = function(spec){
+            var _this = this;
+
+            var headers = {
+                "x-kii-appid": _this.getAppID(),
+                "x-kii-appkey": _this.getAppKey(),
+                "x-app-site": _this.getSite(),
+                "Authorization": _this.getTokenType() + ' ' + _this.getAccessToken()
+            };
+
+            __extends(headers, spec.headers);
+
+            var settings = {
+                headers: headers,
+                method: spec.method,
+                data: spec.data,
+                url: root._extensionUrl + spec.path
+            };
+
+            callbacks = callbacks || {};
+            settings.success = callbacks.success;
+            settings.failure = callbacks.failure;
+
+            return KiiPortalRequest(settings);
+        }
+
+
+        KiiPortalApp.prototype.save = function(callbacks){
+
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var settings, accessToken, tokenType, createAppCallbacks;
+                accessToken = _this.getAdmin().getAccessToken();
+                tokenType = _this.getAdmin().getTokenType();
+
+                settings = {
+                    method: 'POST',
+                    url: root._apis.APP,
+                    headers: {
+                        'Authorization': tokenType + ' ' +accessToken
+                    },
+                    data: {
+                        name: _this.getAppName(),
+                        server: _this.getServer(),
+                        platforms: _this.getPlatforms()
+                    }
+                };
+
+                createAppCallbacks = {
+                    success: function(response){
+                        var appData = response.data;
+                        KiiPortalApp.fromJson(_this, appData);
+
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                KiiPortalRequest(settings).then(createAppCallbacks.success, createAppCallbacks.failure);
+            });
+        };
+
+        KiiPortalApp.Platform_Enum = ['ios', 'android', 'unity', 'html5'];
+
+        /**
+         * refresh this app
+         * @param callbacks
+         * @returns {*|u}
+         * @private
+         */
+        KiiPortalApp.prototype._refresh = function(callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var appID, accessToken, tokenType, setting, refreshAppCallbacks, getAppCallbacks;
+                appID = _this.getAppID();
+                accessToken = _this.getAdmin().getAccessToken();
+                tokenType = _this.getAdmin().getTokenType();
+
+                setting = {
+                    method: 'GET',
+                    url: root._apis.APP + '/' + appID,
+                    headers: {
+                        'Authorization': tokenType + ' ' + accessToken
+                    }
+                };
+
+                getAppCallbacks = {
+                    success: function(response){
+                        var appData = response.data.app;
+                        KiiPortalApp.fromJson(_this, appData);
+                        _this._putSecret(appData);
+                        if(callbacks){
+                            callbacks.success.call(callbacks, _this);
+                        }
+                        resolve(_this);
+
+                        /*
+                        setting = {
+                            method: 'GET',
+                            url: root._apis.APP + '/' + appID + '/secret',
+                            headers: {
+                                'Authorization': tokenType + ' ' + accessToken
+                            }
+                        };
+
+                        refreshAppCallbacks = {
+                            success: function(response){
+                                var appData = response.data;
+                                //KiiPortalApp.fromJson(_this, appData);
+                                _this._putSecret(appData);
+                                if(callbacks){
+                                    callbacks.success.call(callbacks, _this);
+                                }
+                                resolve(_this);
+                            },
+                            failure: function(response){
+                                if(callbacks){
+                                    callbacks.failure.apply(callbacks, arguments);
+                                }
+                                reject(response);
+                            }
+                        };
+
+                        KiiPortalRequest(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
+                        */
+                    },
+                    failure: function(response){
+                        if(callbacks){
+                            callbacks.failure.apply(callbacks, arguments);
+                        }
+                        reject(response);
+                    }
+                };
+
+                KiiPortalRequest(setting).then(getAppCallbacks.success, getAppCallbacks.failure);
+            });
+        };
+
+        /**
+         * get all apps of an administrator
+         * @param admin
+         * @param callbacks
+         * @returns {*|u}
+         * @private
+         */
+        KiiPortalApp._withAdmin = function(admin, callbacks){
+            return new Promise(function (resolve, reject){
+                var accessToken, tokenType, setting, refreshAppsCallbacks;
+
+                tokenType = admin.getTokenType();
+                accessToken = admin.getAccessToken();
+                setting = {
+                    url: root._apis.APP,
+                    method: 'GET',
+                    headers:{
+                        Authorization: tokenType + ' ' + accessToken
+                    }
+                };
+
+                refreshAppsCallbacks = {
+                    success: function(response){
+                        var data, appsData, apps;
+                        apps = [];
+                        data = response.data;
+                        appsData = data.apps;
+                        __each(appsData, function(appData, index){
+                            var app = new KiiPortalApp;
+                            app = KiiPortalApp.fromJson(app, appData);
+                            app.setAdmin(admin);
+                            apps.push(app);
+                        });
+
+                        if(callbacks){
+                            callbacks.success.call(callbacks, apps);
+                        }
+                        resolve(apps);
+                    },
+                    failure: function(response){
+                        if(callbacks.failure) {
+                            callbacks.failure.call(callbacks, response);
+                        }
+                        reject(response);
+                    }
+                };
+                KiiPortalRequest(setting).then(refreshAppsCallbacks.success, refreshAppsCallbacks.failure);
+            });
+        };
+
+        /**
+         * put client id and client secret
+         * @param json
+         * @private
+         */
+
+        KiiPortalApp.prototype._putSecret = function(json){
+            this.setClientID(json['client_id']);
+            this.setClientSecret(json['client_secret']);
+        };
+
+        /**
+         * produce KiiPortalApp instance from json data
+         * @param json
+         * @returns {KiiPortalApp|*}
+         */
+        KiiPortalApp.fromJson = function(app ,json){
+            var appProperty;
+            appProperty = json;
+
+            app.setAppID(appProperty['app_id']);
+            app.setAppKey(appProperty['app_key']);
+            app.setCountry(appProperty['country']);
+            app.setCreated(appProperty['created']);
+            app.setID(appProperty['id']);
+            app.setInactive(appProperty['inactive']);
+            app.setAppName(appProperty['name']);
+            app.setOwner(appProperty['owner']);
+            app.setPlatforms(appProperty['platforms']);
+            app.setSite(appProperty['site_name']);
+            app.setClientID(appProperty['client_id']);
+            app.setClientSecret(appProperty['client_secret']);
+            app.setPlan(appProperty['plan']);
+            app.setAppSites(appProperty['app_sites']);
+
+            return app;
+        };
+
+        /* =============================== model related ========================================== */
+
+        /**
+         * add a model to this app
+         * @param model
+         * @private
+         */
+        KiiPortalApp.prototype._addModel = function(model){
+            this._models.push(model);
+        };
+
+        /**
+         * remove a model from this app
+         * @param model
+         * @private
+         */
+        KiiPortalApp.prototype._removeModel = function(model){
+            __remove(this._models, model);
+        };
+
+        /**
+         * create a new model
+         * @returns {KiiPortalModel|*}
+         */
+        KiiPortalApp.prototype.createModel = function(){
+            return KiiPortalModel.factory(this);
+        };
+
+        /**
+         * get all models of this app
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalApp.prototype.refreshModels = function(callbacks){
+            return KiiPortalModel._getAll(this, callbacks);
+        };
+
+        /**
+         * get one model by its id in this app
+         * @param callbacks
+         */
+        KiiPortalApp.prototype.getModelByID = function(id, callbacks){
+            var model = KiiPortalModel.refreshByID(this, id, callbacks);
+            return model;
+        };
+        /* ==================================== end of model ==============================================*/
+
+
+        /* ====================================== firmware related =======================================*/
+        /**
+         * get firmware from application by firmware's UUID
+         * @param UUID
+         * @returns {*}
+         */
+        KiiPortalApp.prototype.getFirmwareNamespaceByID = function(id, callbacks){
+            return KiiPortalFirmwareNamespace.refreshByID(this, id, callbacks);
+        };
+
+
+        /**
+         * Add a firmware to this app
+         * @param firmware
+         * @returns {Array|*}
+         * @private
+         */
+        KiiPortalApp.prototype._addFirmwareNamespace = function(firmwareNamespace){
+            this._firmwareNamespaces.push(firmwareNamespace);
+            return this._firmwareNamespaces;
+        };
+
+        /**
+         * remove a firmware from this app
+         * @param firmware
+         * @returns {Array|*}
+         * @private
+         */
+        KiiPortalApp.prototype._removeFirmwareNamespace = function(firmwareNamespace){
+            __remove(this._firmwareNamespaces, firmwareNamespace);
+            return this._firmwareNamespaces;
+        };
+
+
+
+        /**
+         * create a firmware
+         * @returns {KiiPortalFirmware}
+         */
+        KiiPortalApp.prototype.createFirmwareNamespace = function(){
+            return KiiPortalFirmwareNamespace.factory(this);
+        };
+
+        /**
+         * get all firmwares of this app
+         * @param callbacks
+         * @returns {Promise}
+         */
+        KiiPortalApp.prototype.refreshFirmwareNamespaces = function(callbacks){
+            return KiiPortalFirmwareNamespace._getAll(this, callbacks);
+        };
+
+        /* =================================== end of firmware ===================================================== */
+
+        /* =================================== tag related ========================================================= */
+        KiiPortalApp.prototype.refreshTags = function(callbacks){
+            return KiiPortalTag._getAll(this, callbacks);
+        };
+
+        KiiPortalApp.prototype._setTags = function(tags){
+            return this._tags = tags;
+        };
+
+        KiiPortalApp.prototype._addTag  =function(tag){
+            this._tags.push(tag);
+        };
+
+        KiiPortalApp.prototype.getTags = function(){
+            return this._tags;
+        };
+
+        KiiPortalApp.prototype.getTagByID = function(id, callbacks){
+            return KiiPortalTag.refreshByID(this, id, callbacks);
+        };
+
+        KiiPortalApp.prototype.createTag = function(){
+            return KiiPortalTag.factory(this);
+        };
+
+        KiiPortalApp.prototype._removeTag = function(tag){
+            __remove(this._tags, tag);
+            return this._tags;
+        };
+
+
+        /* =================================== end of tag ========================================================== */
+
+        /* =================================== user related ======================================================== */
+        KiiPortalApp.prototype.getUserList = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.getUserList(callbacks, queryClause, dictVal);
+        };
+        KiiPortalApp.prototype.findUserByUserID = function(callbacks, queryClause, dictVal){
+            return KiiPortalUser.findUserByUserID(callbacks, queryClause, dictVal);
+        };
+        /* =================================== end of tag ========================================================== */
+
+
+        /* =================================== things related ====================================================== */
+
+        KiiPortalApp.prototype.queryThings = function(callbacks, queryClause, dictVal){
+            return KiiThingAdmin.query(this, callbacks, queryClause, dictVal);
+        };
+
+        KiiPortalApp.prototype.nextThings = function(callbacks, nextQuery){
+            return KiiThingAdmin.nextThings = KiiThingAdmin._nextWithApp(this, callbacks, nextQuery);
+        };
+
+        KiiPortalApp.prototype._setThings = function(things){
+            this._things = things;
+        };
+
+        KiiPortalApp.prototype.getThings = function(things){
+            return this._things;
+        };
+
+        KiiPortalApp.prototype.addThings = function(things){
+            this._things = this._things || [];
+            this._things = this._things.concat(things);
+        };
+
+        /* =================================== end of things ======================================================= */
+        return KiiPortalApp;
+    })();
+
+
+    /**
+     @class Firmware class
+     */
+    root.KiiPortalFirmware = (function (KiiPortalObject) {
+        var _super;
+
+        _super = KiiPortalObject;
+
+        KiiPortalFirmware.prototype = new _super();
+        __inherits(KiiPortalFirmware, _super);
+        KiiPortalFirmware.prototype.constructor = KiiPortalFirmware;
+
+        function KiiPortalFirmware() {
+            var _this = this;
+            __bindMethod(_this);
+
+            this._name = null;
+            this._models = [];
+            this._state = null;
+            this._downloadURL = null;
+            this._description = null;
+            this._namespace = null;
+            this.namespace = null;
+            this._initialSchema = null;
+
+            this.setNamespace = function(namespace){
+                this._namespace = namespace;
+                _this.set('namespace', namespace);
+            };
+
+            this.getNamespace = function(){
+                return _this.get('namespace');
+            };
+
+
+            this.setDownloadURL = function(url){
+                _this._downloadURL = url;
+                _this.set('downloadURL', url);
+            };
+
+            this.getDownloadURL = function(url){
+                return _this.get('downloadURL');
+            };
+
+            /** get name of this firmware
+             @return {String} name of this topic.
+             */
+            this.getName = function () {
+                return _this.get('name');
+            };
+
+            /** set name of this firmware
+             @return void.
+             */
+            this.setName = function (name) {
+                _this._name = name;
+                _this.set('name', name);
+            };
+
+
+            this.setState = function(state){
+                _this._state = state;
+                _this.set('state',state);
+            };
+            this.getState = function(){
+                return _this.get('state');
+            }
+
+            this.setDescription = function(description){
+                _this.description = description;
+                _this.set('description', description);
+            };
+
+            this.getDescription = function(){
+                return _this.get('description');
+            };
+
+            this.setInitialSchema = function(){
+
+            };
+            this.getInitialSchema = function(){
+                return _this.get('initialSchema');
+            }
+        }
+
+        KiiPortalFirmware._bucketName = root.KiiExtensionBuckets.FIRMWARE;
+
+        /**
+         * add firmware to model
+         * @param model
+         * @param callbacks
+         * @returns {*}
+         */
+        KiiPortalFirmware.prototype.addModel = function(model, callbacks){
+            var _this = this;
+            if(this._models.indexOf(model.getName())>-1) return null;
+            this._models.push(model.getName());
+            var addFirmwarePromise = model.addFirmware(this);
+
+            return new Promise(function(resolve, reject){
+                var saveCallbacks = {
+                    success: function(response){
+                        if(callbacks && callbacks.success){
+                            callbacks.success.apply(callbacks.success, arguments);
+                        }
+                        resolve(response);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure.apply(callbacks.failure, arguments);
+                        }
+                        reject(reject)
+                    }
+                };
+
+                _this.set('models', _this._models);
+                _this.save(saveCallbacks);
+            });
+        };
+        KiiPortalFirmware.prototype.getModels = function(){
+            return this._models;
+        };
+        KiiPortalFirmware.prototype.setModels = function(models){
+            this._models = models || [];
+            this.set('models', this._models);
+        };
+        KiiPortalFirmware.prototype.deleteModel = function(model, callbacks){
+            var _this = this;
+            var id = model.getName();
+
+            var index = this._models.indexOf(id);
+            if(index < 0)return null;
+
+            this._models.splice(index, 1);
+
+            var deleteModelPromise = model.deleteFirmware(this);
+
+            return new Promise(function(resolve, reject){
+                var saveCallbacks = {
+                    success: function(response){
+                        if(callbacks && callbacks.success){
+                            callbacks.success.apply(callbacks.success, arguments);
+                        }
+                        resolve(response);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure.apply(callbacks.failure, arguments);
+                        }
+                        reject(error);
+                    }
+                };
+
+
+                _this.set('models' ,_this._models);
+                _this.save(saveCallbacks);
+            });
+        };
+
+        /**
+         * In normal case is not needed. For pushing firmware using only.
+         * @param modelName
+         * @private
+         */
+        KiiPortalFirmware.prototype._setUpdateInfoBucketName = function(modelName){
+            this.set('updateInfoBucketName', root.ReservedBucketPrefix.MODEL_UPDATE_INFO  + modelName);
+        };
+
+        KiiPortalFirmware.StateEnum = {
+            CREATED: 'CREATED', // when firmware is created; firmware is invisible for end users
+            PUBLISHED: 'PUBLISHED', // when firmware is published; firmware is visible for end users and can be downloaded
+            PUSHED: 'PUSHED', // when firmware is pushed to end users, all things receive the firmware installation request
+            DISABLED: 'DISABLED' // firmware is no longer in use, invisible for end users
+        };
+
+        /**
+         * delete firmwareFile
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalFirmware.prototype.deleteFirmwareFile = function(callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var deleteFirmwareFileCallbacks = {
+                    success: function(){
+                        /**
+                         * save firmware object to kii cloud if firmware file is deleted
+                         * @type {{success: firmwareSaveCallbacks.success, failure: firmwareSaveCallbacks.failure}}
+                         */
+                        var firmwareSaveCallbacks = {
+                            success: function(){
+                                if(callbacks && callbacks.success){
+                                    callbacks.success(_this);
+                                }
+                                resolve(_this);
+                            },
+                            failure: function(response){
+                                if(callbacks && callbacks.failure){
+                                    callbacks.failure(response);
+                                }
+                                reject(response);
+                            }
+                        };
+
+                        _this.setDownloadURL('');
+                        _this.save(firmwareSaveCallbacks);
+
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure.apply(callbacks, response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                _this.deleteBody(deleteFirmwareFileCallbacks);
+            });
+        };
+
+        /**
+         * upload a firmware file. the new file will cover the old file.
+         * @param firmwareFile
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalFirmware.prototype.uploadFirmwareFile = function(firmwareFile, callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+
+                /**
+                 * the process of uploading firmware file contains 3 steps.
+                 * step 1. upload file
+                 * step 2. publish file
+                 * step 3. save firmware
+                 */
+
+
+                /**
+                 * if failed in any process
+                 * @param response
+                 */
+                var failure = function(response){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure.apply(callbacks, response);
+                    }
+                    reject(response);
+                };
+
+                /**
+                 * publish firmware body, to enable end users' access to this file's url
+                 */
+                var publishBody = function(){
+                    _this.publishBody({
+                        success: function(obj, url){
+                            saveChanges(url);
+                        },
+                        failure: function(response){
+                            failure(response)
+                        }
+                    });
+                };
+
+                /**
+                 * save all changes
+                 * @param url
+                 */
+                var saveChanges = function(url){
+                    /**
+                     * save firmware object to kii cloud if file is uploaded
+                     * @type {{success: firmwareSaveCallbacks.success, failure: firmwareSaveCallbacks.failure}}
+                     */
+                    var firmwareSaveCallbacks = {
+                        success: function(){
+                            if(callbacks && callbacks.success){
+                                callbacks.success(_this);
+                            }
+                            resolve(_this);
+                        },
+                        failure: function(response){
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(response);
+                            }
+                            reject(response);
+                        }
+                    };
+
+                    _this.setDownloadURL(url);
+                    _this.save(firmwareSaveCallbacks);
+                };
+
+                /**
+                 * upload firmware file
+                 */
+                _super.prototype.uploadBody.call(_this, firmwareFile).then(publishBody, failure);
+            });
+        };
+
+        /**
+         * push firmware to public
+         * can push to one model or all its models.
+         * arg0: models, arg1: callbacks ||
+         * arg0: callbacks
+         * 2 steps of implementation:
+         *  1) create an object, copy firmware field value to this object,
+         *      set a bucket name to field [updateInfoBucket] of this object
+         *      and push to application scope buckets named after models who use this firmware.
+         *
+         *  2) if all request finished, change state and save the firmware object to kii cloud,
+         *      otherwise, raise exception
+         *
+         *  Note:
+         *      The bucket name stored in updateInfoBucket indicates the location
+         *      where the update debugging info goes
+         *
+         *      bucket name for device to subscribe is __MODEL_[model name]
+         *          ReservedBucketPrefix.MODEL + modelName;
+         *
+         *      bucket name for update debugging info is MODEL_UPDATE_INFO_[model name]
+         *          ReservedBucketPrefix.MODEL_UPDATE_INFO  + modelName;
+         * @param *| model | callbacks
+         * @returns {*|u}
+         */
+        KiiPortalFirmware.prototype.push = function (){
+            var models, _this, callbacks;
+            _this = this;
+            models = this._models;
+
+            if(arguments.length>0){
+                if(arguments[0] instanceof KiiPortalModel){
+                    models = [arguments[0]];
+                    callbacks = arguments[1];
+                }else{
+                    callbacks = arguments[0];
+                }
+            }
+
+            return new Promise(function(resolve, reject){
+                var finishedCount = 0;
+
+                if(models.length == 0){
+                    reject('No model uses this firmware, push command is rejected!');
+                }
+                __each(models, function(modelName){
+                    var bucketName, bucket, firmware;
+
+                    firmware = _this.clone();
+
+                    bucketName = ReservedBucketPrefix.MODEL + modelName;
+                    bucket = _this.getKiiApp().getAdminContext().bucketWithName(bucketName);
+                    firmware._setBucket(bucket);
+                    firmware._setUUID(null);
+                    firmware._setUpdateInfoBucketName(modelName);
+
+                    firmware.save({
+                        success: function(){
+                            finishedCount++;
+                            if(finishedCount == models.length){
+                                _this.save().then(function(){
+                                    if(callbacks && callbacks.success){
+                                        callbacks.success(true);
+                                    }
+                                    resolve(true);
+                                }, function(error){
+                                    reject(error);
+                                });
+                            }
+                        },
+                        failure: function(error){
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(error);
+                            }
+                            reject(error);
+                        }
+                    });
+                });
+
+                _this.setState(KiiPortalFirmware.StateEnum.PUSHED);
+
+            });
+
+        };
+
+        /**
+         * disable this firmware
+         */
+        KiiPortalFirmware.prototype.disable = function (callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                _this.setState(KiiPortalFirmware.StateEnum.DISABLED);
+                _this.save({
+                    success: function(){
+                        if(callbacks && callbacks.success){
+                            callbacks.success();
+                        }
+                        resolve();
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                });
+            });
+        };
+
+        /**
+         * publish this firmware
+         */
+        KiiPortalFirmware.prototype.publish = function (callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                _this.setState(KiiPortalFirmware.StateEnum.PUBLISHED);
+                _this.save({
+                    success: function(){
+                        if(callbacks && callbacks.success){
+                            callbacks.success();
+                        }
+                        resolve();
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                });
+            });
+        };
+
+
+        /**
+         * delete firmware
+         * @param callbacks
+         * @returns {Promise|*}
+         */
+        KiiPortalFirmware.prototype.delete = function (callbacks) {
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var deleteCallbacks = {
+                    success: function(){
+                        _this.namespace._removeFirmware(_this);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        reject(response);
+                    }
+                };
+
+                _super.prototype.delete.call(_this, deleteCallbacks);
+            });
+        };
+
+        /**
+         * create or update firmware
+         * @param callbacks
+         * @returns {Promise|*}
+         */
+        KiiPortalFirmware.prototype.save = function (callbacks) {
+            var _this = this;
+            var createFlag = _this.getUUID()? false : true;
+
+            return new Promise(function(resolve, reject){
+                var saveCallbacks = {
+                    success: function(firmware){
+                        if(createFlag){
+                            _this.namespace._addFirmware(_this);
+                        }
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+                _super.prototype.save.call(_this, saveCallbacks);
+            });
+        };
+
+        /**
+         * factory an instance of KiiFirmware
+         * @override
+         * @returns {KiiPortalFirmware}
+         */
+        KiiPortalFirmware.factory = function (kiiApp, firmwareNamespace) {
+            var firmware;
+            firmware = _super.factory.call(this, kiiApp);
+            firmware.setState(KiiPortalFirmware.StateEnum.CREATED);
+            if(firmwareNamespace){
+                firmware.setNamespace(firmwareNamespace.getName());
+                firmware.namespace = firmwareNamespace;
+            }
+        
+            return firmware;
+        };
+
+        /**
+         * This is called in KiiPortalObject factory process.
+         * @override
+         * @public
+         */
+        KiiPortalFirmware.prototype.init = function(){
+            this.setName(this.get('name'));
+            this.setNamespace(this.get('namespace'));
+            this.setState(this.get('state'));
+            this.setModels((this.get('models')));
+        };
+
+
+        KiiPortalFirmware._withFirmwareNamespace = function(firmwareNamespace, callbacks, pageIndex, numberPerPage){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks, clause, app;
+
+
+                app = firmwareNamespace.getKiiApp();
+                clause = KiiClause.equals("namespace", firmwareNamespace.getName());
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause(clause);
+
+                getAllCallbacks = {
+                    success: function(query, firmwares, nextQuery){
+                        firmwareNamespace.setFirmwares(firmwares);
+                        __each(firmwares, function(firmware){
+                            firmware.namespace = firmwareNamespace;
+                        });
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, firmwares, nextQuery);
+                        }
+                        resolve(query, firmwares, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+                // execute query
+                return _this.executeQuery(app ,all_query, getAllCallbacks);
+            });
+        };
+
+
+        /**
+         * get all firmware instances
+         * @param app
+         * @param callbacks
+         * @param pageIndex
+         * @param numberPerPage
+         * @returns {*|u}
+         * @private
+         */
+        KiiPortalFirmware._getAll = function (app, callbacks, pageIndex, numberPerPage) {
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks;
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause();
+
+                getAllCallbacks = {
+                    success: function(query, firmwares, nextQuery){
+                        app.setFirmwares(firmwares);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, firmwares, nextQuery);
+                        }
+                        resolve(query, firmwares, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+                // execute query
+                return _this.executeQuery(app ,all_query, getAllCallbacks);
+            });
+        };
+
+        return KiiPortalFirmware;
+    })(KiiPortalObject);
+
+    
+    /**
+     @class Firmware class
+     */
+    root.KiiPortalFirmwareNamespace = (function (KiiPortalObject) {
+        var _super;
+
+        _super = KiiPortalObject;
+
+        KiiPortalFirmwareNamespace.prototype = new _super();
+        __inherits(KiiPortalFirmwareNamespace, _super);
+        KiiPortalFirmwareNamespace.prototype.constructor = KiiPortalFirmwareNamespace;
+
+        function KiiPortalFirmwareNamespace() {
+            var _this = this;
+            __bindMethod(_this);
+
+            this._name = '';
+            this._versionName = null;
+            this._firmwares = [];
+
+            this.setName = function(name){
+                _this._name = name;
+                _this.set('name', name);
+            };
+
+            this.getName = function(name){
+                return _this.get('name');
+            };
+
+            this.getFirmwares = function(){
+                return _this._firmwares;
+            };
+
+            this.setFirmwares = function(firmwares){
+                _this._firmwares = firmwares;
+            };
+
+            this._addFirmware = function(firmware){
+                _this._firmwares.push(firmware);
+            };
+
+            this._removeFirmware = function(firmware){
+                _this._firmwares.splice(_this._firmwares.indexOf(firmware), 1);
+            };
+
+            /** get current version of this firmware
+             @return {[KiiPortalFirmware]} of this firmware.
+             */
+            this.getVersionName = function () {
+                return _this.get('versionName');
+            };
+
+            /** set current version of this firmware
+             @return {String} name of this firmware.
+             */
+            this.setVersionName = function (currentVersion) {
+                _this._versionName = currentVersion;
+                _this.set('versionName', currentVersion);
+            };
+
+        }
+
+        KiiPortalFirmwareNamespace._bucketName = root.KiiExtensionBuckets.FIRMWARE_NAMESPACE;
+
+        KiiPortalFirmwareNamespace.prototype.refreshFirmwares = function(callbacks, pageIndex, numberPerPage){
+            return KiiPortalFirmware._withFirmwareNamespace(this, callbacks, pageIndex, numberPerPage);
+        };
+
+        /**
+         * [createFirmware description]
+         * @return {[type]} [description]
+         */
+        KiiPortalFirmwareNamespace.prototype.createFirmware = function(){
+            return KiiPortalFirmware.factory(this.getKiiApp(), this);
+        };
+
+        /**
+         * delete firmware
+         * @param callbacks
+         * @returns {Promise|*}
+         */
+        KiiPortalFirmwareNamespace.prototype.delete = function (callbacks) {
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var deleteCallbacks = {
+                    success: function(){
+                        _this._kiiApp._removeFirmwareNamespace(_this);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        reject(response);
+                    }
+                };
+
+                _super.prototype.delete.call(_this, deleteCallbacks);
+            });
+        };
+
+        /**
+         * create or update firmware
+         * @param callbacks
+         * @returns {Promise|*}
+         */
+        KiiPortalFirmwareNamespace.prototype.save = function (callbacks) {
+            var _this = this;
+            var createFlag = _this.getUUID()? false : true;
+
+            return new Promise(function(resolve, reject){
+                var saveCallbacks = {
+                    success: function(firmware){
+                        if(createFlag){
+                            _this._kiiApp._addFirmwareNamespace(_this);
+                        }
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+                _super.prototype.save.call(_this, saveCallbacks);
+            });
+        };
+
+        /**
+         * factory an instance of KiiFirmware
+         * @override
+         * @returns {KiiPortalFirmware}
+         */
+        KiiPortalFirmwareNamespace.factory = function (kiiApp) {
+            var firmwareNamespace = _super.factory.call(this, kiiApp);
+
+            return firmwareNamespace;
+        };
+
+        /**
+         * This is called in KiiPortalObject factory process.
+         * @override
+         * @public
+         */
+        KiiPortalFirmwareNamespace.prototype.init = function(){
+            this.setName(this.get('name'));
+            this.setVersionName(this.get('versionName'));
+        };
+
+
+        /**
+         * get all firmware namespace instances
+         * bucket is defined as KiiPortalFirmwareNamespace._bucketName
+         * @param app
+         * @param callbacks
+         * @param pageIndex
+         * @param numberPerPage
+         * @returns {*|u}
+         * @private
+         */
+        KiiPortalFirmwareNamespace._getAll = function (app, callbacks, pageIndex, numberPerPage) {
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks;
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause();
+
+                getAllCallbacks = {
+                    success: function(query, firmwareNamespaces, nextQuery){
+                        app.setFirmwareNamespaces(firmwareNamespaces);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, firmwares, nextQuery);
+                        }
+                        resolve(query, firmwareNamespaces, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+                // execute query
+                return _this.executeQuery(app ,all_query, getAllCallbacks);
+            });
+        };
+
+        return KiiPortalFirmwareNamespace;
+    })(KiiPortalObject);    /**
+     * class KiiPortalModel
+     */
+    root.KiiPortalModel = (function (KiiPortalObject) {
+        var _super;
+
+        _super = KiiPortalObject;
+
+        KiiPortalModel.prototype = new _super();
+        __inherits(KiiPortalModel, _super);
+        KiiPortalModel.prototype.constructor = KiiPortalModel;
+
+        function KiiPortalModel() {
+            var _this = this;
+
+            __bindMethod(_this);
+            this._name = null;
+            this._things = null;
+            this._imageUrl = null;
+            this._firmwares = [];
+            this._firmwareNamespace = null;
+            this._portalSchemas = null;
+
+
+            this.getImageUrl = function(){
+                return _this._imageUrl;
+            };
+            this.setImageUrl = function(imageUrl){
+                _this._imageUrl = imageUrl;
+                _super.prototype.set.call(_this, 'imageUrl', imageUrl);
+            };
+
+            this.setName = function(name){
+                _this._name = name;
+                _this.set('name', name);
+            };
+
+            this.getName = function(){
+                return _this.get('name');
+            };
+
+
+            this.getFirmwares = function(){
+                return _this._firmwares;
+            };
+            this.setFirmwares = function(firmwares){
+                _this._firmwares = firmwares || [];
+                _this.set('firmwares', _this._firmwares);
+            };
+
+            this.setFirmwareNamespace = function(firmwareNamespace){
+                _this._firmwareNamespace = firmwareNamespace;
+                _this.set('firmwareNamespace' ,firmwareNamespace);
+            };
+            this.getFirmwareNamespace = function(){
+                return _this.get('firmwareNamespace');
+            };
+
+            this.getPortalSchemas = function(){
+                return _this._portalSchemas;
+            };
+            this.setPortalSchemas = function(schemas){
+                _this._portalSchemas = schemas;
+            };
+
+        }
+
+        KiiPortalModel._bucketName = root.KiiExtensionBuckets.MODEL;
+
+        /**
+         * init after data is ready
+         * override
+         * @private
+         */
+        KiiPortalModel.prototype.init = function(){
+            this.setName(_super.prototype.get.call(this, 'name'));
+            this.setImageUrl(_super.prototype.get.call(this, 'imageUrl'));
+            this.setFirmwareNamespace(_super.prototype.get.call(this, 'firmwareNamespace'));
+            this.setFirmwares(_super.prototype.get.call(this, 'firmwares'));
+        };
+
+        /**
+         * factory a kii portal model instance
+         * @param app
+         * @returns {KiiPortalModel|*}
+         */
+        KiiPortalModel.factory = function(kiiApp){
+            var model = _super.factory.call(this, kiiApp);
+            return model;
+        };
+
+        /**
+         * delete firmware
+         * @param firmware
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalModel.prototype.deleteFirmware = function(firmware, callbacks){
+            var _this = this;
+            var id = firmware.getUUID();
+            var index = this._firmwares.indexOf(id);
+            if(index < 0)return null;
+
+            this._firmwares.splice(index, 1);
+
+            var deleteFirmwarePromise = firmware.deleteModel(this);
+
+            return new Promise(function(resolve, reject){
+                var saveCallbacks = {
+                    success: function(response){
+                        if(callbacks && callbacks.success){
+                            callbacks.success.apply(callbacks.success, arguments);
+                        }
+                        resolve(response);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure.apply(callbacks.failure, arguments);
+                        }
+                        reject(error);
+                    }
+                };
+
+                if(deleteFirmwarePromise){
+                    deleteFirmwarePromise.then(function(){
+                        _this.set('firmwares' ,_this._firmwares);
+                        _this.save(saveCallbacks);
+                    },function(error){
+                        saveCallbacks.failure(error);
+                        reject(error);
+                    });
+                }else{
+                    _this.set('firmwares' ,_this._firmwares);
+                    _this.save(saveCallbacks);
+                }
+            });
+        };
+
+        /**
+         * add firmware
+         * @param firmware
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalModel.prototype.addFirmware = function(firmware, callbacks){
+            var _this = this;
+            if(this._firmwares.indexOf(firmware.getUUID())>-1) return null;
+            this._firmwares.push(firmware.getUUID());
+            var addModelPromise = firmware.addModel(this);
+            
+            return new Promise(function(resolve, reject){
+
+                var saveCallbacks = {
+                    success: function(response){
+                        if(callbacks && callbacks.success){
+                            callbacks.success.apply(callbacks.success, arguments);
+                        }
+                        resolve(response);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure.apply(callbacks.failure, arguments);
+                        }
+                        reject(error);
+                    }
+                };
+
+                if(addModelPromise){
+                    addModelPromise.then(function(){
+                        _this.set('firmwares', _this._firmwares);
+                        _this.save(saveCallbacks);
+                    },function(error){
+                        saveCallbacks.failure(error);
+                        reject(error);
+                    });
+                }else{
+                    _this.set('firmwares', _this._firmwares);
+                    _this.save(saveCallbacks);
+                }
+            });
+        };
+
+        /**
+         * get all kii portal models from app
+         * @param app
+         * @param callbacks
+         * @param pageIndex
+         * @param numberPerPage
+         * @returns {*|u}
+         * @private
+         */
+        KiiPortalModel._getAll = function(app, callbacks, pageIndex, numberPerPage){
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks;
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause();
+
+                getAllCallbacks = {
+                    success: function(query, models, nextQuery){
+                        app.setModels(models);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, models, nextQuery);
+                        }
+                        resolve(query, models, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+                // execute query
+                return KiiPortalModel.executeQuery(app ,all_query, getAllCallbacks);
+            });
+        };
+
+        /**
+         * remove a model
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalModel.prototype.delete = function(callbacks){
+            var _this = this;
+
+            return new Promise(function(resolve, reject){
+                var removeModelCallbacks, kiiApp;
+                removeModelCallbacks = {
+                    success: function(response){
+                        kiiApp = _this.getKiiApp();
+                        kiiApp._removeModel(_this);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                _super.prototype.delete.call(_this, removeModelCallbacks);
+            });
+        };
+
+        /**
+         * get a model by its ID
+         * @param app
+         * @param id
+         * @param callbacks
+         */
+        KiiPortalModel.refreshByID = function(kiiApp, id, callbacks){
+            return new Promise(function(resolve, reject){
+                var refreshModelCallbacks;
+                refreshModelCallbacks = {
+                    success: function(model){
+                        if(callbacks && callbacks.success){
+                            callbacks.success(model);
+                        }
+                        resolve(model);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                KiiPortalModel.objectWithID(kiiApp, id)
+                    .then(refreshModelCallbacks.success, refreshModelCallbacks.failure);
+            });
+        };
+
+        KiiPortalModel.prototype.createSchema = function(){
+            KiiPortalSchema.create(this);
+        }
+
+        KiiPortalModel.prototype.uploadImage = function(imageFile ,callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+
+                /**
+                 * the process of uploading image file contains 3 steps.
+                 * step 1. upload file
+                 * step 2. publish file
+                 * step 3. save model
+                 */
+
+
+                /**
+                 * if failed in any process
+                 * @param response
+                 */
+                var failure = function(response){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure.apply(callbacks, response);
+                    }
+                    reject(response);
+                };
+
+                /**
+                 * publish firmware body, to enable end users' access to this file's url
+                 */
+                var publishBody = function(){
+                    _this.publishBody({
+                        success: function(obj, url){
+                            saveChanges(url);
+                        },
+                        failure: function(response){
+                            failure(response)
+                        }
+                    });
+                };
+
+                /**
+                 * save all changes
+                 * @param url
+                 */
+                var saveChanges = function(url){
+                    /**
+                     * save firmware object to kii cloud if file is uploaded
+                     * @type {{success: firmwareSaveCallbacks.success, failure: firmwareSaveCallbacks.failure}}
+                     */
+                    var modelSaveCallbacks = {
+                        success: function(){
+                            if(callbacks && callbacks.success){
+                                callbacks.success(_this);
+                            }
+                            resolve(_this);
+                        },
+                        failure: function(response){
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(response);
+                            }
+                            reject(response);
+                        }
+                    };
+
+                    _this.setImageUrl(url);
+                    _this.save(modelSaveCallbacks);
+                };
+
+                /**
+                 * upload firmware file
+                 */
+                _super.prototype.uploadBody.call(_this, imageFile).then(publishBody, failure);
+            });
+        };
+
+        /**
+         * save a model
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalModel.prototype.save = function(callbacks){
+            var _this = this;
+            var createFlag = _this.getUUID()? false : true;
+
+
+            return new Promise(function(resolve, reject){
+                var modelSaveCallbacks, kiiApp;
+
+                modelSaveCallbacks = {
+                    success: function(model){
+                        kiiApp = _this.getKiiApp();
+
+                        if(createFlag){
+                            kiiApp._addModel(_this);
+                        }
+
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                _super.prototype.save.call(_this, modelSaveCallbacks);
+
+            });
+        };
+
+        KiiPortalModel.prototype.refreshPortalSchemas = function(callbacks){
+            return KiiPortalSchema._withModel(this, callbacks);
+        };
+
+        /**
+         * get firmware bucket
+         * @returns {KiiBucket|*}
+         */
+        KiiPortalModel.prototype.getModelBucket = function(){
+            return this.getKiiApp().getAdminContext().bucketWithName(KiiPortalModel._getBucketName() + this.getUUID());
+        };
+
+
+        return KiiPortalModel;
+    })(root.KiiPortalObject);
+
+    root.KiiPortalSchema = (function(){
+
+        function KiiPortalSchema(schema, kiiApp){
+            var _this = this;
+            this._modelId = null;
+            this._version = null;
+            this.properties = [];
+            this._kiiApp = kiiApp;
+
+
+            this.getProperties = function(){
+                return _this.properties;
+            };
+
+            this.getKiiApp = function(){
+                return _this.kiiApp;
+            }
+
+            this.getModelId = function(){
+                return _this._modelId;
+            };
+
+            this.setModelId = function(modelId){
+                _this._modelId = modelId;
+            }
+
+            this.getVersion = function(){
+                return _this._version;
+            };
+
+            this.setVersion = function(version){
+                _this._version = version;
+            };
+
+            this.init(schema);
+        }
+
+        KiiPortalSchema.prototype.init = function(schema){
+            if(schema){
+                this.setModelId(schema.modelId);
+                __each(schema.properties, function(property){
+                    _this.properties.push(new KiiPortalSchemaProperty(property));
+                });
+            }
+        };
+
+        KiiPortalSchema.prototype.createProperty = function(){
+            var property = new KiiPortalSchemaProperty;
+            this.addProperty(property);
+            return property;
+        }
+
+        KiiPortalSchema.prototype.addProperty = function(property){
+            this.properties.push(property);
+        };
+
+        KiiPortalSchema.prototype.removeProperty = function(property){
+            this.properties.splice(this.properties.indexOf(property), 1);
+        };
+
+        KiiPortalSchema._withModel = function(model, callbacks){
+            var tokenType, accessToken, setting, kiiApp;
+            kiiApp = model.getKiiApp();
+
+            return new Promise(function(resolve, reject){
+                setting = {
+                    method: 'GET',
+                    url: root._apis.MODEL + '/' + model.getUUID() + '/schemas',
+                    success: function(response){
+                        var schemasData = response.data;
+                        var schemas = [];
+
+                        __each(schemasData, function(schema){
+                            schemas.push(KiiPortalSchema.factory(schema, model.getKiiApp()));
+                        });
+
+                        model.setPortalSchemas(schemas);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(schemas);
+                        }
+                        resolve(schemas);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+
+                KiiPortalRequest(setting, kiiApp);
+            });
+        };
+
+        KiiPortalSchema.prototype.refresh = function(property){
+            var setting = {
+                method: 'GET',
+                url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this.getVersion(),
+                headers: {
+                    'Authorization': tokenType + ' ' + accessToken
+                }
+            }
+        };
+
+        KiiPortalSchema.prototype.save = function(callbacks){
+            var versionNumber, createFlag, setting, _this, tokenType, accessToken;
+            tokenType = this.getKiiApp().getAdmin.getTokenType();
+            accessToken = this.getKiiApp().getAdmin().getAccessToken();
+
+            _this = this;
+            versionNumber = this.getVersionNumber();
+
+            if(!versionNumber){
+                createFlag = true;
+            }
+
+            return new Pormise(function(resolve, reject){
+                if(createFlag){
+                    setting = {
+                        method: 'POST',
+                        url: root._apis.MODEL + '/' + this.getModelId() + '/schemas',
+                        headers: {
+                            'Authorization': tokenType + ' ' + accessToken
+                        },
+                        success: function(response){
+                            _this.init(response.data);
+                            if(callbacks && callbacks.success){
+                                callbacks.success(this);
+                            }
+                            resolve(this);
+                        },
+                        failure: function(error){
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(error);
+                                reject(error);
+                            }
+                        }
+                    };
+                }else{
+                    setting = {
+                        method: 'POST',
+                        url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this,
+                        headers: {
+                            'Authorization': tokenType + ' ' + accessToken
+                        },
+                        success: function(response){
+                            _this.init(response.data);
+                            if(callbacks && callbacks.success){
+                                callbacks.success(this);
+                            }
+                            resolve(this);
+                        },
+                        failure: function(error){
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(error);
+                                reject(error);
+                            }
+                        }
+                    };
+                }
+
+                KiiPortalRequest(setting);
+            });
+        };
+
+        KiiPortalSchema.create = function(model){
+            var schema = KiiPortalSchema.factory();
+            schema.setModelId(model.getUUID(), model.getKiiApp());
+            return schema;
+        };
+
+        KiiPortalSchema.factory = function(schema, kiiApp){
+            return new KiiPortalSchema(schema, kiiApp);
+        };
+
+        return KiiPortalSchema;
+    })();
+
+    root.KiiPortalSchemaProperty = (function(){
+
+        function KiiPortalSchemaProperty(property){
+            this.key = null;
+            this.displayName = null;
+            this.type = null;
+            this.controllable = null;
+            this.unit = null;
+            this.min = null;
+            this.max = null
+
+            if(property){
+                __extend(this, property);
+            }
+        }
+
+        KiiPortalSchemaProperty.Schema_Type_Enum = {
+            BOOLEAN: 'boolean',
+            INT: 'integer',
+            FLOAT: 'float',
+            STRING: 'string'
+        };
+
+        return KiiPortalSchemaProperty;
+    })();    /**
+     * class KiiPortalTag.js
+     */
+    root.KiiPortalTag = (function (KiiPortalObject) {
+        var _super;
+
+        _super = KiiPortalObject;
+
+        KiiPortalTag.prototype = new _super();
+        __inherits(KiiPortalTag, _super);
+        KiiPortalTag.prototype.constructor = KiiPortalTag;
+
+        function KiiPortalTag() {
+            var _this = this;
+            __bindMethod(_this);
+
+            this._name = null;
+            this._description = null;
+
+            this.setName = function(name){
+                _this._name = name;
+                _this.set('name' ,name);
+            };
+
+            this.getName = function(){
+                return _this._name;
+            };
+
+            this.getDescription = function(){
+                return _this._discription;
+            };
+            this.setDescript = function(description){
+                _this._description = description;
+                _this.set('description', description);
+            };
+        }
+
+        KiiPortalTag._bucketName = root.KiiExtensionBuckets.TAG;
+
+        /**
+         * save object
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalTag.prototype.save = function(callbacks){
+            var _this = this;
+            var createFlag = _this.getUUID()? false : true;
+
+            return new Promise(function(resolve, reject){
+                var saveCallbacks = {
+                    success: function(tag){
+                        if(createFlag){
+                            _this._kiiApp._addTag(_this);
+                        }
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+                _super.prototype.save.call(_this, saveCallbacks);
+            });
+        };
+
+        /**
+         * get all kii portal tags from app
+         * @param app
+         * @param callbacks
+         * @param pageIndex
+         * @param numberPerPage
+         * @returns {*|u}
+         * @private
+         */
+        KiiPortalTag._getAll = function(app, callbacks, pageIndex, numberPerPage){
+            return new Promise(function(resolve, reject){
+                var all_query, getAllCallbacks;
+                // Build "all" query
+                all_query = KiiQuery.queryWithClause();
+
+                getAllCallbacks = {
+                    success: function(query, tags, nextQuery){
+                        app._setTags(tags);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(query, tags, nextQuery);
+                        }
+                        resolve(query, tags, nextQuery);
+                    },
+                    failure: function(query, error){
+                        reject(query, error)
+                    }
+                };
+
+                // execute query
+                return KiiPortalTag.executeQuery(app ,all_query, getAllCallbacks);
+            });
+        };
+
+
+        /**
+         * refresh a tag
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalTag.prototype.refresh = function(callbacks){
+            return this._refresh(callbacks);
+        };
+
+
+        /**
+         * remove a tag
+         * @param callbacks
+         * @returns {*|u}
+         */
+        KiiPortalTag.prototype.delete = function(callbacks){
+            var _this = this;
+
+            return new Promise(function(resolve, reject){
+                var removeCallbacks, kiiApp;
+                removeCallbacks = {
+                    success: function(response){
+                        kiiApp = _this.getKiiApp();
+                        kiiApp._removeTag(_this);
+                        if(callbacks && callbacks.success){
+                            callbacks.success(_this);
+                        }
+                        resolve(_this);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                _super.prototype.delete.call(_this, removeCallbacks);
+            });
+        };
+
+        KiiPortalTag.prototype.init = function(){
+            this.setName(this.get('name'));
+            this.setDescript(this.get('description'));
+        };
+
+        return KiiPortalTag;
+    })(KiiPortalObject);
+
+/**
+ * class user request
+ */
+
+root.KiiPortalUserQuery = (function(_super) {
+    __inherits(KiiPortalUserQuery, _super);
+    KiiPortalUserQuery.prototype.constructor = KiiPortalUserQuery;
+
+    function KiiPortalUserQuery() {}
+
+    KiiPortalUserQuery.queryName = 'userQuery';
+
+    /**
+     * override
+     * @param  {[type]} kiiApp [description]
+     * @param  {[type]} spec   [description]
+     * @return {[type]}        [description]
+     */
+    KiiPortalUserQuery._getRequest = function(kiiApp, spec) {
+        spec.headers = spec.headers || {};
+        spec.headers['Content-Type'] = 'application/vnd.kii.userqueryrequest+json';
+
+        return new KiiObjectRequest(kiiApp, spec);
+    };
+
+    /**
+     * override
+     * @param  {[type]} kiiApp [description]
+     * @return {[type]}        [description]
+     */
+    KiiPortalUserQuery._generatePath = function(kiiApp) {
+        return _super._generatePath.call(this, kiiApp) + '/users';
+    };
+
+    /**
+     * override
+     * @param  {[type]} data [description]
+     * @return {[type]}      [description]
+     */
+    KiiPortalUserQuery._instantiate = function(data) {
+        if (data === null) {
+            return null;
+        } else {
+            return new KiiPortalUser(data);
+        }
+    };
+
+    return KiiPortalUserQuery;
+})(KiiPortalQuery);
+
+root.KiiPortalUserRequest = (function(_super) {
+    __inherits(KiiPortalUserRequest, _super);
+    KiiPortalUserRequest.prototype.constructor = KiiPortalUserRequest;
+
+    function KiiPortalUserRequest(spec) {
+        var kiiApp = KiiPortalAdmin.getCurrentApp();
+        KiiPortalUserRequest.prototype = new _super(kiiApp, spec);
+        var _spec = {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        };
+        __extends(_spec, spec);
+        this._appID = kiiApp.getAppID();
+        this._appKey = kiiApp.getAppKey();
+        this._token = kiiApp.getAdminContext()._token;
+        this._url = Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + spec.extraUrl;
+        this._data = _spec.data;
+        this._method = _spec.method;
+        this._headers = {};
+        this._extHeaders = _spec.headers;
+    }
+
+    // KiiPortalUserRequest.prototype.execute = function(callbacks){
+    //     _super.prototype.execute.call(this, callbacks);
+    // };
+
+    return KiiPortalUserRequest;
+})(KiiObjectRequest);
+
+root.KiiPortalUser = (function(_super) {
+    __inherits(KiiPortalUser, _super);
+    KiiPortalUser.prototype.constructor = KiiPortalUser;
+
+    function KiiPortalUser(data) {
+        // var _this = this;
+        __bindMethod(this);
+        this._info = data;
+        // this._info = {};
+        // this._info.userID = data.userID;
+        // this._info.internalUserID = data.internalUserID;
+        // this._info.loginName = data.loginName;
+        // this._info.displayName = data.displayName;
+        // this._info.country = data.country;
+        // this._info.emailAddress = data.emailAddress;
+        // this._info.emailAddressVerified = data.emailAddressVerified;
+        // this._info.phoneNumber = data.phoneNumber;
+        // this._info.phoneNumberVerified = data.phoneNumberVerified;
+        // this._info.disabled = data.disabled;
+        // this._info.createdAt = data.createdAt;
+        // this._info.modifiedAt = data.modifiedAt;
+        // this._info.passwordChangedAt = data.passwordChangedAt;
+        // this._info._disabled = data._disabled;
+        // this._info._hasPassword = data._hasPassword;
+    };
+    return KiiPortalUser;
+})(KiiUserAdmin);
+
+/**
+ * Retrieve a list of KiiPortalUser
+ * @param  {[type]} callbacks   [description]
+ * @param  {[type]} queryClause [description]
+ * @param  {[type]} dictVal     [description]
+ * @return {[type]}             [description]
+ */
+KiiPortalUser.getUserList = function(callbacks, queryClause, dictVal) {
+    return new Promise(function(resolve, reject) {
+        var query;
+
+        query = KiiPortalUserQuery.queryWithClause(queryClause);
+        query.setDict(dictVal);
+
+        var queryCallbacks = {
+            success: function(query, users) {
+                if (callbacks && callbacks.success) {
+                    callbacks.success.apply(callbacks.success, arguments);
+                }
+                resolve({
+                    query: query,
+                    users: users
+                });
+            },
+            failure: function(query, error) {
+                if (callbacks && callbacks.failure) {
+                    callbacks.failure.apply(callbacks.failure, arguments);
+                }
+                reject({
+                    query: query,
+                    error: error
+                });
+            }
+        };
+        var kiiApp = KiiPortalAdmin.getCurrentApp();
+        return KiiPortalUserQuery.executeQuery(kiiApp, query, queryCallbacks);
+    });
+};
+
+/**
+ * Find registered KiiPortalUser with userID
+ * @param  {[type]} userID [description]
+ * @return {[type]}        [description]
+ */
+KiiPortalUser.findUserByUserID = function(userID) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            extraUrl: '/users/' + userID
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(new KiiPortalUser(response.data));
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * Register a user
+ * @param  {[type]} data [user data]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.register = function(data) {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'loginName': _self._info.loginName,
+            'password': _self._info.password,
+            'displayName': _self._info.displayName,
+            'emailAddress': _self._info.emailAddress,
+            'phoneNumber': _self._info.phoneNumber,
+            'country': _self._info.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+        if (!_data.country) delete _data.country;
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            extraUrl: '/users'
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * Delete the user from the server
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.delete = function() {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            method: 'DELETE',
+            extraUrl: '/users/' + _self.getID()
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * Get the ID of the current KiiPortalUser instance
+ * @return {[type]} [description]
+ */
+KiiPortalUser.prototype.getID = function() {
+    return this._info.userID;
+};
+
+/**
+ * Retrieve a list of groups which the user is a member of
+ * @return {[type]} [description]
+ */
+KiiPortalUser.prototype.memberOfGroups = function() {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            headers: {
+                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
+            },
+            extraUrl: '/groups?is_member=' + _self.getID()
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * Retrieve the groups owned by this user
+ * @param  {[type]} userID [description]
+ * @return {[type]}        [description]
+ */
+KiiPortalUser.prototype.ownerOfGroups = function() {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            headers: {
+                'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
+            },
+            extraUrl: '/groups?owner=' + _self.getID()
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * Resend the email/SMS verification code to the user
+ * @param  {[string]}  [EMAIL / SMS]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.resetPassword = function(data) {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'notificationMethod': data
+        };
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.ResetPasswordRequest+json',
+            },
+            extraUrl: '/users/' + _self.getID() + '/password/request-reset'
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * toggle user active/suspended status
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.toggleUserStatus = function(data) {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            data: data,
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/vnd.kii.UserStatusUpdateRequest+json',
+            },
+            extraUrl: '/users/' + _self.getID() + '/status'
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * update user data
+ * @param  {[type]} data [description]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.update = function(data) {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            data: data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.UserUpdateRequest+json',
+            },
+            extraUrl: '/users/' + _self.getID()
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+    /**
+     * Thing request
+     */
+    root.KiiThingAdminQuery = (function(_super){
+
+        __inherits(KiiThingAdminQuery, _super);
+        KiiThingAdminQuery.prototype.constructor = KiiThingAdminQuery;
+
+        function KiiThingAdminQuery(query){
+            /*
+            var _this = this;
+            __each(KiiPortalFirmware.prototype, function(value, key){
+                if(__isFunction(value))
+                    _this[key] = __bind(value, _this);
+            });
+
+            return this._clone(query);
+            */
+        };
+
+        KiiThingAdminQuery.queryName = 'thingQuery';
+
+        /**
+         * override
+         * @param  {[type]} kiiApp [description]
+         * @param  {[type]} spec   [description]
+         * @return {[type]}        [description]
+         */
+        KiiThingAdminQuery._getRequest = function(kiiApp, spec){
+            spec.headers = spec.headers || {};
+            spec.headers["Content-Type"] = "application/vnd.kii.thingqueryrequest+json";
+
+            return new KiiObjectRequest(kiiApp, spec);
+        };
+
+        /**
+         * override
+         * @param  {[type]} kiiApp [description]
+         * @return {[type]}        [description]
+         */
+        KiiThingAdminQuery._generatePath = function(kiiApp){
+            return _super._generatePath.call(this, kiiApp) + '/things';
+        };
+
+        /**
+         * override
+         * @param  {[type]} data [description]
+         * @return {[type]}      [description]
+         */
+        KiiThingAdminQuery._instantiate = function(data){
+            return new KiiThingAdmin(data);
+        };
+
+        return KiiThingAdminQuery;
+    })(KiiPortalQuery);
+
+    KiiThingAdmin.query = function(kiiApp, callbacks, queryClause, dictVal){
+        return new Promise(function(resolve, reject){
+            var query;
+
+            query = KiiThingAdminQuery.queryWithClause(queryClause);
+            query.setDict(dictVal);
+
+            var queryCallbacks = {
+                success: function(query, things){
+                    kiiApp._setThings(things);
+
+                    if(callbacks && callbacks.success){
+                        callbacks.success.apply(callbacks.success, arguments);
+                    }
+                    resolve({query: query, things: things});
+                },
+                failure: function(query, error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure.apply(callbacks.failure, arguments);
+                    }
+                    reject({query: query, error: error});
+                }
+            };
+
+            return KiiThingAdminQuery.executeQuery(kiiApp, query, queryCallbacks);
+        });
+    };
+
+    KiiThingAdmin._nextWithApp = function(kiiApp, callbacks, nextQuery){
+        return new Promise(function(resolve, reject){
+            var queryCallbacks = {
+                success: function(query, things){
+                    kiiApp.addThings(things);
+                    resolve({query:query, things: kiiApp.getThings()});
+                },
+                failure: function(query, error){
+                    reject({query:query, error: error});
+                }
+            };
+
+            KiiThingAdminQuery.executeQuery(kiiApp, nextQuery, queryCallbacks);
+        });
+    };
+
+    KiiThingAdmin.prototype.save = function(callbacks){
+        var _this = this;
+        return new Promise(function(resolve, reject){
+            var spec, request, data, kiiApp;
+
+            var ThingKeys = [
+                '_globalThingID', '_vendorThingID', '_vendor', '_disabled', '_created',
+                '_Iot', '_productName', '_thingID', '_firmwareVersion', '_thingType'
+            ];
+
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+
+            data = {
+                _created: _this.getCreated(),
+                _disabled: _this.getDisabled(),
+                _layoutPosition: "STANDALONE",
+                _thingID: _this.getThingID(),
+                _thingType: _this.fields._thingType,
+                _vendorThingID: _this.getVendorThingID()
+            };
+
+            __each(_this.fields, function(value, key){
+                data[key] = value;
+            });
+
+            spec = {
+                data: data,
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/vnd.kii.ThingUpdateRequest+json',
+                },
+                url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
+            };
+
+            var request = new KiiObjectRequest(kiiApp, spec);
+
+            request.execute().then(function(response){
+                resolve(response);
+            }, function(error){
+                reject(error);
+            });
+        });
+    };
+
+
 })();
