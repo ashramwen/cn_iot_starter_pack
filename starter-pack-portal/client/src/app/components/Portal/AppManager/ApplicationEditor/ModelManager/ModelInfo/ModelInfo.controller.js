@@ -12,6 +12,7 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
      * @return {[null]} [description]
      */
     $scope.init = function(){
+        $scope.schemaOnEdit = {};
         $scope.$watch('modelsReady', function(ready){
             if(ready){
                 $scope.initModel();
@@ -209,9 +210,24 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
         });
 
         modalInstance.result.then(function (property) {
-            $scope.schemaProperties = schema.getProperties();
+            
         }, function () {
             
+        });
+    };
+
+    /**
+     * save schema
+     * 
+     */
+    $scope.saveSchema = function(schema){
+        AppUtils.doLoading();
+        schema.save().then(function(schema){
+            $scope.$apply();
+            AppUtils.whenLoaded();
+            console.log(schema);
+        }, function(erro){
+            AppUtils.whenLoaded();
         });
     };
 

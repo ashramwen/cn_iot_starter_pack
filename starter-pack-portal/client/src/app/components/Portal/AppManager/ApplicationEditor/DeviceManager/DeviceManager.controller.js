@@ -4,6 +4,7 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
   .controller('DeviceManagerController', ['$scope', '$rootScope', '$state', 'AppUtils', '$timeout', function($scope, $rootScope, $state, AppUtils, $timeout) {
     
     $scope.myDevices = [];
+    $scope.deviceEdit = {};
     $scope.collapseIndex = -1;
 
     $scope.init = function(){
@@ -98,8 +99,6 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
         }, function(){
             AppUtils.whenLoaded();
         });
-
-                
     }
 
 

@@ -1,6 +1,13 @@
 @import 'src/app/components/AppShared/scss/global.scss';
 .app-portal-modelmanager-modelinfo{
-/*
- * TODO
- **/
+    .schemas{
+        border: solid 1px #ccc;
+        .detail-content{
+            .sub-table{
+                border: solid 1px #ccc;
+            }
+            background: #eee;
+        }
+    }
+    
 }

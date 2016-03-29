@@ -35,7 +35,9 @@ angular.module('StarterPack.Portal.AppManager')
     $scope.serverOptions = [
         {text: 'Japan', value: 'jp'},
         {text: 'China', value: 'cn3'},
-        {text: 'America', value: 'us'}
+        {text: 'America', value: 'us'},
+        {text: 'QA', value: 'qa'},
+        {text: 'Dev', value: 'dev'}
     ];
 
     $scope.platforms = [

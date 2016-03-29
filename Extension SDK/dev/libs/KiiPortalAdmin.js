@@ -89,7 +89,9 @@
                         reject(response);
                     }
                 };
-                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks);
+                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks).catch(function(e){
+                    console.log(e);
+                });
             });
         };
 

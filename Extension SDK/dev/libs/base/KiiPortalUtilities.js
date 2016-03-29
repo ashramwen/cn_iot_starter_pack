@@ -262,6 +262,12 @@ root.KiiPortalUtilities = (function() {
     return e;
   };
 
+  KiiPortalUtilities.logger = {};
+  KiiPortalUtilities.logger.debug = function(e){
+    if(KiiPortalDevSettings.debug)
+      console.log(e);
+  };
+
   return KiiPortalUtilities;
 
 })();

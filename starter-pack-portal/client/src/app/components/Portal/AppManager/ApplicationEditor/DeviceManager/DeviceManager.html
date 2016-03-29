@@ -13,7 +13,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat-start="device in myDevices" ng-click="device._onEdit = !device._onEdit">
+    <tr ng-repeat-start="device in myDevices" ng-click="deviceEdit[device.getThingID()] = !deviceEdit[device.getThingID()]">
       <td><input type="checkbox" /></td>
       <td>{{device.getThingID()}}</td>
       <td>{{device.getVendorThingID()}}</td>
@@ -25,7 +25,7 @@
     </tr>
     <tr ng-repeat-end>
       <td colspan="8" style="padding:0px;">
-        <div class="detail-content" uib-collapse="!device._onEdit">
+        <div class="detail-content" uib-collapse="!deviceEdit[device.getThingID()]">
           <uib-tabset>
             <uib-tab heading="General">
               <table class="sub-table">

@@ -64,6 +64,14 @@
         SERVER_ADDRESS: 'https://qa21.internal.kii.com/api'
     };
 
+    /**
+     * 
+     */
+    root.KiiPortalDevSettings = {
+        log: true,
+        debug: true,
+    };
+
     //<!-- base:js --><!-- injection:end -->
 
     //<!-- components:js --><!-- injection:end -->

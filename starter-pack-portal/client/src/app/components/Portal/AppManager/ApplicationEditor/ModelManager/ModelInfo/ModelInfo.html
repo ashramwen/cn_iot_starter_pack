@@ -57,53 +57,60 @@
 
     <!-- industrial schema -->
     <uib-tab heading="Industrial Schema">
-      <div>
+      <div class="form-group">
         <button class="btn btn-success" ng-click="createSchema()">
           <span class="fa fa-plus"></span> Add Schema
         </button>
       </div>
-      <table st-table="mySchemas" class="table table-striped">
+      <table st-table="mySchemas" class="table table-striped schemas">
         <thead>
           <th>Schema ID</th>
           <td>Created Time</td>
           <td>Updated Time</td>
         </thead>
         <tbody>
-          <tr ng-repeat-start="schema in mySchemas">
-            <td>{{schema.version || '[New Schema]'}}</td>
+          <tr ng-repeat-start="schema in mySchemas" ng-click="schemaOnEdit[$index]._onEdit = !schemaOnEdit[$index]._onEdit">
+            <td>{{schema._version || schema.id || '[New Schema]'}}</td>
             <td>{{schema.updatedAt}}</td>
             <td>{{schema.createdAt}}</td>
           </tr>
           <tr ng-repeat-end>
-            <td colspan="3">
-              <!-- Schema Content -->
-              <div class="form-group">
-                <button class="btn btn-success" ng-click="openCreatePropertyModal(schema)">
-                  <span class="fa fa-plus"></span> Add Property
-                </button>
-                <button class="btn btn-success">
-                  <span class="fa fa-file-o"></span>Save Schema
-                </button>
+            <td colspan="3" style="padding: 0px">
+              <div class="detail-content" uib-collapse="!schemaOnEdit[$index]._onEdit">
+                <!-- Schema Content -->
+                <table st-table="schemaProperties" class="table table-striped sub-table">
+                  <thead>
+                    <th>Display Name</th>
+                    <th>Key</th>
+                    <th>Type</th>
+                    <th>Unit</th>
+                    <th>Controllable</th>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="property in schema.getProperties()">
+                      <td>{{property.displayName}}</td>
+                      <td>{{property.key}}</td>
+                      <td>{{property.type}}</td>
+                      <td>{{property.unit}}</td>
+                      <td><span class="fa fa-check" ng-if="property.controllable"></span><span class="fa fa-close"  ng-if="!property.controllable"></span></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <!-- End of Schema Content -->
+
+                <!-- operational buttons -->
+                <div class="tab-pane-footer clearfix">
+                  <div class="clearfix pull-right">
+                    <button class="btn btn-success" ng-if="!schema.id" ng-click="openCreatePropertyModal(schema)">
+                      <span class="fa fa-plus"></span> Add Property
+                    </button>
+                    <button class="btn btn-success" ng-if="!schema.id" ng-click="saveSchema(schema)">
+                      <span class="fa fa-file-o"></span>Save Schema
+                    </button>
+                  </div>
+                </div>
+                <!-- end of buttons -->
               </div>
-              <table st-table="schemaProperties" class="table table-striped">
-                <thead>
-                  <th>Display Name</th>
-                  <th>Key</th>
-                  <th>Type</th>
-                  <th>Unit</th>
-                  <th>Controllable</th>
-                </thead>
-                <tbody>
-                  <tr ng-repeat="property in schemaProperties">
-                    <td>{{property.displayName}}</td>
-                    <td>{{property.key}}</td>
-                    <td>{{property.type}}</td>
-                    <td>{{property.unit}}</td>
-                    <td><span class="fa fa-check" ng-if="property.controllable"></span><span class="fa fa-close"  ng-if="!property.controllable"></span></td>
-                  </tr>
-                </tbody>
-              </table>
-              <!-- End of Schema Content -->
             </td>
           </tr>
         </tbody>

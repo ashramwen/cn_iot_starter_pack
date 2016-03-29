@@ -21,6 +21,8 @@ angular.module('StarterPack.Portal.AppManager')
             AppUtils.whenLoaded();
         }, function(error){
             AppUtils.whenLoaded();
+        }).catch(function(e){
+            console.log(e);
         });
     };
   }]);

@@ -225,7 +225,7 @@
                                 return;
                             }
                         }
-                        response = {status: status, data: data};
+                        response = {status: status, data: data, code: xmlhttp.status};
                         if (success) {
                             success(response);
                         }
@@ -234,12 +234,18 @@
                         var response, status, data;
 
                         status = xmlhttp.statusText;
-                        data = JSON.parse(xmlhttp.responseText);
-                        response = {status: status, data: data};
+                        try{
+                            data = JSON.parse(xmlhttp.responseText);
+                        }catch(e){
+                            data = {};
+                            console.log(e);
+                        }
+                        
+                        response = {status: status, data: data, code: xmlhttp.status};
                         if (failure) {
                             failure(response);
                         }
-                        reject(xmlhttp.response ,response);
+                        reject(response);
                     }
                 }
             };
@@ -306,6 +312,38 @@
     var DevelopmentSettings = {
         SERVER_ADDRESS: 'https://qa21.internal.kii.com/api'
     };
+
+    /**
+     * 
+     */
+    root.KiiPortalDevSettings = {
+        log: true,
+        debug: true,
+    };
+
+        /**
+     * class KiiLogger
+     */
+    root.KiiLogger = (function(){
+        function KiiLogger(){
+
+        }
+
+        KiiLogger.log = function(e){
+            if(KiiPortalDevSettings.log){
+                console.log(e);
+            }
+        }
+
+        KiiLogger.debug = function(e){
+            if(KiiPortalDevSettings.debug){
+                console.log(e);
+            }
+        };
+
+
+        return KiiLogger;
+    })();
 
         
 
@@ -376,6 +414,17 @@
 
 
 
+
+    /**
+     * class KiiPortalExceptions
+     */
+    root.KiiPortalException = (function () {
+        function KiiPortalException(e){
+            __extends(this, e);
+        }
+
+        return KiiPortalException;
+    })();
 
     /**
      * abstract class
@@ -1251,6 +1300,12 @@
     return e;
   };
 
+  KiiPortalUtilities.logger = {};
+  KiiPortalUtilities.logger.debug = function(e){
+    if(KiiPortalDevSettings.debug)
+      console.log(e);
+  };
+
   return KiiPortalUtilities;
 
 })();
@@ -1346,7 +1401,9 @@
                         reject(response);
                     }
                 };
-                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks);
+                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks).catch(function(e){
+                    console.log(e);
+                });
             });
         };
 
@@ -3207,7 +3264,6 @@
             var _this = this;
             var createFlag = _this.getUUID()? false : true;
 
-
             return new Promise(function(resolve, reject){
                 var modelSaveCallbacks, kiiApp;
 
@@ -3281,12 +3337,16 @@
 
     root.KiiPortalSchema = (function(){
 
-        function KiiPortalSchema(schema, kiiApp){
+        function KiiPortalSchema(schema, model){
             var _this = this;
-            this._modelId = null;
+            this.id = null;
+            this._modelId = model.getUUID();
             this._version = null;
             this.properties = [];
-            this._kiiApp = kiiApp;
+            this._kiiApp = model.getKiiApp();
+            this._model = model;
+            this.createdAt = null;
+            this.updatedAt = null;
 
 
             this.getProperties = function(){
@@ -3294,7 +3354,7 @@
             };
 
             this.getKiiApp = function(){
-                return _this.kiiApp;
+                return _this._kiiApp;
             }
 
             this.getModelId = function(){
@@ -3316,13 +3376,19 @@
             this.init(schema);
         }
 
-        KiiPortalSchema.prototype.init = function(schema){
+        KiiPortalSchema.prototype.init = function(schema, model){
+            var _this = this;
             if(schema){
-                this.setModelId(schema.modelId);
+                _this.id = schema.id;
+                _this.setVersion(schema.version);
+                _this.setModelId(schema.modelId);
+                _this.createdAt = schema.createdAt;
+                _this.updatedAt = schema.updatedAt;
                 __each(schema.properties, function(property){
                     _this.properties.push(new KiiPortalSchemaProperty(property));
                 });
             }
+            _this._model = model || _this._model;
         };
 
         KiiPortalSchema.prototype.createProperty = function(){
@@ -3348,11 +3414,11 @@
                     method: 'GET',
                     url: root._apis.MODEL + '/' + model.getUUID() + '/schemas',
                     success: function(response){
-                        var schemasData = response.data;
+                        var schemasData = response.data.schemas;
                         var schemas = [];
 
                         __each(schemasData, function(schema){
-                            schemas.push(KiiPortalSchema.factory(schema, model.getKiiApp()));
+                            schemas.push(KiiPortalSchema.factory(schema, model));
                         });
 
                         model.setPortalSchemas(schemas);
@@ -3379,33 +3445,50 @@
                 url: root._apis.MODEL + '/' + this.getModelId() + '/schemas/' + this.getVersion(),
                 headers: {
                     'Authorization': tokenType + ' ' + accessToken
+                },
+                success: function(response){
+
+                },
+                failure: function(error){
+
                 }
-            }
+            };
+
+            KiiPortalRequest(setting, this.getKiiApp());
         };
 
         KiiPortalSchema.prototype.save = function(callbacks){
-            var versionNumber, createFlag, setting, _this, tokenType, accessToken;
-            tokenType = this.getKiiApp().getAdmin.getTokenType();
+            var id, createFlag, setting, _this, tokenType, accessToken, properties;
+            tokenType = this.getKiiApp().getAdmin().getTokenType();
             accessToken = this.getKiiApp().getAdmin().getAccessToken();
+            properties = [];
+
+            __each(this.getProperties(), function(property){
+                properties.push(property.purify());
+            });
 
             _this = this;
-            versionNumber = this.getVersion();
+            id = this.id;
 
-            if(!versionNumber){
+            if(!id){
                 createFlag = true;
             }
 
-            return new Pormise(function(resolve, reject){
+            return new Promise(function(resolve, reject){
                 if(createFlag){
                     setting = {
                         method: 'POST',
-                        url: root._apis.MODEL + '/' + this.getModelId() + '/schemas',
+                        url: root._apis.MODEL + '/' + _this.getModelId() + '/schemas',
+                        data: {
+                            modelId: _this.getModelId(),
+                            properties: properties,
+                            version: _this.getVersion()
+                        },
                         headers: {
                             'Authorization': tokenType + ' ' + accessToken
                         },
                         success: function(response){
-                            _this.init(response.data);
-
+                            _this.init(response.data, _this._model);
 
                             if(callbacks && callbacks.success){
                                 callbacks.success(_this);
@@ -3420,14 +3503,24 @@
                         }
                     };
                 }else{
+                    /**
+                     * for now, update is not allowed
+                     * @type {Object}
+                     */
                     setting = {
                         method: 'POST',
-                        url: root._apis.MODEL + '/' + _this.getModelId() + '/schemas/' + _this.getVersion(),
+                        data: {
+                            id: _this.id,
+                            modelId: _this.getModelId(),
+                            properties: properties,
+                            version: _this.getVersion()
+                        },
+                        url: root._apis.MODEL + '/' + _this._model.getUUID() + '/schemas/' + _this.getVersion(),
                         headers: {
                             'Authorization': tokenType + ' ' + accessToken
                         },
                         success: function(response){
-                            _this.init(response.data);
+                            _this.init(response.data, this._model);
                             if(callbacks && callbacks.success){
                                 callbacks.success(_this);
                             }
@@ -3436,24 +3529,26 @@
                         failure: function(error){
                             if(callbacks && callbacks.failure){
                                 callbacks.failure(error);
-                                reject(error);
                             }
+                            reject(error);
                         }
                     };
                 }
 
-                KiiPortalRequest(setting);
+                KiiPortalRequest(setting, _this.getKiiApp()).catch(function(e){
+                    KiiLogger.debug(new KiiPortalException(e));
+                });
             });
         };
 
         KiiPortalSchema.create = function(model){
-            var schema = KiiPortalSchema.factory(null, model.getKiiApp());
+            var schema = KiiPortalSchema.factory(null, model);
             schema.setModelId(model.getUUID());
             return schema;
         };
 
-        KiiPortalSchema.factory = function(schema, kiiApp){
-            return new KiiPortalSchema(schema, kiiApp);
+        KiiPortalSchema.factory = function(schema, model){
+            return new KiiPortalSchema(schema, model);
         };
 
         return KiiPortalSchema;
@@ -3471,15 +3566,29 @@
             this.max = null
 
             if(property){
-                __extend(this, property);
+                __extends(this, property);
             }
         }
+
+        KiiPortalSchemaProperty.KeyEnum = ['key', 'displayName', 'type', 
+            'controllable', 'unit', 'min', 'max'];
 
         KiiPortalSchemaProperty.Schema_Type_Enum = {
             BOOLEAN: 'boolean',
             INT: 'integer',
             FLOAT: 'float',
             STRING: 'string'
+        };
+
+        KiiPortalSchemaProperty.prototype.purify = function(){
+            var data = {},
+                _this = this;
+            __each(KiiPortalSchemaProperty.KeyEnum, function(val){
+                if(_this[val]){
+                    data[val] = _this[val];
+                }
+            });
+            return data;
         };
 
         return KiiPortalSchemaProperty;

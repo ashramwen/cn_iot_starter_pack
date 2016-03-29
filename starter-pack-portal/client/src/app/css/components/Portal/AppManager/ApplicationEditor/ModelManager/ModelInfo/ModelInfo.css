@@ -1,4 +1,6 @@
-.app-portal-modelmanager-modelinfo {
-  /*
- * TODO
- **/ }
+.app-portal-modelmanager-modelinfo .schemas {
+  border: solid 1px #ccc; }
+  .app-portal-modelmanager-modelinfo .schemas .detail-content {
+    background: #eee; }
+    .app-portal-modelmanager-modelinfo .schemas .detail-content .sub-table {
+      border: solid 1px #ccc; }

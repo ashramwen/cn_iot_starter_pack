@@ -220,7 +220,7 @@
                                 return;
                             }
                         }
-                        response = {status: status, data: data};
+                        response = {status: status, data: data, code: xmlhttp.status};
                         if (success) {
                             success(response);
                         }
@@ -229,12 +229,18 @@
                         var response, status, data;
 
                         status = xmlhttp.statusText;
-                        data = JSON.parse(xmlhttp.responseText);
-                        response = {status: status, data: data};
+                        try{
+                            data = JSON.parse(xmlhttp.responseText);
+                        }catch(e){
+                            data = {};
+                            console.log(e);
+                        }
+                        
+                        response = {status: status, data: data, code: xmlhttp.status};
                         if (failure) {
                             failure(response);
                         }
-                        reject(xmlhttp.response ,response);
+                        reject(response);
                     }
                 }
             };
