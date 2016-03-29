@@ -19,7 +19,6 @@ module.exports = {
 				},
 				body: '{}'
 			};	
-
 			sails.request(options, function(error, response, body) {
 				if (error) {
 					res.badRequest(error)

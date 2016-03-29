@@ -49,12 +49,16 @@ module.exports = {
 					return
 				}
 
-				var authorization = 'Bearer ' + body['access_token']
+				var authorization = 'Bearer ' + JSON.parse(body)['access_token']
 
-				var appInfo = {}
-				appInfo.headers['authorization'] = authorization
-				appInfo.headers['x-app-id'] = appID
-				appInfo.headers['x-app-key'] = appKey
+				var appInfo = {
+					headers: {
+						authorization: authorization,
+						'x-app-id': appID,
+						'x-app-key': appKey,
+						'x-app-site': 'qa'
+					}
+				}
 				//TODO add site info when in production
 				// appInfo.headers['x-app-site'] = 
 				sails.controllers.firmwares.init(appInfo, res)

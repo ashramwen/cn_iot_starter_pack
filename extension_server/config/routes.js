@@ -82,11 +82,6 @@ module.exports.routes = {
     action: 'login'
   },
 
-  'POST /apps': {
-    controller: 'DevelopersController',
-    action: 'create'
-  },
-
   'GET /apps': {
     controller: 'DevelopersController',
     action: 'find'

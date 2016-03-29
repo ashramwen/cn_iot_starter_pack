@@ -35,11 +35,6 @@ module.exports = {
 		});
 	},
 
-	create: function(req, res) {
-		res.ok('to be implemented')
-
-	},
-
 	find: function(req, res) {
 		var authorization = req.headers['authorization']
 		if (!authorization) {
