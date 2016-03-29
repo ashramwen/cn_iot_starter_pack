@@ -26,16 +26,18 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             });
         };
 
-        $scope.addUser = function(user) {
+        $scope.addUser = function(newUser) {
             cleanMessage();
-            user._status = userValidateService.validate(user);
-            if (!user._status.isPass()) return;
+            newUser._status = userValidateService.validate(newUser);
+            if (!newUser._status.isPass()) return;
             AppUtils.doLoading();
-            $scope.myApp.addUser(user).then(function(result) {
+            delete newUser._status;
+            var user = new KiiPortalUser(newUser);
+            user.register().then(function(result) {
                 // queryUsers();
                 $scope.cancelAddUser();
                 $scope.message = {
-                    'user': user.loginName,
+                    'loginName': newUser.loginName,
                     'status': MessageType.Created
                 };
                 $scope.$apply();
@@ -45,34 +47,38 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
 
         $scope.cancelAddUser = function() {
             cleanMessage();
-            $scope.newUser = new User();
             $scope.isExpanded = !1;
+        };
+
+        $scope.cancelDelete = function() {
+            cleanMessage();
         };
 
         $scope.confirmDeleteUser = function(user, index) {
             cleanMessage();
             $document[0].body.scrollTop = 0;
             $scope.message = {
-                'user': user._info.loginName,
-                'userID': user._info.userID,
+                'loginName': user._info.loginName,
+                'user': user,
                 'index': index,
                 'status': MessageType.ConfirmDelete
             };
         };
 
         $scope.deleteUser = function() {
-            var user = angular.copy($scope.message);
+            var user = angular.copy($scope.message.user);
+            var index = $scope.message.index;
             cleanMessage();
             AppUtils.doLoading();
-            $scope.myApp.deleteUser(user.userID).then(function(result) {
+            user.delete().then(function(result) {
                 $scope.message = {
-                    user: user.user,
-                    status: MessageType.Deleted
+                    'loginName': user._info.loginName,
+                    'status': MessageType.Deleted
                 }
-                if ($scope.users[user.index]._info.userID === userID) {
-                    $scope.users.splice(user.index, 1);
-                    $scope.$apply();
+                if ($scope.users[index].getID() === user.getID()) {
+                    $scope.users.splice(index, 1);
                 }
+                $scope.$apply();
                 AppUtils.whenLoaded();
             }, ajaxError);
         };
@@ -89,14 +95,14 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
 
         $scope.getGroupData = function(user) {
             AppUtils.doLoading();
-            user.group = {};
-            $scope.myApp.groupOwner(user.userID).then(function(result) {
-                user.group.owner = result.groups;
+            user._field.group = {};
+            user.ownerOfGroups().then(function(result) {
+                user._field.group.owner = result.data.groups;
                 $scope.$apply();
                 AppUtils.whenLoaded();
             }, ajaxError);
-            $scope.myApp.groupMember(user.userID).then(function(result) {
-                user.group.member = result.groups;
+            user.memberOfGroups().then(function(result) {
+                user._field.group.member = result.data.groups;
                 $scope.$apply();
                 AppUtils.whenLoaded();
             }, ajaxError);
@@ -108,28 +114,29 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 limit: 5,
                 paginationKey: query._paginationKey
             };
-            AppUtils.doLoading();
-            $scope.myApp.queryUsers({}, null, _option).then(function(result) {
-                $scope.query = result.query;
-                $scope.users = $scope.users.concat(result.users);
-                $scope.$apply();
-                AppUtils.whenLoaded();
-            }, ajaxError);
+            queryUsers(_option, !0);
+        };
+
+        $scope.expandAddUser = function() {
+            if ($scope.isExpanded === !0) return;
+            $scope.isExpanded = !0;
+            $scope.newUser = new User();
+            cleanMessage();
         };
 
         $scope.resetUserPassword = function(user, type) {
             cleanMessage();
             AppUtils.doLoading();
-            $scope.myApp.resetPassword(user._info.userID, type).then(function(result) {
+            user.resetPassword(type).then(function(result) {
                 if (type === 'SMS') {
                     $scope.message = {
-                        user: user._info.loginName,
-                        status: MessageType.SendSms
+                        'loginName': user._info.loginName,
+                        'status': MessageType.SendSms
                     }
                 } else {
                     $scope.message = {
-                        user: user._info.loginName,
-                        status: MessageType.SendEmail
+                        'loginName': user._info.loginName,
+                        'status': MessageType.SendEmail
                     }
                 }
                 $scope.$apply();
@@ -139,8 +146,8 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                     error = angular.fromJson(error);
                     if (error.errorCode !== 'USER_DISABLED') return;
                     $scope.message = {
-                        user: user._info.loginName,
-                        status: MessageType.isSuspended
+                        'loginName': user._info.loginName,
+                        'status': MessageType.isSuspended
                     }
                     $scope.$apply();
                 })
@@ -166,10 +173,10 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
                 'disabled': !user._info._disabled
             };
             AppUtils.doLoading();
-            $scope.myApp.toggleUserStatus(user._info.userID, _data).then(function(result) {
+            user.toggleUserStatus(_data).then(function(result) {
                 user._info._disabled = !user._info._disabled;
                 $scope.message = {
-                    'user': user._info.loginName,
+                    'loginName': user._info.loginName,
                     'status': (user._info._disabled ? MessageType.Suspend : MessageType.Activated)
                 };
                 $scope.toggleEdit(user, false);
@@ -189,11 +196,11 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             }
             _.extend(_data, user._field.customAttributes);
             AppUtils.doLoading();
-            $scope.myApp.updateUser(user._info.userID, _data).then(function(result) {
-                $scope.myApp.queryUserByID(user._info.userID).then(function(result) {
+            user.update(_data).then(function(result) {
+                $scope.myApp.findUserByUserID(user.getID()).then(function(result) {
                     user._info = result._info;
                     $scope.message = {
-                        'user': user._info.loginName,
+                        'loginName': user._info.loginName,
                         'status': MessageType.Updated
                     };
                     $scope.toggleEdit(user, false);
@@ -213,13 +220,15 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             $scope.message = {};
         }
 
-        function queryUsers() {
+        function queryUsers(option, concat) {
+            var _option = {
+                'limit': 200
+            };
+            angular.extend(_option, option);
             AppUtils.doLoading();
-            $scope.myApp.queryUsers({}, null, {
-                limit: 200
-            }).then(function(result) {
+            $scope.myApp.getUserList({}, null, _option).then(function(result) {
                 $scope.query = result.query;
-                $scope.users = result.users;
+                $scope.users = (concat ? $scope.users.concat(result.users) : result.users);
                 $scope.$apply();
                 AppUtils.whenLoaded();
             }, ajaxError);
