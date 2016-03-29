@@ -37,7 +37,7 @@ angular.module('StarterPack.Portal.AppManager')
         {text: 'China', value: 'cn3'},
         {text: 'America', value: 'us'},
         {text: 'QA', value: 'qa'},
-        {text: 'Dev', value: 'dev'}
+        {text: 'Dev', value: 'devjp'}
     ];
 
     $scope.platforms = [

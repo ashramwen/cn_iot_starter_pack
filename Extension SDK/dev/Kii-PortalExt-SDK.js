@@ -60,10 +60,6 @@
         MODEL: root._extensionUrl + '/models'
     };
 
-    var DevelopmentSettings = {
-        SERVER_ADDRESS: 'https://qa21.internal.kii.com/api'
-    };
-
     /**
      * 
      */
@@ -71,6 +67,15 @@
         log: true,
         debug: true,
     };
+
+    /**
+     * for developement
+     */
+    __extends(KiiSite, {
+        DEV: 'https://api-development-jp.internal.kii.com/api',
+        QA: 'https://qa21.internal.kii.com/api'
+    });
+
 
     //<!-- base:js --><!-- injection:end -->
 

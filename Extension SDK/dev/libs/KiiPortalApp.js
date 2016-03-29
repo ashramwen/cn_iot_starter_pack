@@ -54,6 +54,10 @@
                         return KiiSite.US;
                     case 'jp':
                         return KiiSite.JP;
+                    case 'devjp':
+                        return KiiSite.DEV;
+                    case 'qa':
+                        return KiiSite.QA;
                     default:
                         return KiiSite.CN3;
                 }

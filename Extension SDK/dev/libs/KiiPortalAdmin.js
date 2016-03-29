@@ -177,7 +177,7 @@
                         /**
                          * init site with app info
                          */
-                        Kii.initializeWithSite(app.getAppID(), app.getAppKey(), DevelopmentSettings.SERVER_ADDRESS || app.getSiteURL());
+                        Kii.initializeWithSite(app.getAppID(), app.getAppKey(), app.getSiteURL());
 
                         /**
                          * get addmin context

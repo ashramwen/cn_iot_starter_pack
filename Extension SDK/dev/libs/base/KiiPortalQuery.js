@@ -84,7 +84,7 @@
          * @return {[type]}        [description]
          */
         KiiPortalQuery._generatePath = function(kiiApp){
-            return (DevelopmentSettings.SERVER_ADDRESS || kiiApp.getSiteURL())+ '/apps/' + kiiApp.getAppID();
+            return kiiApp.getSiteURL()+ '/apps/' + kiiApp.getAppID();
         };
 
         /**

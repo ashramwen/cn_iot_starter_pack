@@ -309,10 +309,6 @@
         MODEL: root._extensionUrl + '/models'
     };
 
-    var DevelopmentSettings = {
-        SERVER_ADDRESS: 'https://qa21.internal.kii.com/api'
-    };
-
     /**
      * 
      */
@@ -320,6 +316,15 @@
         log: true,
         debug: true,
     };
+
+    /**
+     * for developement
+     */
+    __extends(KiiSite, {
+        DEV: 'https://api-development-jp.internal.kii.com/api',
+        QA: 'https://qa21.internal.kii.com/api'
+    });
+
 
         /**
      * class KiiLogger
@@ -949,7 +954,7 @@
          * @return {[type]}        [description]
          */
         KiiPortalQuery._generatePath = function(kiiApp){
-            return (DevelopmentSettings.SERVER_ADDRESS || kiiApp.getSiteURL())+ '/apps/' + kiiApp.getAppID();
+            return kiiApp.getSiteURL()+ '/apps/' + kiiApp.getAppID();
         };
 
         /**
@@ -1489,7 +1494,7 @@
                         /**
                          * init site with app info
                          */
-                        Kii.initializeWithSite(app.getAppID(), app.getAppKey(), DevelopmentSettings.SERVER_ADDRESS || app.getSiteURL());
+                        Kii.initializeWithSite(app.getAppID(), app.getAppKey(), app.getSiteURL());
 
                         /**
                          * get addmin context
@@ -1567,6 +1572,10 @@
                         return KiiSite.US;
                     case 'jp':
                         return KiiSite.JP;
+                    case 'devjp':
+                        return KiiSite.DEV;
+                    case 'qa':
+                        return KiiSite.QA;
                     default:
                         return KiiSite.CN3;
                 }
