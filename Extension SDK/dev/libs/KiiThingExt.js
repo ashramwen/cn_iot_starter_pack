@@ -99,7 +99,8 @@
     };
 
     KiiThingAdmin.prototype.save = function(callbacks){
-        var _this = this;
+        var _this = this,
+            createFlag = false;
         return new Promise(function(resolve, reject){
             var spec, request, data, kiiApp;
 
@@ -123,22 +124,51 @@
                 data[key] = value;
             });
 
-            spec = {
-                data: data,
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/vnd.kii.ThingUpdateRequest+json',
-                },
-                url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
-            };
 
-            var request = new KiiObjectRequest(kiiApp, spec);
+            if(!_this.getThingID()){
+                createFlag = true;
+            }
 
-            request.execute().then(function(response){
-                resolve(response);
-            }, function(error){
-                reject(error);
-            });
+            if(createFlag){
+                spec = {
+                    data: data,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/vnd.kii.ThingRegistrationAndAuthorizationRequest+json',
+                    },
+                    url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things'
+                };
+
+                var request = new KiiObjectRequest(kiiApp, spec);
+
+                request.execute().then(function(response){
+                    kiiApp.addThing(_this);
+                    _this._renewThingFields(response.data);
+                    resolve(_this);
+                }, function(error){
+                    reject(error);
+                });
+
+            } else {
+                spec = {
+                    data: data,
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/vnd.kii.ThingUpdateRequest+json',
+                    },
+                    url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
+                };
+
+                var request = new KiiObjectRequest(kiiApp, spec);
+
+                request.execute().then(function(response){
+                    resolve(response);
+                }, function(error){
+                    reject(error);
+                });
+            }
+
+           
         });
     };
 

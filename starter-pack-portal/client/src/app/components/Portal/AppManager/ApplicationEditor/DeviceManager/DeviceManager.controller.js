@@ -1,11 +1,35 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.DeviceManager')
-  .controller('DeviceManagerController', ['$scope', '$rootScope', '$state', 'AppUtils', '$timeout', function($scope, $rootScope, $state, AppUtils, $timeout) {
+  .controller('DeviceManagerController', ['$scope', '$rootScope', '$state', 'AppUtils', '$timeout', 'DeviceService', function($scope, $rootScope, $state, AppUtils, $timeout, DeviceService) {
     
     $scope.myDevices = [];
     $scope.deviceEdit = {};
     $scope.collapseIndex = -1;
+    $scope.hideNewDevice = true;
+    $scope.newDevice = {};
+    var jsonEditor = null;
+
+    $scope.searchOptions = [
+        {type: 'string', text: '_vendorThingID', value: '_vendorThingID'},
+        {type: 'string', text: '_thingID', value: '_thingID'},
+        {type: 'boolean', text: '_disabled', value: '_disabled'},
+        {type: 'string', text: '_vendor', value: '_vendor'},
+        {type: 'boolean', text: '_created', value: '_created'},
+        {type: 'string', text: '_lot', value: '_lot'},
+        {type: 'string', text: '_productName', value: '_lot'},
+        {type: 'string', text: '_firmwareVersion', value: '_firmwareVersion'},
+        {type: 'string', text: '_stringField1', value: '_stringField1'},
+        {type: 'float', text: '_numberField1', value: '_numberField1'},
+        {type: 'string', text: '_stringField2', value: '_stringField2'},
+        {type: 'float', text: '_numberField2', value: '_numberField2'},
+        {type: 'string', text: '_stringField3', value: '_stringField3'},
+        {type: 'float', text: '_numberField3', value: '_numberField3'},
+        {type: 'string', text: '_stringField4', value: '_stringField4'},
+        {type: 'float', text: '_numberField4', value: '_numberField4'},
+        {type: 'string', text: '_stringField5', value: '_stringField5'},
+        {type: 'float', text: '_numberField5', value: '_numberField5'}
+    ];
 
     $scope.init = function(){
         $scope.$watch('appReady', function(ready){
@@ -16,8 +40,6 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
                 $scope.myDevices = result.things;
                 $scope.nextQuery = result.query;
 
-                $scope.initDevices($scope.myDevices);
-
                 $scope.$apply();
 
                 AppUtils.whenLoaded();
@@ -26,71 +48,59 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
                 AppUtils.whenLoaded();
             });;
         });
+        activateJsonEditor();
     };
 
-    $scope.initDevices = function(devices){
-        _.each(devices, function(thing){
-            thing.customFieldEditor = {
-                customFields:{},
-                options: {
-                    mode: 'code'
-                }
-            };
-        });
-    };
-
-    $scope.getCustomFields = function(device){
-        var existingKeys = [
-            '_globalThingID', '_vendorThingID', '_vendor', '_disabled', '_created',
-            '_lot', '_productName', '_thingID', '_firmwareVersion', '_thingType', 
-
-            '_stringField1', '_numberField1', '_stringField2', '_numberField2',
-            '_stringField3', '_numberField3', '_stringField4', '_numberField4',
-            '_stringField5', '_numberField5', '_accessToken', 'fields', 
-            
-
-            '_onEdit', 'customFieldEditor', '$$hashKey'
-        ];
-
-        device.customFieldEditor.customFields = {};
-
-        _.each(device.fields, function(value, key){
-            if(existingKeys.indexOf(key) == -1 && !_.isFunction(value)){
-                device.customFieldEditor.customFields[key] = value;
-            }
-        });
-
+    function activateJsonEditor (){
         $timeout(function(){
-            device._customActive = true;
+            var options = {
+                mode: 'code'
+            };
+
+            jsonEditor = $('#new-device').find('.json-editor')[0];
+            jsonEditor = new JSONEditor(jsonEditor, options);
         });
     };
 
-    $scope.updateDevice = function(device){
+    /**
+     * Add device button onclick
+     */
+    $scope.addDevice = function(){
+        $scope.newDevice = new KiiThingAdmin({});
+        $scope.hideNewDevice = false;
+    };
 
-        AppUtils.doLoading();
-
+    $scope.saveDevice = function(device){
         var myDevice = _.clone(device);
+        $scope.customFields = jsonEditor.get();
 
-        _.extend(device.fields, device.customFieldEditor.customFields);
+        _.extend(device.fields, $scope.customFields);
         
+        AppUtils.doLoading();
+        KiiThingAdmin.prototype.save.apply(myDevice).then(function(device){
 
-        KiiThingAdmin.prototype.save.apply(myDevice).then(function(response){
-
-            console.log(response);
             AppUtils.whenLoaded();
+            $scope.myDevices = $scope.myApp.getThings();
+            $scope.hideNewDevice = true;
+            $scope.$apply();
         }, function(response){
-
             AppUtils.whenLoaded();
             console.log(response);
+            $scope.hideNewDevice = true;
+            $scope.$apply();
         });
     };
+
+    $scope.cancelNewDevice = function(){
+        $scope.newDevice = {};
+        $scope.hideNewDevice = true;
+    }
 
     $scope.loadMore = function(){
         AppUtils.doLoading();
         $scope.myApp.nextThings(null, $scope.nextQuery).then(function(response){
             $scope.nextQuery = response.query;
             var devices = response.things;
-            $scope.initDevices(devices);
 
             $scope.myDevices = $scope.myApp.getThings();
 
@@ -99,7 +109,67 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
         }, function(){
             AppUtils.whenLoaded();
         });
-    }
+    };
 
 
+  }])
+  .directive('deviceDetail', ['AppUtils', '$timeout', 'DeviceService', function(AppUtils, $timeout, DeviceService){
+    return {
+        scope:{
+            device: '=?',
+            isCollapse: '=?'
+        },
+        replace: true,
+        restrict: 'E',
+        templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/DeviceManager/DeviceDetailContent.template.html',
+        link: function($scope, element, attr){
+            var jsonEditor = null;
+
+            $scope.init = function(){
+                if($scope.isCollapse === undefined){
+                    $scope.isCollapse = true;
+                }
+
+                $scope.customFields = DeviceService.getCustomFields($scope.device);
+
+                activateJsonEditor($scope.device);
+            };
+
+            function activateJsonEditor (){
+                $timeout(function(){
+                    var options = {
+                        mode: 'code'
+                    };
+
+                    jsonEditor = $(element).find('.json-editor')[0];
+                    jsonEditor = new JSONEditor(jsonEditor, options);
+                    jsonEditor.set($scope.customFields);
+                });
+            };
+
+            /**
+             * save device
+             * @param  {[type]} device [description]
+             * @return {[type]}        [description]
+             */
+            $scope.saveDevice = function (device){
+
+                var myDevice = _.clone(device);
+                $scope.customFields = jsonEditor.get();
+
+                _.extend(device.fields, $scope.customFields);
+                
+                AppUtils.doLoading();
+                KiiThingAdmin.prototype.save.apply(myDevice).then(function(response){
+                    console.log(response);
+                    AppUtils.whenLoaded();
+                }, function(response){
+                    AppUtils.whenLoaded();
+                    console.log(response);
+                });
+            };
+
+            $scope.init();
+        }
+    };
   }]);

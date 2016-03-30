@@ -589,6 +589,10 @@
             return this._things;
         };
 
+        KiiPortalApp.prototype.addThing = function(thing){
+            return this._things.splice(0, 0, thing);
+        }
+
         KiiPortalApp.prototype.addThings = function(things){
             this._things = this._things || [];
             this._things = this._things.concat(things);

@@ -10,6 +10,21 @@
     Core: General style
 ----------------------------
 */
+::-webkit-scrollbar {
+  width: 5px; }
+
+/* this targets the default scrollbar (compulsory) */
+::-webkit-scrollbar-track {
+  background-color: transparent; }
+
+/* the new scrollbar will have a flat appearance with the set background color */
+::-webkit-scrollbar-button {
+  background-color: black; }
+
+/* optionally, you can style the top and the bottom buttons (left and right for horizontal bars) */
+::-webkit-scrollbar-corner {
+  background-color: rgba(0, 0, 0, 0.5); }
+
 html,
 body {
   overflow-x: hidden !important;
@@ -70,6 +85,8 @@ body .app-portal > .header {
 
 /*left side - contains sidebar*/
 .left-side {
+  height: 100%;
+  padding-top: 50px;
   position: absolute;
   width: 270px;
   top: 0px;
@@ -84,7 +101,9 @@ body .app-portal > .header {
     font-size: 17px;
     overflow-x: hidden;
     overflow-y: auto;
-    transition: width 0.5s; }
+    margin-right: -50px;
+    transition: width 0.5s;
+    z-index: 12; }
     .left-side .sidebar-left .toggle-button {
       width: 100%;
       text-align: center;
@@ -118,17 +137,16 @@ body .app-portal > .header {
       .left-side .sidebar-left ul li a.active, .left-side .sidebar-left ul li a:hover {
         background: #37424f; }
   .left-side .sidebar-right {
-    width: 220px;
-    float: left;
-    transition: width 0.5px; }
+    height: 100%;
+    overflow-y: auto;
+    z-index: 11; }
+    .left-side .sidebar-right > ul {
+      margin-left: 50px; }
 
 .right-side.shrink {
   margin-left: 270px; }
 
 @media screen and (min-width: 992px) {
-  .left-side {
-    top: 50px;
-    margin-top: 0px; }
   /*Right side strech mode*/
   .right-side.strech > .content-header {
     margin-top: 0px; }
@@ -139,8 +157,6 @@ body .app-portal > .header {
 
 /*Give content full width on xs screens*/
 @media screen and (max-width: 992px) {
-  .left-side {
-    top: 50px; }
   .right-side {
     margin-left: 0; }
   /*Right side strech mode*/
@@ -917,12 +933,14 @@ Gradient Background colors
   padding: 0; }
 
 .sidebar .sidebar-menu > li > a {
+  width: 220px;
   padding: 12px 5px 12px 15px;
   display: block; }
 
 .sidebar .sidebar-menu > li > a > .fa,
 .sidebar .sidebar-menu > li > a > .glyphicon,
 .sidebar .sidebar-menu > li > a > .ion {
+  margin-right: 11px;
   width: 20px; }
 
 .sidebar .sidebar-menu .treeview-menu {
