@@ -1,10 +1,8 @@
 angular.module('StarterPack.Portal.AppManager.UserManager')
     .filter('dateOnly', ['$filter', function($filter) {
+        var angularDateFilter = $filter('date');
         return function(input) {
-            var angularDateFilter = $filter('date');
-            return function(theDate) {
-                return angularDateFilter(theDate, 'yyyy-MM-dd');
-            }
+            return angularDateFilter(input, 'yyyy-MM-dd');
         };
     }])
     .filter('country', ['country', function(country) {
