@@ -88,14 +88,14 @@
           </tr>
           <tr>
             <td colspan="5">
-              <div validate-message status="newUser._status"></div>
+              <div user-validate-message class="panel-bottom pull-left" status="newUser._status"></div>
             </td>
             <td>
               <div class="panel-bottom pull-left">
-                <button class="btn btn-danger" ng-click="cancelAddUser(newUser)">
+                <button type="button" class="btn btn-danger" ng-click="cancelAddUser(newUser)">
                   <span class="fa fa-remove"></span> Cancel
                 </button>
-                <button class="btn btn-success" ng-click="addUser(newUser)">
+                <button type="button" class="btn btn-success" ng-click="addUser(newUser)">
                   <span class="fa fa-user-plus"></span> Save
                 </button>
               </div>
@@ -132,8 +132,8 @@
         <td>{{user._info.phoneNumber}}</td>
         <td>{{user._info.country|country}}</td>
         <td>{{user._info._disabled?'Suspended':'Active'}}</td>
-        <td>{{user._info.createdAt|dateOnly}}</td>
-        <td>{{user._info.modifiedAt|dateOnly}}</td>
+        <td>{{user._info.createdAt|date:'yyyy-MM-dd'}}</td>
+        <td>{{user._info.modifiedAt|date:'yyyy-MM-dd'}}</td>
       </tr>
       <tr ng-repeat-end>
         <td colspan="10" style="padding:0px;">
@@ -196,7 +196,7 @@
                 </div>
                 <div class="row">
                   <div class="panel-bottom pull-left col-md-1"></div>
-                  <div validate-message status="user._status"></div>
+                  <div user-validate-message class="panel-bottom pull-left" status="user._status"></div>
                 </div>
               </uib-tab>
               <uib-tab heading="Attribute">

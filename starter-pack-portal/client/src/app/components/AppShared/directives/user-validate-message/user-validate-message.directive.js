@@ -1,10 +1,10 @@
-angular.module('StarterPack.Portal.AppManager.UserManager')
-    .directive('validateMessage', ['$timeout', function($timeout) {
+angular.module('StarterPack.AppShared')
+    .directive('userValidateMessage', ['$timeout', function($timeout) {
         var timer;
         return {
             restrict: 'EA',
             replace: true,
-            templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/UserManager/UserManager.template.html',
+            templateUrl: 'app/components/AppShared/directives/user-validate-message/user-validate-message.template.html',
             scope: {
                 status: '='
             },
