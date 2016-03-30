@@ -35,7 +35,8 @@
     "angular-cookies": "~1.4.9",
     "kii-storage": "kii-cloud-sdk#~2.4.1",
     "animate.css": "~3.5.1",
-    "ng-jsoneditor": "^1.0.0"
+    "ng-jsoneditor": "^1.0.0",
+    "paho-mqtt-js": "^1.0.1"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"
