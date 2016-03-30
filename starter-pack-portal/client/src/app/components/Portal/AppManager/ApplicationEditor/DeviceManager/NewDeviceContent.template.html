@@ -1,0 +1,101 @@
+<div id="new-device" class="detail-content" uib-collapse="hideNewDevice">
+  <uib-tabset>
+    <uib-tab heading="General">
+      <table class="sub-table">
+        <tr>
+          <td>_vendorThingID</td>
+          <td>
+            <text-limit max="200" ng-model="newDevice.fields._vendorThingID"></text-limit>
+          </td>
+          <td>_password</td>
+          <td>
+            <text-limit max="200" ng-model="newDevice.fields._password"></text-limit>
+          </td>
+        </tr>
+        <tr>
+          <td>_lot</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._lot"></text-limit>
+          </td>
+          <td>_productName</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._productName"></text-limit>
+          </td>
+        </tr>
+        <tr>
+          <td>_firmwareVersion</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._firmwareVersion"></text-limit>
+          </td>
+          <td>_vendor</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._vendor"></text-limit>
+          </td>
+        </tr>
+      </table>
+    </uib-tab>
+    <uib-tab heading="Additional">
+      <table class="sub-table">
+        <tr>
+          <td>_stringField1</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._stringField1"></text-limit>
+          </td>
+          <td>_numberField1</td>
+          <td>
+            <text-limit type="number" max="100" ng-model="newDevice.fields._numberField1"></text-limit>
+          </td>
+        </tr>
+        <tr>
+          <td>_stringField2</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._stringField2"></text-limit>
+          </td>
+          <td>_numberField2</td>
+          <td>
+            <text-limit type="number" max="100" ng-model="newDevice.fields._numberField2"></text-limit>
+          </td>
+        </tr>
+        <tr>
+          <td>_stringField3</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._stringField3"></text-limit>
+          </td>
+          <td>_numberField3</td>
+          <td>
+            <text-limit type="number" max="100" ng-model="newDevice.fields._numberField3"></text-limit>
+          </td>
+        </tr>
+        <tr>
+          <td>_stringField4</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._stringField4"></text-limit>
+          </td>
+          <td>_numberField4</td>
+          <td>
+            <text-limit type="number" max="100" ng-model="newDevice.fields._numberField4"></text-limit>
+          </td>
+        </tr>
+        <tr>
+          <td>_stringField5</td>
+          <td>
+            <text-limit max="100" ng-model="newDevice.fields._stringField5"></text-limit>
+          </td>
+          <td>_numberField5</td>
+          <td>
+            <text-limit type="number" max="100" ng-model="newDevice.fields._numberField5"></text-limit>
+          </td>
+        </tr>
+      </table>
+    </uib-tab>
+    <uib-tab heading="Custom">
+      <div class="json-editor" style="height:300px; width:100%;"></div>
+    </uib-tab>
+  </uib-tabset>
+  <div class="tab-pane-footer clearfix">
+    <div class="clearfix pull-right">
+      <button class="btn btn-danger" ng-click="cancelNewDevice()"><span class="fa fa-remove"></span>Cancel</button>
+      <button class="btn btn-success" ng-click="saveDevice(newDevice)"><span class="fa fa-cloud-upload"></span>Save</button>
+    </div>
+  </div>
+</div>

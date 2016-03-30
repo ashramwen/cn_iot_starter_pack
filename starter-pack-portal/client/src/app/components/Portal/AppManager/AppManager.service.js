@@ -11,7 +11,7 @@ angular.module('StarterPack.Portal.AppManager').factory('AppManagerService', fun
     AppManagerService.portalNavs = [
         {name: 'Dashboard', state: $state.get('app.Portal.AppManager.ApplicationEditor.Dashboard'), icon:'fa-dashboard'},
         {name: 'Users', state: $state.get('app.Portal.AppManager.ApplicationEditor.UserManager'), icon: 'fa-user'},
-        {name: 'Groups', state: $state.get('app.Portal.AppManager.ApplicationEditor.UserGroupManager'), icon: 'fa-group'},
+        {name: 'Groups', state: $state.get('app.Portal.AppManager.ApplicationEditor.UserGroupManager'), icon: 'fa-group', hidden: true},
         {
             name: 'Model Management',
             state: $state.get('app.Portal.AppManager.ApplicationEditor.ModelManager'), icon: 'fa-cube',
