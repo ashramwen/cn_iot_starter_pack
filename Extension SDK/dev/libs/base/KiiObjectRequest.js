@@ -1,4 +1,4 @@
-    
+
 
     root.KiiObjectRequest = (function(){
         function KiiObjectRequest(kiiApp, spec){
@@ -22,7 +22,7 @@
         };
 
         KiiObjectRequest.prototype.getToken = function(){
-            return 'Bearer ' + this._token;
+            return 'bearer ' + this._token;
         };
 
         KiiObjectRequest.prototype.execute = function(callbacks){
