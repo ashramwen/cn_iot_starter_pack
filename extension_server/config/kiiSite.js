@@ -4,5 +4,5 @@ module.exports.kiiSite = {
   jp: 'api-jp.kii.com',
   sg: 'api.sg.kii.com',
   qa: 'qa21.internal.kii.com',
-  jpdev: 'api-development-jp.internal.kii.com' 
+  devjp: 'api-development-jp.internal.kii.com' 
 };
