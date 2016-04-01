@@ -12,14 +12,14 @@ root.KiiPortalMqttRequest = (function(_super) {
             }
         };
         __extends(_spec, spec);
-        // this._appID = kiiApp.getAppID();
-        // this._appKey = kiiApp.getAppKey();
-        // this._token = kiiApp.getAdminContext()._token;
-        // this._url = Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + spec.extraUrl;
-        this._appID = '0ce64137';
-        this._appKey = 'e61d8b23b67a89a944414197452d7663';
-        this._token = '5FWEJIoWHBykcwD75rcT7Uu3VNE32Upc0_ajT85aAAc'
-        this._url = Kii.getBaseURL() + '/apps/0ce64137' + spec.extraUrl;
+        this._appID = kiiApp.getAppID();
+        this._appKey = kiiApp.getAppKey();
+        this._token = kiiApp.getAdmin()._accessToken;
+        this._url = Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + spec.extraUrl;
+        // this._appID = '0ce64137';
+        // this._appKey = 'e61d8b23b67a89a944414197452d7663';
+        // this._token = '5FWEJIoWHBykcwD75rcT7Uu3VNE32Upc0_ajT85aAAc'
+        // this._url = Kii.getBaseURL() + '/apps/0ce64137' + spec.extraUrl;
         this._data = _spec.data;
         this._method = _spec.method;
         this._headers = {};
@@ -99,16 +99,17 @@ KiiPortalMqtt.prototype.init = function() {
             });
         });
     }
-
-    installMQTTForUser().then(function(response) {
-        retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(response) {
-            resolve(response);
+    return new Promise(function(resolve, reject) {
+        installMQTTForUser().then(function(response) {
+            retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(response) {
+                resolve(response);
+            }, function(error) {
+                reject(error);
+            });
         }, function(error) {
             reject(error);
-        });
-    }, function(error) {
-        reject(error);
-    })
+        })
+    });
 }
 
 // subscribes to the topic
