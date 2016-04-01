@@ -5,8 +5,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         $scope.init = function() {
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
-                // var mqtt = new KiiPortalMqtt();
-                // mqtt.init();
+
             });
         };
 
@@ -16,8 +15,8 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 newUser.register({
                     success: function(theUser) {
                         $scope.myApp.user = theUser;
+                        $scope.mqttInit(theUser);
                         $scope.$apply();
-                        AppUtils.whenLoaded();
                     },
                     failure: function(errorString) {
                         console.log(errorString);
@@ -30,6 +29,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             KiiPortalUser.authenticate(user.loginName, user.password, {
                 success: function(theUser) {
                     $scope.myApp.user = theUser;
+                    $scope.mqttInit(theUser);
                     $scope.$apply();
                     AppUtils.whenLoaded();
                 },
@@ -43,4 +43,33 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 }
             });
         };
+
+        var onMessageReceived = function(message) {
+            $scope.$apply(function() {
+                consoleService.log('message ' + JSON.stringify(message));
+                console.log('Message Received by Thing', message);
+
+                var parsed = $scope.thingMqttClient.parseResponse(message);
+                console.log('parsed ' + JSON.stringify(parsed));
+
+                if (parsed.type == 'PUSH_MESSAGE') {
+                    $scope.thingMessage.receivedActions.push(parsed.payload);
+                }
+            });
+        };
+
+        var onConnectionLost = function(responseObject) {
+            console.log('Conneciton Lost');
+        };
+
+        $scope.mqttInit = function(user) {
+            var mqtt = new KiiPortalMqtt(user, onMessageReceived, onConnectionLost);
+            mqtt.init().then(function(res) {
+                console.log('onConnect');
+                // mqtt.connect();
+            }, function(err) {
+                console.log(err);
+                AppUtils.whenLoaded();
+            });
+        }
     }]);

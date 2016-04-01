@@ -2,7 +2,7 @@ root.KiiPortalMqttRequest = (function(_super) {
     __inherits(KiiPortalMqttRequest, _super);
     KiiPortalMqttRequest.prototype.constructor = KiiPortalMqttRequest;
 
-    function KiiPortalMqttRequest(spec) {
+    function KiiPortalMqttRequest(user, spec) {
         var kiiApp = KiiPortalAdmin.getCurrentApp();
         KiiPortalMqttRequest.prototype = new _super(kiiApp, spec);
         var _spec = {
@@ -14,7 +14,7 @@ root.KiiPortalMqttRequest = (function(_super) {
         __extends(_spec, spec);
         this._appID = kiiApp.getAppID();
         this._appKey = kiiApp.getAppKey();
-        this._token = kiiApp.getAdmin()._accessToken;
+        this._token = user._accessToken;
         this._url = Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + spec.extraUrl;
         // this._appID = '0ce64137';
         // this._appKey = 'e61d8b23b67a89a944414197452d7663';
@@ -34,13 +34,19 @@ root.KiiPortalMqttRequest = (function(_super) {
 })(KiiObjectRequest);
 
 root.KiiPortalMqtt = (function() {
-    function KiiPortalMqtt(config, messageHandler, disconnectHandler) {
-        this.config = config;
-        this.messageHandler = messageHandler;
-        this.disconnectHandler = disconnectHandler;
-
-        // var kiiApp = KiiPortalAdmin.getCurrentApp();
-        // this._url = kiiApp.getSiteUrl();
+    /**
+     * [KiiPortalMqtt description]
+     * @param {[type]} user               [description]
+     * @param {[type]} onMessageArrived   [description]
+     * @param {[type]} onConnectionLost   [description]
+     * @param {[type]} onMessageDelivered [description]
+     */
+    function KiiPortalMqtt(user, onMessageArrived, onConnectionLost, onMessageDelivered) {
+        this.config = {};
+        this.user = user;
+        this.onMessageArrived = onMessageArrived;
+        this.onConnectionLost = onConnectionLost;
+        this.onMessageDelivered = onMessageDelivered;
     }
 
     return KiiPortalMqtt;
@@ -48,9 +54,6 @@ root.KiiPortalMqtt = (function() {
 
 KiiPortalMqtt.prototype.init = function() {
     function installMQTTForUser() {
-        // var onComplete = function(response) {
-        //     retrieveMQTTEndpointForUser(theUser, JSON.parse(response).installationID, 5);
-        // };
         return new Promise(function(resolve, reject) {
             var spec = {
                 data: {
@@ -64,7 +67,7 @@ KiiPortalMqtt.prototype.init = function() {
                 extraUrl: '/installations'
             };
 
-            var request = new KiiPortalMqttRequest(spec);
+            var request = new KiiPortalMqttRequest(_self.user, spec);
             request.execute().then(function(response) {
                 resolve(response);
             }, function(error) {
@@ -74,19 +77,15 @@ KiiPortalMqtt.prototype.init = function() {
     }
 
     function retrieveMQTTEndpointForUser(installationID, retryCount) {
-        // var onComplete = function(response) {
-        //     var mqttEndpointInfo = JSON.parse(response);
-        //     connectMQTTEndpointForUser(mqttEndpointInfo);
-        // };
         return new Promise(function(resolve, reject) {
             var spec = {
                 method: 'GET',
                 extraUrl: '/installations/' + installationID + '/mqtt-endpoint'
             };
 
-            var request = new KiiPortalMqttRequest(spec);
+            var request = new KiiPortalMqttRequest(_self.user, spec);
             request.execute().then(function(response) {
-                resolve(response);
+                resolve(response.data);
             }, function(error) {
                 console.log("retry: " + retryCount);
                 if (retryCount > 0) {
@@ -99,10 +98,23 @@ KiiPortalMqtt.prototype.init = function() {
             });
         });
     }
+
+    var _self = this;
     return new Promise(function(resolve, reject) {
         installMQTTForUser().then(function(response) {
-            retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(response) {
-                resolve(response);
+            retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(mqttEndpointInfo) {
+                _self.config = {
+                    host: mqttEndpointInfo.host,
+                    port: mqttEndpointInfo.portWS,
+                    username: mqttEndpointInfo.username,
+                    password: mqttEndpointInfo.password,
+                    clientID: mqttEndpointInfo.mqttTopic
+                };
+                _self.connect().then(function(res) {
+                    resolve(res);
+                }, function(error) {
+                    reject(error);
+                });
             }, function(error) {
                 reject(error);
             });
@@ -122,23 +134,30 @@ KiiPortalMqtt.prototype.connect = function() {
     return new Promise(function(resolve, reject) {
         try {
             this.client = new Paho.MQTT.Client(this.config.host, this.config.port, this.config.clientID);
+            if (this.onConnectionLost)
+                this.client.onConnectionLost = this.onConnectionLost;
+            if (this.onMessageArrived)
+                this.client.onMessageArrived = this.onMessageArrived;
+            if (this.onMessageDelivered)
+                this.client.onMessageDelivered = this.onMessageDelivered;
+
             // connect the client
             this.client.connect({
-                onSuccess: function() {
+                onSuccess: function(res) {
                     // auto subscribe to the topic
                     // this.client.subscribe(this.config.clientID);
-                    resolve();
+                    resolve(res);
                 },
-                onFailure: function(err) { deferred.reject(err) },
+                onFailure: function(err) {
+                    reject(err)
+                },
                 userName: this.config.username,
                 password: this.config.password
             });
-            this.client.onConnectionLost = this.disconnectHandler;
-            this.client.onMessageArrived = this.messageHandler;
         } catch (err) {
             reject(err);
         }
-    });
+    }.bind(this));
 }
 
 // disconnects

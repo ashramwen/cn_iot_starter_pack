@@ -8,5 +8,10 @@
     </div>
     <button type="button" class="btn btn-default" ng-click="login(user)">Sign in</button>
   </form>
-  <div class="alert" ng-if="myApp.user">User: <strong>{{myApp.user.getUsername()}}</strong></div>
+  <div class="alert" ng-if="myApp.user">
+    User: <strong>{{myApp.user.getUsername()}}</strong>
+    <button type="button" class="btn btn-default" ng-click="mqttInit(myApp.user)">
+      <span class="fa fa-refresh"></span>
+    </button>
+  </div>
 </div>
