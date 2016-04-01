@@ -8,5 +8,6 @@ angular.module('StarterPack.Portal.AppManager',['StarterPack.AppShared',
     'StarterPack.Portal.AppManager.Settings',
     'StarterPack.Portal.AppManager.UserGroupManager',
     'StarterPack.Portal.AppManager.UserManager',
-    'StarterPack.Portal.AppManager.VirtualDevice'
+    'StarterPack.Portal.AppManager.VirtualDevice',
+    'StarterPack.Portal.AppManager.Observation'
   ]);
