@@ -3818,11 +3818,11 @@ KiiPortalMqtt.prototype.sendCommand = function(payload, thingID) {
     this.sendMessage(topic, commandMessage);
 }
 
-KiiPortalMqtt.prototype.updateState = function(state, thingID) {
+KiiPortalMqtt.prototype.updateState = function(state, thingID, token) {
     // fill message
     var stateMessage = 'PUT\n';
     stateMessage += 'Content-type:application/json\n';
-    stateMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
+    stateMessage += 'Authorization:Bearer ' + token + '\n';
     // mandatory blank line
     stateMessage += '\n';
     // state
@@ -3835,11 +3835,11 @@ KiiPortalMqtt.prototype.updateState = function(state, thingID) {
     this.sendMessage(topic, stateMessage);
 }
 
-KiiPortalMqtt.prototype.updateActionResults = function(actionResults, thingID, commandID) {
+KiiPortalMqtt.prototype.updateActionResults = function(actionResults, thingID, commandID, token) {
     // fill message
     var actionResultsMessage = 'PUT\n';
     actionResultsMessage += 'Content-type:application/json\n';
-    actionResultsMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
+    actionResultsMessage += 'Authorization:Bearer ' + token + '\n';
     // mandatory blank line
     actionResultsMessage += '\n';
     // payload
