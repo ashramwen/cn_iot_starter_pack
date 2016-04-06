@@ -2,12 +2,11 @@
 
 angular.module('StarterPack.Portal.AppManager.VirtualDevice')
     .controller('VirtualDeviceController', ['$scope', '$rootScope', '$state', 'AppConfig', 'AppUtils', '$uibModal', function($scope, $rootScope, $state, AppConfig, AppUtils, $uibModal) {
-        var demoUser = {
-            'loginName': 'abc3',
-            'password': '1234'
-        }
-
         function demo() {
+            var demoUser = {
+                'loginName': 'abc3',
+                'password': '1234'
+            }
             $scope.login(demoUser);
         }
 
@@ -23,7 +22,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         $scope.init = function() {
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
-                demo();
+                // demo();
             });
         };
 
@@ -111,12 +110,14 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                     var thing = _.findWhere($scope.deviceList, { '_thingID': parsed.payload.thingID });
                     if (thing) {
                         thing._accessToken = parsed.payload.accessToken;
+                        thing.payload = angular.copy(parsed.payload);
                         $scope.currentThing = thing;
                     } else {
                         thing = {
                             '_accessToken': parsed.payload.accessToken,
                             '_vendorThingID': $scope.newThing._vendorThingID,
-                            '_thingID': parsed.payload.thingID
+                            '_thingID': parsed.payload.thingID,
+                            'payload': angular.copy(parsed.payload)
                         }
                         $scope.deviceList.push(thing);
                         $scope.currentThing = thing;
@@ -124,6 +125,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                     $scope.cancel();
                     break;
                 default:
+                    $scope.newThing.message = parsed.payload.message;
                     break;
             }
         }

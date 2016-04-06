@@ -49,9 +49,11 @@
         </div>
       </div>
       <div class="modal-footer ng-scope">
-        <button class="btn btn-success" type="button" ng-click="onboardThing(newThing)">Onboard</button>
-        <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
-        <div>{{onboarding.message}}</div>
+        <div>
+          <button class="btn btn-success" type="button" ng-click="onboardThing(newThing)">Onboard</button>
+          <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+        </div>
+        <div class="text-danger onboard-message" ng-if="newThing.message">{{newThing.message}}</div>
       </div>
     </div>
   </script>
