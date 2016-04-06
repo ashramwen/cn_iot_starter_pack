@@ -6,12 +6,54 @@
     <div class="form-group">
       <input type="password" class="form-control" placeholder="Password" ng-model="user.password">
     </div>
-    <button type="button" class="btn btn-default" ng-click="login(user)">Sign in</button>
+    <button type="button" class="btn btn-default" ng-click="login(user)"><i class="fa fa-sign-in"></i></button>
   </form>
-  <div class="alert" ng-if="myApp.user">
+  <div ng-if="myApp.user">
     User: <strong>{{myApp.user.getUsername()}}</strong>
     <button type="button" class="btn btn-default" ng-click="mqttInit(myApp.user)">
       <span class="fa fa-refresh"></span>
     </button>
   </div>
+  <div class="device" ng-if="mqttInitialed">
+    <div class="device-list clearfix">
+      <div class="new-tile" ng-click="open()"><i class="fa fa-plus"></i></div>
+      <div class="new-tile thing-entity" ng-click="selectThing(device)" ng-repeat="device in deviceList">
+        <div>
+          <div>{{device._thingID}}</div>
+          <div>{{device._vendorThingID}}</div>
+        </div>
+      </div>
+    </div>
+    <div ng-if="currentThing._accessToken">
+      Onboarding vendorThingID: <strong>{{currentThing._vendorThingID}}</strong>
+    </div>
+    <div class="device-panel">
+    </div>
+  </div>
+  <!-- register device modal -->
+  <script type="text/ng-template" id="registerThing.html">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Register Device</h3>
+      </div>
+      <div class="modal-body clearfix">
+        <div>
+          <div class="form-group clearfix">
+            <label>VendorThingID</label>
+            <input ng-model="newThing._vendorThingID" type="text" class="form-control" placeholder="VendorThingID" ng-readonly="newThing._thingID" />
+          </div>
+          <div class="form-group clearfix">
+            <label>Password</label>
+            <input ng-model="newThing.password" type="password" class="form-control" placeholder="Password" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer ng-scope">
+        <button class="btn btn-success" type="button" ng-click="onboardThing(newThing)">Onboard</button>
+        <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+        <div>{{onboarding.message}}</div>
+      </div>
+    </div>
+  </script>
+  <!-- END register device modal -->
 </div>

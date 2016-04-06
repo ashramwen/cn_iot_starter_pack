@@ -1,4 +1,19 @@
-.app-portal-virtualdevice {
-  /*
- * TODO
- **/ }
+.app-portal-virtualdevice .new-tile {
+  float: left;
+  width: 150px;
+  height: 135px;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-align-items: center;
+  align-items: center; }
+
+.app-portal-virtualdevice .thing-entity {
+  font-size: 12px;
+  border: 2px solid #ccc;
+  line-height: 12px; }
+  .app-portal-virtualdevice .thing-entity div {
+    text-align: left; }
+  .app-portal-virtualdevice .thing-entity:hover {
+    border: 2px solid #0099ff; }

@@ -1,17 +1,35 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.VirtualDevice')
-    .controller('VirtualDeviceController', ['$scope', '$rootScope', '$state', 'AppUtils', function($scope, $rootScope, $state, AppUtils) {
+    .controller('VirtualDeviceController', ['$scope', '$rootScope', '$state', 'AppConfig', 'AppUtils', '$uibModal', function($scope, $rootScope, $state, AppConfig, AppUtils, $uibModal) {
+        var demoUser = {
+            'loginName': 'abc3',
+            'password': '1234'
+        }
+
+        function demo() {
+            $scope.login(demoUser);
+        }
+
+        $scope.currentThing = {};
+        $scope.deviceList = [];
+        $scope.thingMessage = {
+            receivedActions: [],
+            state: "",
+            actionResults: "",
+            commandID: ""
+        };
+
         $scope.init = function() {
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
-
+                demo();
             });
         };
 
         $scope.login = function(user) {
             function register(user) {
-                var newUser = KiiUser.userWithUsername(user.loginName, user.password);
+                var newUser = new KiiPortalUser({ 'loginName': user.loginName, 'password': user.password });
                 newUser.register({
                     success: function(theUser) {
                         $scope.myApp.user = theUser;
@@ -30,8 +48,9 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 success: function(theUser) {
                     $scope.myApp.user = theUser;
                     $scope.mqttInit(theUser);
+                    $scope.queryThing();
                     $scope.$apply();
-                    AppUtils.whenLoaded();
+                    // AppUtils.whenLoaded();
                 },
                 failure: function(theUser, errorString) {
                     if (errorString === 'invalid_grant') {
@@ -44,32 +63,108 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             });
         };
 
+        $scope.queryThing = function() {
+            // var clause = KiiClause.equals('_stringField5', AppConfig.VIRTUAL_DEVICE);
+            $scope.myApp.queryThings({}, null, { limit: 200 }).then(function(result) {
+                $scope.deviceList = result.things;
+                $scope.$apply();
+                AppUtils.whenLoaded();
+            }, function(error) {
+                console.log(error);
+                AppUtils.whenLoaded();
+            });
+        }
+
+        $scope.selectThing = function(thing) {
+            if (thing._accessToken) {
+                $scope.currentThing = thing;
+                return;
+            }
+            $scope.newThing = thing;
+            $scope.open();
+        }
+
         var onMessageReceived = function(message) {
             $scope.$apply(function() {
-                consoleService.log('message ' + JSON.stringify(message));
                 console.log('Message Received by Thing', message);
 
-                var parsed = $scope.thingMqttClient.parseResponse(message);
-                console.log('parsed ' + JSON.stringify(parsed));
+                var parsed = $scope.mqtt.parseResponse(message);
+                console.log('parsed: ', parsed);
 
                 if (parsed.type == 'PUSH_MESSAGE') {
                     $scope.thingMessage.receivedActions.push(parsed.payload);
                 }
+                switch (parsed.type) {
+                    case 'PUSH_MESSAGE':
+                        $scope.thingMessage.receivedActions.push(parsed.payload);
+                        break;
+                    case 'ONBOARD_THING':
+                        ONBOARD_THING(parsed);
+                        break;
+                }
             });
         };
+
+        function ONBOARD_THING(parsed) {
+            switch (parsed.code) {
+                case '200':
+                    var thing = _.findWhere($scope.deviceList, { '_thingID': parsed.payload.thingID });
+                    if (thing) {
+                        thing._accessToken = parsed.payload.accessToken;
+                        $scope.currentThing = thing;
+                    } else {
+                        thing = {
+                            '_accessToken': parsed.payload.accessToken,
+                            '_vendorThingID': $scope.newThing._vendorThingID,
+                            '_thingID': parsed.payload.thingID
+                        }
+                        $scope.deviceList.push(thing);
+                        $scope.currentThing = thing;
+                    }
+                    $scope.cancel();
+                    break;
+                default:
+                    break;
+            }
+        }
 
         var onConnectionLost = function(responseObject) {
             console.log('Conneciton Lost');
         };
 
         $scope.mqttInit = function(user) {
-            var mqtt = new KiiPortalMqtt(user, onMessageReceived, onConnectionLost);
-            mqtt.init().then(function(res) {
+            $scope.mqtt = new KiiPortalMqtt(user, onMessageReceived, onConnectionLost);
+            $scope.mqtt.init().then(function(res) {
                 console.log('onConnect');
-                // mqtt.connect();
+                $scope.mqttInitialed = !0;
+                $scope.$apply();
             }, function(err) {
                 console.log(err);
                 AppUtils.whenLoaded();
             });
+        };
+
+        var modalInstance;
+        $scope.open = function() {
+            modalInstance = $uibModal.open({
+                backdrop: 'static',
+                templateUrl: 'registerThing.html',
+                scope: $scope
+            });
+
+            modalInstance.result.then(function(selectedItem) {
+                // $scope.selected = selectedItem;
+            }, function() {
+                // $log.info('Modal dismissed at: ' + new Date());
+            });
+        };
+
+        $scope.onboardThing = function(newThing) {
+            $scope.mqtt.onboardThing(newThing._vendorThingID, newThing.password);
+        }
+
+        $scope.cancel = function() {
+            modalInstance.dismiss('cancel');
+            $scope.newThing = {};
         }
     }]);

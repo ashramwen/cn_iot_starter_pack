@@ -47,62 +47,17 @@ root.KiiPortalMqtt = (function() {
         this.onMessageArrived = onMessageArrived;
         this.onConnectionLost = onConnectionLost;
         this.onMessageDelivered = onMessageDelivered;
+        this.kiiApp = KiiPortalAdmin.getCurrentApp();
     }
 
     return KiiPortalMqtt;
 })();
 
 KiiPortalMqtt.prototype.init = function() {
-    function installMQTTForUser() {
-        return new Promise(function(resolve, reject) {
-            var spec = {
-                data: {
-                    "deviceType": "MQTT",
-                    "development": true
-                },
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/vnd.kii.InstallationCreationRequest+json',
-                },
-                extraUrl: '/installations'
-            };
-
-            var request = new KiiPortalMqttRequest(_self.user, spec);
-            request.execute().then(function(response) {
-                resolve(response);
-            }, function(error) {
-                reject(error);
-            });
-        });
-    }
-
-    function retrieveMQTTEndpointForUser(installationID, retryCount) {
-        return new Promise(function(resolve, reject) {
-            var spec = {
-                method: 'GET',
-                extraUrl: '/installations/' + installationID + '/mqtt-endpoint'
-            };
-
-            var request = new KiiPortalMqttRequest(_self.user, spec);
-            request.execute().then(function(response) {
-                resolve(response.data);
-            }, function(error) {
-                console.log("retry: " + retryCount);
-                if (retryCount > 0) {
-                    setTimeout(function() {
-                        retrieveMQTTEndpointForUser(installationID, retryCount - 1);
-                    }, 5000);
-                } else {
-                    reject(error);
-                }
-            });
-        });
-    }
-
     var _self = this;
     return new Promise(function(resolve, reject) {
-        installMQTTForUser().then(function(response) {
-            retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(mqttEndpointInfo) {
+        _self.installMQTTForUser().then(function(response) {
+            _self.retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(mqttEndpointInfo) {
                 _self.config = {
                     host: mqttEndpointInfo.host,
                     port: mqttEndpointInfo.portWS,
@@ -122,6 +77,62 @@ KiiPortalMqtt.prototype.init = function() {
             reject(error);
         })
     });
+}
+
+/**
+ * [installMQTTForUser description]
+ * @return {[type]} [description]
+ */
+KiiPortalMqtt.prototype.installMQTTForUser = function() {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            data: {
+                "deviceType": "MQTT",
+                "development": true
+            },
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.InstallationCreationRequest+json',
+            },
+            extraUrl: '/installations'
+        };
+
+        var request = new KiiPortalMqttRequest(this.user, spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    }.bind(this));
+}
+
+/**
+ * [retrieveMQTTEndpointForUser description]
+ * @param  {[type]} installationID [description]
+ * @param  {[type]} retryCount     [description]
+ * @return {[type]}                [description]
+ */
+KiiPortalMqtt.prototype.retrieveMQTTEndpointForUser = function(installationID, retryCount) {
+    return new Promise(function(resolve, reject) {
+        var spec = {
+            method: 'GET',
+            extraUrl: '/installations/' + installationID + '/mqtt-endpoint'
+        };
+
+        var request = new KiiPortalMqttRequest(this.user, spec);
+        request.execute().then(function(response) {
+            resolve(response.data);
+        }, function(error) {
+            console.log("retry: " + retryCount);
+            if (retryCount > 0) {
+                setTimeout(function() {
+                    retrieveMQTTEndpointForUser(installationID, retryCount - 1);
+                }, 5000);
+            } else {
+                reject(error);
+            }
+        });
+    }.bind(this));
 }
 
 // subscribes to the topic
@@ -176,12 +187,21 @@ KiiPortalMqtt.prototype.sendMessage = function(topic, message) {
     this.client.send(message);
 }
 
-KiiPortalMqtt.prototype.onboardThing = function(appID, vendorThingID, thingPassword, userID, token) {
+/**
+ * Register thing
+ * @param  {[type]} appID         [description]
+ * @param  {[type]} vendorThingID [description]
+ * @param  {[type]} thingPassword [description]
+ * @param  {[type]} userID        [description]
+ * @param  {[type]} token         [description]
+ * @return {[type]}               [description]
+ */
+KiiPortalMqtt.prototype.onboardThing = function(vendorThingID, thingPassword) {
 
     // fill onboarding message
     var onboardingMessage = 'POST\n';
     onboardingMessage += 'Content-type:application/vnd.kii.OnboardingWithVendorThingIDByOwner+json\n';
-    onboardingMessage += 'Authorization:Bearer ' + token + '\n';
+    onboardingMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
     // TODO: generate ID to check it back
     onboardingMessage += 'X-Kii-RequestID:asdf1234\n';
     // mandatory blank line
@@ -190,53 +210,50 @@ KiiPortalMqtt.prototype.onboardThing = function(appID, vendorThingID, thingPassw
     var payload = {
         vendorThingID: vendorThingID,
         thingPassword: thingPassword,
-        owner: 'USER:' + userID
+        owner: 'USER:' + this.user.getID()
     }
     onboardingMessage += JSON.stringify(payload);
-    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/onboardings';
+    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + this.kiiApp.getAppID() + '/onboardings';
     this.sendMessage(topic, onboardingMessage);
-
 }
 
-KiiPortalMqtt.prototype.sendCommand = function(appID, payload, thingID, token) {
-
+KiiPortalMqtt.prototype.sendCommand = function(payload, thingID) {
     // fill onboarding message
     var commandMessage = 'POST\n';
     commandMessage += 'Content-type:application/json\n';
-    commandMessage += 'Authorization:Bearer ' + token + '\n';
+    commandMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
     // TODO: generate ID to check it back
     commandMessage += 'X-Kii-RequestID:asdf1234\n';
     // mandatory blank line
     commandMessage += '\n';
     // payload
     commandMessage += JSON.stringify(payload);
-    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets' + '/THING:' + thingID + '/commands';
+    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + this.kiiApp.getAppID() + '/targets' + '/THING:' + thingID + '/commands';
     this.sendMessage(topic, commandMessage);
-
 }
 
-KiiPortalMqtt.prototype.updateState = function(appID, state, thingID, token) {
+KiiPortalMqtt.prototype.updateState = function(state, thingID) {
     // fill message
     var stateMessage = 'PUT\n';
     stateMessage += 'Content-type:application/json\n';
-    stateMessage += 'Authorization:Bearer ' + token + '\n';
+    stateMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
     // mandatory blank line
     stateMessage += '\n';
     // state
     stateMessage += state;
 
     // fill topic
-    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets/THING:' + thingID + '/states';
+    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + this.kiiApp.getAppID() + '/targets/THING:' + thingID + '/states';
 
     // send out the message to topic
     this.sendMessage(topic, stateMessage);
 }
 
-KiiPortalMqtt.prototype.updateActionResults = function(appID, actionResults, thingID, commandID, token) {
+KiiPortalMqtt.prototype.updateActionResults = function(actionResults, thingID, commandID) {
     // fill message
     var actionResultsMessage = 'PUT\n';
     actionResultsMessage += 'Content-type:application/json\n';
-    actionResultsMessage += 'Authorization:Bearer ' + token + '\n';
+    actionResultsMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
     // mandatory blank line
     actionResultsMessage += '\n';
     // payload
@@ -246,7 +263,7 @@ KiiPortalMqtt.prototype.updateActionResults = function(appID, actionResults, thi
     actionResultsMessage += JSON.stringify(payload);
 
     // fill topic
-    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + appID + '/targets/THING:' + thingID + '/commands/' + commandID + '/action-results';
+    var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + this.kiiApp.getAppID() + '/targets/THING:' + thingID + '/commands/' + commandID + '/action-results';
 
     // send out the message to topic
     this.sendMessage(topic, actionResultsMessage);

@@ -1,6 +1,25 @@
 @import 'src/app/components/AppShared/scss/global.scss';
-.app-portal-virtualdevice{
-/*
- * TODO
- **/
+.app-portal-virtualdevice {
+    .new-tile {
+        float: left;
+        width: 150px;
+        height: 135px;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        align-items: center;
+    }
+    .thing-entity {
+        font-size: 12px;
+        border: 2px solid #ccc;
+        line-height: 12px;
+        div {
+            text-align: left;
+        }
+        &:hover {
+            border: 2px solid #0099ff;
+        }
+    }
 }
