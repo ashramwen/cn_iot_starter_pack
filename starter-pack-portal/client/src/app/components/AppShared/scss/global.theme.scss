@@ -2296,6 +2296,7 @@ content: '';
     -moz-border-radius: 3px;
     border-radius: 3px;
     border: 1px solid transparent;
+    padding: 7px 12px;
 }
 .btn.btn-default {
     background-color: #fafafa;
@@ -4070,7 +4071,6 @@ white-space: nowrap;
 }
 .panel .panel-heading {
 padding: 10px 15px;
-text-transform: uppercase;
 }
 .bg-info {
 background-color: #7acbee;

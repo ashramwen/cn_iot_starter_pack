@@ -2130,6 +2130,10 @@
             });
         };
 
+        KiiPortalApp.prototype.removeThing = function(thing){
+            __remove(this._things, thing);
+        };
+
         /* =================================== end of things ======================================================= */
         return KiiPortalApp;
     })();
@@ -3390,9 +3394,11 @@
                 _this.setModelId(schema.modelId);
                 _this.createdAt = schema.createdAt;
                 _this.updatedAt = schema.updatedAt;
-                __each(schema.properties, function(property){
-                    _this.properties.push(new KiiPortalSchemaProperty(property));
-                });
+                if(schema.properties){
+                    __each(schema.properties, function(property){
+                        _this.properties.push(new KiiPortalSchemaProperty(property));
+                    });
+                }
             }
             _this._model = model || _this._model;
         };
@@ -3420,7 +3426,7 @@
                     method: 'GET',
                     url: root._apis.MODEL + '/' + model.getUUID() + '/schemas',
                     success: function(response){
-                        var schemasData = response.data.schemas;
+                        var schemasData = response.data.schemas || [];
                         var schemas = [];
 
                         __each(schemasData, function(schema){
@@ -3861,14 +3867,14 @@
             };
 
             this.getName = function(){
-                return _this._name;
+                return _this.get('name');
             };
 
             this.getDescription = function(){
-                return _this._discription;
+                return _this.get('description');
             };
 
-            this.setDescript = function(description){
+            this.setDescription = function(description){
                 _this._description = description;
                 _this.set('description', description);
             };
@@ -3988,7 +3994,7 @@
          */
         KiiPortalTag.prototype.init = function(){
             this.setName(this.get('name'));
-            this.setDescript(this.get('description'));
+            this.setDescription(this.get('description'));
             this.setThingIDs(this.get('thingIDs'));
             this.setCustomData(this.get('customData'));
         };
@@ -3997,6 +4003,7 @@
             if(!this._things){
                 this._things = [];
             }
+            if(this.getThingIDs().indexOf(kiiThing.getThingID())>-1) return;
             this._things.push(kiiThing);
             this.addThingID(kiiThing.getThingID());
         };
@@ -4010,6 +4017,7 @@
         };
 
         KiiPortalTag.prototype.removeThing = function(kiiThing){
+            if(this.getThingIDs().indexOf(kiiThing.getThingID())==-1)return;
             this.removeThingID(kiiThing.getThingID());
             __remove(this._things, kiiThing);
         };
@@ -4019,11 +4027,25 @@
         }
 
         KiiPortalTag.prototype.refreshThings = function(callbacks){
-            var kiiApp, queryClause, inClause, _this;
+            var kiiApp, queryClause, inClause, _this, thingIDs;
 
             _this = this;
             kiiApp = this.getKiiApp();
-            inClause = KiiClause['in']('_thingID', this.getThingIDs());
+            thingIDs = this.getThingIDs() || [];
+
+            if(thingIDs.length == 0){
+                return new Promise(function(resolve, reject){
+                    _this.setThings([]);
+                    _this.setNextThingQuery(null);
+
+                    if(callbacks && callbacks.success){
+                        callbacks.success([]);
+                    }
+                    resolve([]);
+                });
+            }
+
+            inClause = KiiClause['in']('_thingID', thingIDs);
 
             return new Promise(function(resolve, reject){
                 var tagThingCallbacks = {
@@ -4627,6 +4649,38 @@ KiiPortalUser.prototype.update = function(data) {
             }
 
            
+        });
+    };
+
+    /**
+     * remove thing
+     * @param  {[type]} callbacks [description]
+     * @return {[type]}           [description]
+     */
+    KiiThingAdmin.prototype.remove = function(callbacks){
+        var _this = this;
+        return new Promise(function(resolve, reject){
+            var spec;
+
+            spec = {
+                method: 'DELETE',
+                url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
+            };
+
+            var request = new KiiObjectRequest(kiiApp, spec);
+
+            request.execute().then(function(response){
+                kiiApp.removeThing(_this);
+                if(callbacks && callbacks.success){
+                    callbacks.success(_this);
+                }
+                resolve(_this);
+            }, function(error){
+                if(callbacks && callbacks.failure){
+                    callbacks.failure(error);
+                }
+                reject(error);
+            });
         });
     };
 

@@ -1,3 +1,77 @@
+@import 'src/app/components/AppShared/scss/global.scss';
 .app-portal-observation {
-    
+    position: relative;
+
+
+    .tag-container{
+        .gridster{
+            margin: 0px -10px;
+            position: relative;
+        }
+        @media(min-width: 1090px){
+            .gridster{
+                top: -10px;
+            }
+        }
+        position: relative;
+        height: 100%;
+        z-index: 1;
+        &.shrink{
+            padding-right: 210px;
+        }
+    }
+
+    .right-panel{
+        &.fixed{
+            position: fixed;
+            top: 125px;
+            right: 15px;
+        }
+
+        hr{
+            margin: 10px -15px;
+        }
+
+        z-index: 2;
+        position: relative;
+        float: right;
+        top: 0px;
+        max-height: 100%;
+        .panel{
+            width: 200px;
+            @include transition(width 0.3s);
+        }
+
+        &.shrink{
+            .panel{
+                width: auto;
+            }
+        }
+
+        .device-tag{
+            width: 100%;
+            position: relative;
+            height: 37px;
+            margin-bottom: 3px;
+            .fa{
+                position: absolute;
+                right: 10px;
+                top: 12px;
+            }
+        }
+        .new-tag{
+            border: dashed 2px #eee;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            color: #999;
+            cursor: pointer;
+            margin-bottom: 3px;
+            &:hover{
+                color: #000;
+                border: dashed 2px #ccc;
+            }
+        }
+    }
+
 }

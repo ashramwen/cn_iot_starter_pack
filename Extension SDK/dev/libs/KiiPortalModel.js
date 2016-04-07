@@ -477,9 +477,11 @@
                 _this.setModelId(schema.modelId);
                 _this.createdAt = schema.createdAt;
                 _this.updatedAt = schema.updatedAt;
-                __each(schema.properties, function(property){
-                    _this.properties.push(new KiiPortalSchemaProperty(property));
-                });
+                if(schema.properties){
+                    __each(schema.properties, function(property){
+                        _this.properties.push(new KiiPortalSchemaProperty(property));
+                    });
+                }
             }
             _this._model = model || _this._model;
         };
@@ -507,7 +509,7 @@
                     method: 'GET',
                     url: root._apis.MODEL + '/' + model.getUUID() + '/schemas',
                     success: function(response){
-                        var schemasData = response.data.schemas;
+                        var schemasData = response.data.schemas || [];
                         var schemas = [];
 
                         __each(schemasData, function(schema){

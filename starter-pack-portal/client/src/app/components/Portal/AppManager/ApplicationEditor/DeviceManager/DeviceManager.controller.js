@@ -120,7 +120,7 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
     $scope.cancelNewDevice = function(){
         $scope.newDevice = {};
         $scope.hideNewDevice = true;
-    }
+    };
 
     $scope.loadMore = function(){
         AppUtils.doLoading();
@@ -136,8 +136,6 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
             AppUtils.whenLoaded();
         });
     };
-
-
   }])
   .directive('deviceDetail', ['AppUtils', '$timeout', 'DeviceService', function(AppUtils, $timeout, DeviceService){
     return {
@@ -193,6 +191,19 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
                     AppUtils.whenLoaded();
                     console.log(response);
                 });
+            };
+
+            $scope.deleteDevice = function(device){
+                var title = 'Delete Thing',
+                    message = 'Do you want to remove this device?',
+                    func = function(){
+                        device.remove().then(function(){
+                            $scope.myDevices.remove(device);
+                            $scope.$apply();
+                        });
+                    };
+
+                AppUtils.confirm(title, message, func);
             };
 
             $scope.init();

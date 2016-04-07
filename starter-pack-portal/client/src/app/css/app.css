@@ -48,6 +48,17 @@
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
 
+.newField {
+  border: dashed 1px #ddd;
+  text-align: center;
+  height: 32px;
+  line-height: 32px;
+  cursor: pointer;
+  color: #999; }
+  .newField:hover {
+    border: dashed 1px #ccc;
+    color: #000; }
+
 .modal .modal-body {
   overflow: auto;
   max-height: 350px; }

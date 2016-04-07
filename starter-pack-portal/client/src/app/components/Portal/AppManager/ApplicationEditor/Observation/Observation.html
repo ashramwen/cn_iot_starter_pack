@@ -1,6 +1,102 @@
 <div class="app-portal-observation" ng-init="init()">
-  <div></div>
-  <div class="tag-container">
-    <device-board tag="tag" ng-repeat="tag in displayedTags"></device-board>
+  <!-- right panel -->
+  <div class="right-panel" ng-class="{'shrink': !onEdit}">
+    <div class="panel">
+      <div class="panel-heading clearfix">
+        <span ng-show="onEdit">Device Group</span>
+        <div class="pull-right">
+          <span class="fa fa-remove" ng-show="onEdit" ng-click="onEdit = false"></span>
+          <span class="fa fa-edit" ng-show="!onEdit" ng-click="onEdit = true"></span>
+        </div>
+      </div>
+      <div class="panel-body" ng-show="onEdit">
+        <!-- name filter -->
+        <div class="input-group">
+          <input type="text" ng-model="selectedTagName" class="form-control" placeholder="filter tagName...">
+          <span class="input-group-btn">
+              <button type="submit" name="seach" id="search-btn" class="btn btn-flat btn-info"><i class="fa fa-search"></i></button>
+          </span>
+        </div>
+        <!-- end of name filter -->
+        <hr/>
+
+        <div class="new-tag" ng-click="createTag()"><span class="fa fa-plus"></span> Create</div>
+
+        <!-- tags --> 
+        <tag class="device-tag btn" ng-click="toggleTag(tag)" ng-repeat="tag in tags | filter: tagNameFilter" ng-class="tag.getDisplayed()? 'btn-success': 'btn-default'" ng-mouseover="highlightTag(tag)" ng-mouseout="mouseout(tag)">
+          {{tag.getName()}}
+          <span class="fa fa-remove" ng-click="deleteTag(tag, $event)"></span>
+        </tag>
+        <!-- end of tags -->
+      </div>
+    </div>
   </div>
+  <!-- end of right panel -->
+
+  <!-- tag-container -->
+  <div class="tag-container" ng-class="{'shrink': onEdit}">
+    <div gridster="gridsterOpts">
+      <div ng-repeat="tag in tags | filter: displayTagFilter" gridster-item="customItemMap">
+        <device-board tag="tag" my-app="myApp"></device-board>
+      </div>
+    </div>
+  </div>
+  <!-- tag-container -->
 </div>
+
+<!-- create modal template -->
+<script type="text/ng-template" id="app.Portal.AppManager.ApplcationEditor.Observation.CreateModal">
+  <div class="modal-content" ng-init="init()">
+    <div class="modal-header">
+        <h3 class="modal-title">Create Thing Group</h3>
+    </div>
+    <div class="modal-body clearfix">
+      <div class="row">
+        <div class="col-xs-6">
+          <div class="form-group clearfix">
+            <label>Group Name</label>
+            <input type="text" class="form-control" ng-model="tagBO.name"/>
+          </div>
+          <div class="form-group clearfix">
+            <label>Group Description</label>
+            <textarea class="form-control" ng-model="tagBO.description"></textarea>
+          </div>
+        </div>
+        <div class="col-xs-6">
+          <div class="form-group clearfix">
+            <label>Observed fields</label>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Field Name</th>
+                  <th>Display Name</th>
+                </tr>
+              </thead>
+              <tr ng-repeat="field in tagBO.fields">
+                <td>
+                  <input class="form-control" type="text" ng-model="field.fieldName" />
+                </td>
+                <td>
+                  <input class="form-control" type="text" ng-model="field.displayName" />
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <div class="newField" ng-click="newField()">
+                    <span class="fa fa-plus"></span>Add New Field
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer clearfix">
+      <div class="pull-right">
+        <button class="btn btn-success" ng-click="ok()">Create</button><button ng-click="cancel()" class="btn btn-danger">Cancel</button>
+      </div>
+    </div>
+  </div>
+</script>
+<!-- end of create modal template -->

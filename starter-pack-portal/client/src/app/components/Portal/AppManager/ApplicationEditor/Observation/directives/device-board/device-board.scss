@@ -1,8 +1,62 @@
 .device-board{
-    .newField{
-        border:solid 1px #ccc;
-        text-align: center;
-        height: 32px;
-        line-height: 32px;
+    &.panel{
+        height: 100%;
+        .panel-body{
+            height: 100%;
+            padding-top: 41px;
+            margin-top: -41px;
+            .panel-body-container{
+                height: 100%;
+                width: 100%;
+                overflow: auto;
+            }
+        }
+    }
+
+    .tag-editBoard{
+        padding-top: 10px;
+        .operation{
+            text-align: center;
+        }
+        table.tag-detail{
+            width: 100%;
+            td{
+                padding: 5px;
+            }
+        }
+        .tab-content{
+            border: solid 1px #ddd;
+            border-top: 0px;
+            padding: 15px;
+        }
+    }
+    .fa.fa-refresh.start{
+        color: #23b7e5;
+        -webkit-transform: translateZ(0);
+        -ms-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-animation: loading 0.8s infinite linear;
+        animation: loading 0.8s infinite linear;
+    }
+
+    @-webkit-keyframes loading {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+    }
+    @keyframes loading {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
     }
 }

@@ -172,3 +172,36 @@
         });
     };
 
+    /**
+     * remove thing
+     * @param  {[type]} callbacks [description]
+     * @return {[type]}           [description]
+     */
+    KiiThingAdmin.prototype.remove = function(callbacks){
+        var _this = this;
+        return new Promise(function(resolve, reject){
+            var spec, kiiApp;
+            
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+            spec = {
+                method: 'DELETE',
+                url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
+            };
+
+            var request = new KiiObjectRequest(kiiApp, spec);
+
+            request.execute().then(function(response){
+                kiiApp.removeThing(_this);
+                if(callbacks && callbacks.success){
+                    callbacks.success(_this);
+                }
+                resolve(_this);
+            }, function(error){
+                if(callbacks && callbacks.failure){
+                    callbacks.failure(error);
+                }
+                reject(error);
+            });
+        });
+    };
+

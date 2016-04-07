@@ -612,6 +612,10 @@
             });
         };
 
+        KiiPortalApp.prototype.removeThing = function(thing){
+            __remove(this._things, thing);
+        };
+
         /* =================================== end of things ======================================================= */
         return KiiPortalApp;
     })();
