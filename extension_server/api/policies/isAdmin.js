@@ -7,7 +7,7 @@ module.exports = function isAdmin(req, res, next) {
 	var authorization = req.headers['authorization'];
 
 	if (appID && appKey && site && authorization) {
-		var host = (process.env.STARTER_PACK_ENV == "PRODUCTION") ? sails.config.kiiSite[site] : sails.config.kiiSite.qa;
+		var host = sails.config.kiiSite[site];
 		var options = {
 			method: 'GET',
 			url: 'https://' + host + '/api/apps/' + appID + '/configuration/parameters/isMasterApp',
@@ -17,6 +17,8 @@ module.exports = function isAdmin(req, res, next) {
 				'x-kii-appid': appID
 			}
 		};
+
+		console.log(options)
 
 		sails.request(options, function(error, response, body) {
 			if (error) throw new Error(error);

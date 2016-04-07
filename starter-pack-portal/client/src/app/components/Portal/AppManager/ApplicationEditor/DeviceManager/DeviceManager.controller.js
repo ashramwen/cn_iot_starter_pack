@@ -1,15 +1,21 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.DeviceManager')
-  .controller('DeviceManagerController', ['$scope', '$rootScope', '$state', 'AppUtils', '$timeout', 'DeviceService', function($scope, $rootScope, $state, AppUtils, $timeout, DeviceService) {
+  .controller('DeviceManagerController', ['$scope', '$rootScope', '$state', 'AppUtils', '$timeout', 'DeviceService', 'AppConfig', function($scope, $rootScope, $state, AppUtils, $timeout, DeviceService, AppConfig) {
     
     $scope.myDevices = [];
     $scope.deviceEdit = {};
     $scope.collapseIndex = -1;
     $scope.hideNewDevice = true;
     $scope.newDevice = {};
+    $scope.searchParam = {};
+
     var jsonEditor = null;
 
+    /**
+     * thing search options
+     * @type {Array}
+     */
     $scope.searchOptions = [
         {type: 'string', text: '_vendorThingID', value: '_vendorThingID'},
         {type: 'string', text: '_thingID', value: '_thingID'},
@@ -31,22 +37,42 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
         {type: 'float', text: '_numberField5', value: '_numberField5'}
     ];
 
+    $scope.searchDevices = function(searchParam){
+
+        var whereClauses = [],
+            baseClause = KiiClause.and();
+
+        if(searchParam){
+            var fieldName = searchParam.field,
+                fieldValue = searchParam.value;
+
+            if(fieldName && fieldValue){
+                var searchClause = KiiClause.equals(fieldName, fieldValue);
+                whereClauses = [searchClause];
+            }
+        }
+
+        whereClauses.push(KiiClause.notEquals('_stringField5', AppConfig.VIRTUAL_DEVICE));
+
+        baseClause._setWhereClauses(whereClauses);
+        AppUtils.doLoading();
+
+        $scope.myApp.queryThings({}, baseClause, {limit: 5}).then(function(result){
+            $scope.myDevices = result.things;
+            $scope.nextQuery = result.query;
+
+            $scope.$apply();
+
+            AppUtils.whenLoaded();
+        }, function(){
+            AppUtils.whenLoaded();
+        });
+    };
+
     $scope.init = function(){
         $scope.$watch('appReady', function(ready){
             if(!ready) return;
-            AppUtils.doLoading();
-            $scope.myApp.queryThings({}, null, {limit: 5}).then(function(result){
-
-                $scope.myDevices = result.things;
-                $scope.nextQuery = result.query;
-
-                $scope.$apply();
-
-                AppUtils.whenLoaded();
-            }, function(error){
-                console.log(error);
-                AppUtils.whenLoaded();
-            });;
+            $scope.searchDevices();
         });
         activateJsonEditor();
     };

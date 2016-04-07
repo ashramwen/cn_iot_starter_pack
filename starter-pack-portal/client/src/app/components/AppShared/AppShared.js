@@ -16,6 +16,7 @@ angular.module('StarterPack.AppShared', ['ngAnimate', 'ngCookies', 'ngSanitize',
         MODEL_NAME: 'MODEL_NAME',
         FIRMWARE_NAMESPACE_NAME: 'FIRMWARE_NAMESPACE_NAME'
     },
+    VIRTUAL_DEVICE: 'VIRTUAL_DEVICE',
     Schema_Type_Enum: KiiPortalSchemaProperty.Schema_Type_Enum
 })
 .config(function(localStorageServiceProvider, AppConfig) {

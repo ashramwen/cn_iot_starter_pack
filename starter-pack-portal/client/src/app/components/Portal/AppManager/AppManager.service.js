@@ -9,6 +9,7 @@ angular.module('StarterPack.Portal.AppManager').factory('AppManagerService', fun
      * @type {Array}
      */
     AppManagerService.portalNavs = [
+        {name: 'Observation', state: $state.get('app.Portal.AppManager.ApplicationEditor.Observation'), icon:'fa-eye'},
         {name: 'Dashboard', state: $state.get('app.Portal.AppManager.ApplicationEditor.Dashboard'), icon:'fa-dashboard'},
         {name: 'Users', state: $state.get('app.Portal.AppManager.ApplicationEditor.UserManager'), icon: 'fa-user'},
         {name: 'Groups', state: $state.get('app.Portal.AppManager.ApplicationEditor.UserGroupManager'), icon: 'fa-group', hidden: true},

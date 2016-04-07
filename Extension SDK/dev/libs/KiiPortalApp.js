@@ -594,8 +594,22 @@
         }
 
         KiiPortalApp.prototype.addThings = function(things){
+            var _this = this;
             this._things = this._things || [];
-            this._things = this._things.concat(things);
+
+            __each(things, function(thingToAdd){
+                var flag = true;
+
+                __each(_this._things, function(thing){
+                    if(thing.getThingID() == thingToAdd.getThingID()){
+                        flag = false;
+                    }
+                });
+
+                if(flag){
+                    _this._things.push(thingToAdd);
+                }
+            });
         };
 
         /* =================================== end of things ======================================================= */

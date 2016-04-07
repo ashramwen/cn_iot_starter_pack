@@ -1,0 +1,43 @@
+<div class="device-board panel">
+  <div class="panel-heading">{{tag.getName()}}</div>
+  <div class="panel-body">
+    <div class="tagDashboard">
+      <table>
+        <thead>
+          <th>_vendorThingID</th>
+          <th ng-repeat="field in fields">{{field.displayName}}</th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{device.getVendorThingID()}}</td>
+            <td ng-repeat="field in fields">{{device[field.fieldName]}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tagEditBoard">
+      <table>
+        <thead>
+          <tr>
+            <th>fieldName</th>
+            <th>fieldDisplayName</th>
+            <th>Operation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="field in editingFields">
+            <td><input class="form-control" type="text" ng-model="field.fieldName" /></td>
+            <td><input class="form-control" type="text" ng-model="field.displayName" /></td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              <div class="newField">
+                <span class="fa fa-plus"></span>Add New Field
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

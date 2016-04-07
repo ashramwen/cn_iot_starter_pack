@@ -97,5 +97,14 @@ angular.module('StarterPack.Portal.AppManager')
           return 'Settings';
         },
         previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
+      })
+      .state('app.Portal.AppManager.ApplicationEditor.Observation', {
+        url: '/Observation',
+        templateUrl: 'app/components/Portal/AppManager/ApplicationEditor/Observation/Observation.html',
+        controller: 'ObservationController',
+        getName: function(){
+          return 'Observation';
+        },
+        previous: 'app.Portal.AppManager.ApplicationEditor.ApplicationInfo'
       });
   });
