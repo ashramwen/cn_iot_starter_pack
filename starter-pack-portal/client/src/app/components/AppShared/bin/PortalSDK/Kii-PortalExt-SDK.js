@@ -4660,8 +4660,9 @@ KiiPortalUser.prototype.update = function(data) {
     KiiThingAdmin.prototype.remove = function(callbacks){
         var _this = this;
         return new Promise(function(resolve, reject){
-            var spec;
-
+            var spec, kiiApp;
+            
+            kiiApp = KiiPortalAdmin.getCurrentApp();
             spec = {
                 method: 'DELETE',
                 url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
