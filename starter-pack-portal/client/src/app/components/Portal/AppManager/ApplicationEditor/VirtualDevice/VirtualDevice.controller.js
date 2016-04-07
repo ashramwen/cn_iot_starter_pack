@@ -14,15 +14,15 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         $scope.deviceList = [];
         $scope.thingMessage = {
             receivedActions: [],
-            state: "",
-            actionResults: "",
-            commandID: ""
+            state: '',
+            actionResults: '',
+            commandID: ''
         };
 
         $scope.init = function() {
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
-                // demo();
+                demo();
             });
         };
 

@@ -8,11 +8,16 @@
     </div>
     <button type="button" class="btn btn-default" ng-click="login(user)"><i class="fa fa-sign-in"></i></button>
   </form>
-  <div ng-if="myApp.user">
-    User: <strong>{{myApp.user.getUsername()}}</strong>
-    <button type="button" class="btn btn-default" ng-click="mqttInit(myApp.user)">
-      <span class="fa fa-refresh"></span>
-    </button>
+  <div class="clearfix">
+    <div class="col-md-2" ng-if="myApp.user">
+      User: <strong>{{myApp.user.getUsername()}}</strong>
+      <button type="button" class="btn btn-default" ng-click="mqttInit(myApp.user)">
+        <span class="fa fa-refresh"></span>
+      </button>
+    </div>
+    <div class="col-md-2" ng-if="currentThing._accessToken">
+      Onboarding vendorThingID: <strong>{{currentThing._vendorThingID}}</strong>
+    </div>
   </div>
   <div class="device" ng-if="mqttInitialed">
     <div class="device-list clearfix">
@@ -24,10 +29,39 @@
         </div>
       </div>
     </div>
-    <div ng-if="currentThing._accessToken">
-      Onboarding vendorThingID: <strong>{{currentThing._vendorThingID}}</strong>
-    </div>
-    <div class="device-panel">
+    <div class="device-panel" ng-if="currentThing._accessToken">
+      <div class="state">
+        <div class="switch">
+          <div><i class="fa fa-power-off fa-3x"></i></div>
+          <div><i class="fa fa-upload fa-3x"></i></div>
+        </div>
+        <div class="title">Thing Attribute</div>
+        <div class="content clearfix">
+          <div>VendorThingID: <span>{{currentThing._vendorThingID}}</span></div>
+          <div>ThingID: <span>{{currentThing._thingID}}</span></div>
+          <div>Model: <span>{{currentThing.model}}</span></div>
+          <div>Firmware Version: <span>{{currentThing.firmware}}</span></div>
+          <div>Password: <span>***</span></div>
+          <div>CreatedAt: <span>{{currentThing._created|date:'yyyy-MM-dd'}}</span></div>
+        </div>
+        <div class="title">State Attribute</div>
+        <div class="content">
+        </div>
+      </div>
+      <div class="command-panel">
+        <div class="title">Console</div>
+        <div class="content">{{feedback}}</div>
+        <div class="title">Controller</div>
+        <div class="content clearfix">
+          <div class="pull-left">
+            <div>Get Current States</div>
+            <div>Send Command</div>
+            <div>Manage triggers</div>
+            <div>Ownership</div>
+          </div>
+          <div class="pull-left"></div>
+        </div>
+      </div>
     </div>
   </div>
   <!-- register device modal -->
