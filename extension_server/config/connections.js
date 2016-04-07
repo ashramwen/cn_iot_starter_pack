@@ -60,8 +60,8 @@ module.exports.connections = {
     adapter: 'sails-mongo',
     host: 'localhost',
     port: 27017,
-    user: 'leonardean',
-    password: 'xzw1989724',
+    user: process.env.MONGODB_USERNAME,
+    password: process.env.MONGODB_PASSWD,
     database: 'Kii_Starter_Pack'
   },
 
