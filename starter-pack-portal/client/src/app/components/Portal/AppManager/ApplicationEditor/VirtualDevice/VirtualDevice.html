@@ -50,7 +50,7 @@
       </div>
       <div class="command-panel">
         <div class="title">Console</div>
-        <div class="content">{{feedback}}</div>
+        <div class="content"><pre ng-if="feedback">{{feedback|json}}</pre></div>
         <div class="title">Controller</div>
         <div class="clearfix">
           <div class="command pull-left" ng-init="command='1'">
@@ -67,9 +67,9 @@
                   <label for="commandPayload">Command actions</label>
                   <div class="form-inline">
                     <input class="form-control" type="text" ng-model="action.name" />
-                    <select class="form-control" ng-model="action.type">
-                      <option selected>boolean</option>
+                    <select class="form-control" ng-model="action.type" ng-init="action.type='string'">
                       <option>string</option>
+                      <option>boolean</option>
                       <option>number</option>
                     </select>
                     <input class="form-control" type="text" ng-model="action.value" />

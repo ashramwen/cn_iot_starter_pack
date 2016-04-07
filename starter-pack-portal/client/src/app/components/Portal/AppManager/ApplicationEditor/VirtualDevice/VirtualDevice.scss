@@ -41,7 +41,7 @@
                     cursor: pointer;
                     border: 1px solid #666;
                     padding: 5px;
-                    &:hover{
+                    &:hover {
                         background-color: #ccc;
                     }
                 }
@@ -54,6 +54,7 @@
             padding: 5px;
             border: 1px solid #666;
             i:hover {
+                cursor: pointer;
                 color: #0099ff;
             }
         }

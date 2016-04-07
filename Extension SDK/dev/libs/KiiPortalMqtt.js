@@ -300,7 +300,7 @@ KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
         }
     }
 
-    console.log("messageToParse", messageToParse);
+    // console.log("messageToParse", messageToParse);
 
     var message = messageToParse.payloadString;
     var topic = messageToParse.destinationName;

@@ -100,11 +100,14 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                     $scope.thingMessage.receivedActions.push(parsed.payload);
                 }
                 switch (parsed.type) {
+                    case 'ONBOARD_THING':
+                        ONBOARD_THING(parsed);
+                        break;
                     case 'PUSH_MESSAGE':
                         $scope.thingMessage.receivedActions.push(parsed.payload);
                         break;
-                    case 'ONBOARD_THING':
-                        ONBOARD_THING(parsed);
+                    case 'SEND_COMMAND':
+                        $scope.feedback = parsed;
                         break;
                 }
             });
@@ -213,6 +216,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         }
 
         $scope.onClickSendCommand = function() {
+            $scope.feedback = undefined;
             // payload
             var payload = {
                 actions: $scope.userMessage.actions,
