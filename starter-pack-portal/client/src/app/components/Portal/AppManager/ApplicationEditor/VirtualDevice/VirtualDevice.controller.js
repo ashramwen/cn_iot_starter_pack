@@ -11,12 +11,18 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         }
 
         $scope.currentThing = {};
+        $scope.newThing = {};
         $scope.deviceList = [];
+        $scope.selectedActions = [];
         $scope.thingMessage = {
             receivedActions: [],
             state: '',
             actionResults: '',
             commandID: ''
+        };
+        $scope.userMessage = {
+            actions: [],
+            receivedActionResults: []
         };
 
         $scope.init = function() {
@@ -28,7 +34,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
 
         $scope.login = function(user) {
             function register(user) {
-                var newUser = new KiiPortalUser({ 'loginName': user.loginName, 'password': user.password });
+                var newUser = KiiUser.userWithUsername(username, password);
                 newUser.register({
                     success: function(theUser) {
                         $scope.myApp.user = theUser;
@@ -43,7 +49,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             }
 
             AppUtils.doLoading();
-            KiiPortalUser.authenticate(user.loginName, user.password, {
+            KiiUser.authenticate(user.loginName, user.password, {
                 success: function(theUser) {
                     $scope.myApp.user = theUser;
                     $scope.mqttInit(theUser);
@@ -63,8 +69,8 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         };
 
         $scope.queryThing = function() {
-            // var clause = KiiClause.equals('_stringField5', AppConfig.VIRTUAL_DEVICE);
-            $scope.myApp.queryThings({}, null, { limit: 200 }).then(function(result) {
+            var clause = KiiClause.equals('_stringField5', AppConfig.VIRTUAL_DEVICE);
+            $scope.myApp.queryThings({}, clause, { limit: 200 }).then(function(result) {
                 $scope.deviceList = result.things;
                 $scope.$apply();
                 AppUtils.whenLoaded();
@@ -162,11 +168,58 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         };
 
         $scope.onboardThing = function(newThing) {
-            $scope.mqtt.onboardThing(newThing._vendorThingID, newThing.password);
+            var thingProperties = { '_stringField5': 'VIRTUAL_DEVICE' }
+            $scope.mqtt.onboardThing(newThing._vendorThingID, newThing.password, thingProperties);
         }
 
         $scope.cancel = function() {
             modalInstance.dismiss('cancel');
             $scope.newThing = {};
+        }
+
+        $scope.onClickAddAction = function(action) {
+            if (!angular.isDefined(action.name) ||  !angular.isDefined(action.type) ||  !angular.isDefined(action.value)) {
+                return;
+            }
+
+            if (action.type == 'boolean' && !(action.value == 'true' || action.value == 'false')) {
+                return;
+            }
+
+            if (action.type == 'number' && !(!isNaN(parseFloat(action.value)) && isFinite(action.value))) {
+                return;
+            }
+
+            var insertAction = {
+                name: action.name,
+                type: action.type,
+                value: action.value
+            }
+            var actionObject = {};
+            if (action.type == 'string') {
+                actionObject[action.name] = action.value;
+            } else if (action.type == 'number') {
+                actionObject[action.name] = new Number(action.value);
+            } else if (action.type == 'boolean') {
+                actionObject[action.name] = new Boolean(action.value);
+            }
+            $scope.selectedActions.push(insertAction);
+            $scope.userMessage.actions.push(actionObject);
+        }
+
+        $scope.onClickDeleteAction = function(index) {
+            $scope.selectedActions.splice(index, 1);
+            $scope.userMessage.actions.splice(index, 1);
+        }
+
+        $scope.onClickSendCommand = function() {
+            // payload
+            var payload = {
+                actions: $scope.userMessage.actions,
+                issuer: 'USER:' + $scope.myApp.user._uuid,
+                schema: 'SmartLight',
+                schemaVersion: 1
+            };
+            $scope.mqtt.sendCommand(payload, $scope.currentThing._thingID);
         }
     }]);

@@ -52,14 +52,52 @@
         <div class="title">Console</div>
         <div class="content">{{feedback}}</div>
         <div class="title">Controller</div>
-        <div class="content clearfix">
-          <div class="pull-left">
-            <div>Get Current States</div>
-            <div>Send Command</div>
-            <div>Manage triggers</div>
-            <div>Ownership</div>
+        <div class="clearfix">
+          <div class="command pull-left" ng-init="command='1'">
+            <div ng-click="command='1'">Get Current States</div>
+            <div ng-click="command='2'">Send Command</div>
+            <!-- <div ng-click="command='3'">Manage triggers</div> -->
+            <!-- <div ng-click="command='4'">Ownership</div> -->
           </div>
-          <div class="pull-left"></div>
+          <div class="pull-left" ng-switch="command">
+            <div class="content" ng-switch-when="1"></div>
+            <div class="content" ng-switch-when="2">
+              <form class="form">
+                <div class="form-group">
+                  <label for="commandPayload">Command actions</label>
+                  <div class="form-inline">
+                    <input class="form-control" type="text" ng-model="action.name" />
+                    <select class="form-control" ng-model="action.type">
+                      <option selected>boolean</option>
+                      <option>string</option>
+                      <option>number</option>
+                    </select>
+                    <input class="form-control" type="text" ng-model="action.value" />
+                    <button class="btn btn-positive" ng-click="onClickAddAction(action)">+</button>
+                  </div>
+                  <table class="table table-striped">
+                    <tr>
+                      <th>name</th>
+                      <th>type</th>
+                      <th>value</th>
+                      <th></th>
+                    </tr>
+                    <tr ng-repeat="actionValue in selectedActions">
+                      <td>{{actionValue.name}}</td>
+                      <td>{{actionValue.type}}</td>
+                      <td>{{actionValue.value}}</td>
+                      <td>
+                        <button class="btn btn-danger" ng-click="onClickDeleteAction($index)">X</button>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <button type="button" class="btn btn-default" ng-click="onClickSendCommand()">Send command</button>
+              </form>
+            </div>
+            <div class="content" ng-switch-when="3"></div>
+            <div class="content" ng-switch-when="4"></div>
+          </div>
         </div>
       </div>
     </div>

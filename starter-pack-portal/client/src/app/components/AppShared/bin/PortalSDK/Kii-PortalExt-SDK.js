@@ -3796,7 +3796,7 @@ KiiPortalMqtt.prototype.sendMessage = function(topic, message) {
  * @param  {[type]} token         [description]
  * @return {[type]}               [description]
  */
-KiiPortalMqtt.prototype.onboardThing = function(vendorThingID, thingPassword) {
+KiiPortalMqtt.prototype.onboardThing = function(vendorThingID, thingPassword, thingProperties) {
 
     // fill onboarding message
     var onboardingMessage = 'POST\n';
@@ -3811,6 +3811,9 @@ KiiPortalMqtt.prototype.onboardThing = function(vendorThingID, thingPassword) {
         vendorThingID: vendorThingID,
         thingPassword: thingPassword,
         owner: 'USER:' + this.user.getID()
+    };
+    if (thingProperties) {
+        payload.thingProperties = thingProperties
     }
     onboardingMessage += JSON.stringify(payload);
     var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + this.kiiApp.getAppID() + '/onboardings';
