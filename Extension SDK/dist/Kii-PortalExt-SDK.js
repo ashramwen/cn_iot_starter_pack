@@ -3648,6 +3648,7 @@ root.KiiPortalMqtt = (function() {
         this.onConnectionLost = onConnectionLost;
         this.onMessageDelivered = onMessageDelivered;
         this.kiiApp = KiiPortalAdmin.getCurrentApp();
+        this.Constant_X_Kii_RequestID = "asdf1234";
     }
 
     return KiiPortalMqtt;
@@ -3803,7 +3804,7 @@ KiiPortalMqtt.prototype.onboardThing = function(vendorThingID, thingPassword, th
     onboardingMessage += 'Content-type:application/vnd.kii.OnboardingWithVendorThingIDByOwner+json\n';
     onboardingMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
     // TODO: generate ID to check it back
-    onboardingMessage += 'X-Kii-RequestID:asdf1234\n';
+    onboardingMessage += 'X-Kii-RequestID:' + this.Constant_X_Kii_RequestID + '\n';
     // mandatory blank line
     onboardingMessage += '\n';
     // payload
@@ -3826,7 +3827,7 @@ KiiPortalMqtt.prototype.sendCommand = function(payload, thingID) {
     commandMessage += 'Content-type:application/json\n';
     commandMessage += 'Authorization:Bearer ' + this.user._accessToken + '\n';
     // TODO: generate ID to check it back
-    commandMessage += 'X-Kii-RequestID:asdf1234\n';
+    commandMessage += 'X-Kii-RequestID:' + this.Constant_X_Kii_RequestID + '\n';
     // mandatory blank line
     commandMessage += '\n';
     // payload
@@ -4315,9 +4316,8 @@ root.KiiPortalUserRequest = (function(_super) {
     return KiiPortalUserRequest;
 })(KiiObjectRequest);
 
-root.KiiPortalUser = (function(_super, _super2) {
+root.KiiPortalUser = (function(_super) {
     __inherits(KiiPortalUser, _super);
-    __inherits(KiiPortalUser, _super2);
     KiiPortalUser.prototype.constructor = KiiPortalUser;
 
     function KiiPortalUser(data) {
@@ -4342,7 +4342,7 @@ root.KiiPortalUser = (function(_super, _super2) {
         // this._info._hasPassword = data._hasPassword;
     };
     return KiiPortalUser;
-})(KiiUser, KiiUserAdmin);
+})(KiiUserAdmin);
 
 /**
  * Retrieve a list of KiiPortalUser

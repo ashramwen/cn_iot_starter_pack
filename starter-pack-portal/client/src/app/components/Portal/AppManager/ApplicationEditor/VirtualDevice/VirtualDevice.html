@@ -39,14 +39,13 @@
         <div class="content clearfix">
           <div>VendorThingID: <span>{{currentThing._vendorThingID}}</span></div>
           <div>ThingID: <span>{{currentThing._thingID}}</span></div>
-          <div>Model: <span>{{currentThing.model}}</span></div>
-          <div>Firmware Version: <span>{{currentThing.firmware}}</span></div>
+          <!-- <div>Model: <span>{{currentThing.model}}</span></div> -->
+          <div>Firmware Version: <span>{{currentThing.fields._firmwareVersion}}</span></div>
           <div>Password: <span>***</span></div>
           <div>CreatedAt: <span>{{currentThing._created|date:'yyyy-MM-dd'}}</span></div>
         </div>
-        <div class="title">State Attribute</div>
-        <div class="content">
-        </div>
+        <!-- <div class="title">State Attribute</div>
+        <div class="content"></div> -->
       </div>
       <div class="command-panel">
         <div class="title">Console</div>

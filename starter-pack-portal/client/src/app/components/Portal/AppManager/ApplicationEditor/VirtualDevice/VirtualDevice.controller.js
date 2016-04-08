@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('StarterPack.Portal.AppManager.VirtualDevice')
-    .controller('VirtualDeviceController', ['$scope', '$rootScope', '$state', 'AppConfig', 'AppUtils', '$uibModal', function($scope, $rootScope, $state, AppConfig, AppUtils, $uibModal) {
+    .controller('VirtualDeviceController', ['$scope', '$rootScope', '$state', 'AppConfig', 'AppUtils', '$uibModal', 'thingService', function($scope, $rootScope, $state, AppConfig, AppUtils, $uibModal, thingService) {
         function demo() {
             var demoUser = {
                 'loginName': 'abc3',
@@ -131,6 +131,9 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                         $scope.deviceList.push(thing);
                         $scope.currentThing = thing;
                     }
+                    thingService.getState(thing).then(function(res) {
+                        var a = 1;
+                    });
                     $scope.cancel();
                     break;
                 default:
@@ -171,7 +174,10 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         };
 
         $scope.onboardThing = function(newThing) {
-            var thingProperties = { '_stringField5': 'VIRTUAL_DEVICE' }
+            var thingProperties = {
+                '_stringField5': 'VIRTUAL_DEVICE',
+                '_firmwareVersion': '0.0.1'
+            }
             $scope.mqtt.onboardThing(newThing._vendorThingID, newThing.password, thingProperties);
         }
 

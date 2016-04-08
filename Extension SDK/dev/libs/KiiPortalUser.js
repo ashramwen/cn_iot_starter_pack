@@ -79,9 +79,8 @@ root.KiiPortalUserRequest = (function(_super) {
     return KiiPortalUserRequest;
 })(KiiObjectRequest);
 
-root.KiiPortalUser = (function(_super, _super2) {
+root.KiiPortalUser = (function(_super) {
     __inherits(KiiPortalUser, _super);
-    __inherits(KiiPortalUser, _super2);
     KiiPortalUser.prototype.constructor = KiiPortalUser;
 
     function KiiPortalUser(data) {
@@ -106,7 +105,7 @@ root.KiiPortalUser = (function(_super, _super2) {
         // this._info._hasPassword = data._hasPassword;
     };
     return KiiPortalUser;
-})(KiiUser, KiiUserAdmin);
+})(KiiUserAdmin);
 
 /**
  * Retrieve a list of KiiPortalUser
