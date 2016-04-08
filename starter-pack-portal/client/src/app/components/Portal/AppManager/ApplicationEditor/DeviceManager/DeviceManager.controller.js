@@ -141,7 +141,8 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
     return {
         scope:{
             device: '=?',
-            isCollapse: '=?'
+            isCollapse: '=?',
+            myDevices: '=?'
         },
         replace: true,
         restrict: 'E',

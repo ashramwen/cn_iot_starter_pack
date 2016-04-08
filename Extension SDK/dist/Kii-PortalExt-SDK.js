@@ -291,7 +291,7 @@
      * extension server url
      * @type {String}
      */
-    root._extensionUrl = 'http://localhost:1337';
+    root._extensionUrl = 'http://' + window.location.hostname + ':1337';
 
     root._extApis = {
         MODEL: '/models'
@@ -411,7 +411,9 @@
                 "x-kii-sdk": KiiSDKClientInfo.getSDKClientInfo(),
                 "Authorization": this.getToken()
             };
-            __extends(this._headers, this._extHeaders);
+            if(this._extHeaders){
+                __extends(this._headers, this._extHeaders);
+            }
         };
 
         return KiiObjectRequest;
@@ -1734,8 +1736,15 @@
             settings.failure = callbacks.failure;
 
             return KiiPortalRequest(settings);
-        }
+        };
 
+        KiiPortalApp.prototype.getBaseURL = function(){
+            return Kii.getBaseURL() + '/apps/' + kiiApp.getAppID();
+        };
+
+        KiiPortalApp.prototype.getThingIFURL = function(){
+            return Kii.getBaseURL() + '/thing-if/apps/' + kiiApp.getAppID();
+        }
 
         KiiPortalApp.prototype.save = function(callbacks){
 
@@ -2138,7 +2147,63 @@
         return KiiPortalApp;
     })();
 
+    root.KiiPortalCommand = (function(){
 
+        function KiiPortalCommand(command){
+            this._kiiApp = null;
+            this._thing = null;
+
+            __extend(this, {
+                'commandID': '',
+                'issuer': 'user:',
+                'target': 'thing:',
+                'actions': [],
+                'commandState': 'DONE',
+                'schema': '',
+                'schemaVersion': '',
+                'title': '',
+                'description': '',
+                'metadata': {},
+                'created': null,
+                'modified': null
+            })
+
+            if(command){
+                __extend(this, command);
+            }
+        }
+
+        KiiPortalCommand.prototype.init = function(command){
+            __extend(this, command);
+        };
+
+        KiiPortalCommand.prototype.addAction = function(action){
+
+        };
+
+        return KiiPortalCommand;
+    })();
+
+    root.KiiPortalCommandAction = (function(){
+
+        function KiiPortalCommandAction(){
+            this.actionName = '';
+        }
+
+        return KiiPortalCommandAction;
+    })();
+
+
+    root.KiiPortalCommandResult = (function(){
+
+        function KiiPortalCommandResult(){
+            this.succeeded = false; // required. Specify if the action execution was a success.
+            this.errorMessage = ''; // An additional message for describing the cause of action execution failure.
+            this.data = null; // A custom data.
+        }
+
+        return KiiPortalCommandResult;
+    })();
     /**
      @class Firmware class
      */
@@ -4534,6 +4599,16 @@ KiiPortalUser.prototype.update = function(data) {
         return KiiThingAdminQuery;
     })(KiiPortalQuery);
 
+    KiiThingAdmin._baseUrl = '/things'; 
+
+    KiiThingAdmin.getBaseURL = function(){
+        return KiiPortalAdmin.getCurrentApp().getBaseURL() + KiiThingAdmin._baseUrl;
+    };
+
+    KiiThingAdmin.getThingIFURL = function(){
+        return KiiPortalAdmin.getCurrentApp().getThingIFURL();
+    };
+
     KiiThingAdmin.query = function(kiiApp, callbacks, queryClause, dictVal){
         return new Promise(function(resolve, reject){
             var query;
@@ -4661,7 +4736,7 @@ KiiPortalUser.prototype.update = function(data) {
         var _this = this;
         return new Promise(function(resolve, reject){
             var spec, kiiApp;
-            
+
             kiiApp = KiiPortalAdmin.getCurrentApp();
             spec = {
                 method: 'DELETE',

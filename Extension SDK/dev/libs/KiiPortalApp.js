@@ -216,8 +216,15 @@
             settings.failure = callbacks.failure;
 
             return KiiPortalRequest(settings);
-        }
+        };
 
+        KiiPortalApp.prototype.getBaseURL = function(){
+            return Kii.getBaseURL() + '/apps/' + kiiApp.getAppID();
+        };
+
+        KiiPortalApp.prototype.getThingIFURL = function(){
+            return Kii.getBaseURL() + '/thing-if/apps/' + kiiApp.getAppID();
+        }
 
         KiiPortalApp.prototype.save = function(callbacks){
 

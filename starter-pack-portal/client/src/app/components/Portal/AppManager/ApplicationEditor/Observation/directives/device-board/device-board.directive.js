@@ -67,13 +67,21 @@ angular.module('StarterPack.Portal.AppManager.Observation')
 
             function initTimer(){
                 var tag = $scope.tag;
-                if(myTimer){
-                    $interval.cancel(myTimer);
-                }
+                destroyTimer();
                 if(tag.getRefreshInterval() && tag.getRefreshInterval() > 0){
                     myTimer = $interval($scope.refreshThings, tag.getRefreshInterval() * 1000);
                 }
             }
+
+            function destroyTimer(){
+                if(myTimer){
+                    $interval.cancel(myTimer);
+                }
+            }
+
+            $scope.$on('$destroy',function(){
+                destroyTimer();
+            });
         }]
     }
   }])

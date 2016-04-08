@@ -59,7 +59,9 @@
                 "x-kii-sdk": KiiSDKClientInfo.getSDKClientInfo(),
                 "Authorization": this.getToken()
             };
-            __extends(this._headers, this._extHeaders);
+            if(this._extHeaders){
+                __extends(this._headers, this._extHeaders);
+            }
         };
 
         return KiiObjectRequest;

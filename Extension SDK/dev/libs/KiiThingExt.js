@@ -54,6 +54,16 @@
         return KiiThingAdminQuery;
     })(KiiPortalQuery);
 
+    KiiThingAdmin._baseUrl = '/things'; 
+
+    KiiThingAdmin.getBaseURL = function(){
+        return KiiPortalAdmin.getCurrentApp().getBaseURL() + KiiThingAdmin._baseUrl;
+    };
+
+    KiiThingAdmin.getThingIFURL = function(){
+        return KiiPortalAdmin.getCurrentApp().getThingIFURL();
+    };
+
     KiiThingAdmin.query = function(kiiApp, callbacks, queryClause, dictVal){
         return new Promise(function(resolve, reject){
             var query;
@@ -181,7 +191,7 @@
         var _this = this;
         return new Promise(function(resolve, reject){
             var spec, kiiApp;
-            
+
             kiiApp = KiiPortalAdmin.getCurrentApp();
             spec = {
                 method: 'DELETE',
