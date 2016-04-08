@@ -23,7 +23,7 @@
   <div class="device" ng-if="mqttInitialed">
     <div class="device-list clearfix">
       <div class="new-tile" ng-click="open()"><i class="fa fa-plus"></i></div>
-      <div class="new-tile thing-entity" ng-click="selectThing(device)" ng-repeat="device in deviceList">
+      <div class="new-tile thing-entity" ng-click="selectThing(device)" ng-repeat="device in deviceList track by device._thingID">
         <div>
           <div>{{device._thingID}}</div>
           <div>{{device._vendorThingID}}</div>
@@ -45,8 +45,14 @@
           <div>Password: <span>***</span></div>
           <div>CreatedAt: <span>{{currentThing._created|date:'yyyy-MM-dd'}}</span></div>
         </div>
-        <!-- <div class="title">State Attribute</div>
-        <div class="content"></div> -->
+        <div class="title">State Attribute</div>
+        <div class="content">
+          <div ng-repeat="(key, value) in currentThing.states">
+            {{key}}:
+            <span ng-if="normal(value)">{{value}}</span>
+            <switchery ng-model="currentThing.states[key]" ng-if="!normal(value)" readonly></switchery>
+          </div>
+        </div>
       </div>
       <div class="command-panel">
         <div class="title">Controller</div>

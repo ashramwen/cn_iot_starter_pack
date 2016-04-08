@@ -29,12 +29,13 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
                 thingService.init();
-                // demo();
+                demo();
             });
         };
 
         $scope.login = function(user) {
             $scope.loginMessage = '';
+
             function register(user) {
                 var newUser = KiiUser.userWithUsername(user.loginName, user.password);
                 newUser.register({
@@ -133,9 +134,18 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                         }
                         $scope.deviceList.push(thing);
                         $scope.currentThing = thing;
+                        thingService.setState(thing, {
+                            'power': true,
+                            'presetTemperature': 25,
+                            'fanspeed': 5,
+                            'currentTemperature': 28,
+                            'currentHumidity': 65
+                        });
                     }
-                    thingService.getCommands(thing).then(function(res) {
-                        console.log('thing:', res.data);
+                    thingService.getCommands(thing);
+                    thingService.getState(thing).then(function(res) {
+                        console.log(res.data);
+                        $scope.currentThing.states = res.data;
                     });
                     $scope.cancel();
                     break;
@@ -234,5 +244,9 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 schemaVersion: 1
             };
             $scope.mqtt.sendCommand(payload, $scope.currentThing._thingID);
+        }
+
+        $scope.normal = function(data) {
+            return typeof(data) !== 'boolean';
         }
     }]);
