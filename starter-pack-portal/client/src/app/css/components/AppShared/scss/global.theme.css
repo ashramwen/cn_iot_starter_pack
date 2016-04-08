@@ -2194,7 +2194,8 @@ Gradient Background colors
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 3px;
-  border: 1px solid transparent; }
+  border: 1px solid transparent;
+  padding: 7px 12px; }
 
 .btn.btn-default {
   background-color: #fafafa;
@@ -3930,8 +3931,7 @@ ul.online-users {
   white-space: nowrap; }
 
 .panel .panel-heading {
-  padding: 10px 15px;
-  text-transform: uppercase; }
+  padding: 10px 15px; }
 
 .bg-info {
   background-color: #7acbee;

@@ -29,22 +29,24 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
                 thingService.init();
-                demo();
+                // demo();
             });
         };
 
         $scope.login = function(user) {
+            $scope.loginMessage = '';
             function register(user) {
-                var newUser = KiiUser.userWithUsername(username, password);
+                var newUser = KiiUser.userWithUsername(user.loginName, user.password);
                 newUser.register({
                     success: function(theUser) {
                         $scope.myApp.user = theUser;
                         $scope.mqttInit(theUser);
                         $scope.$apply();
                     },
-                    failure: function(errorString) {
-                        console.log(errorString);
+                    failure: function(theUser, errorString) {
+                        $scope.loginMessage = errorString;
                         AppUtils.whenLoaded();
+                        $scope.$apply();
                     }
                 });
             }

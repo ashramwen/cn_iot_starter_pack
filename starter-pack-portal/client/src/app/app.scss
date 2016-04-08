@@ -56,7 +56,18 @@
     }
     /* end of spinner */
 }
-
+.newField{
+    border:dashed 1px #ddd;
+    text-align: center;
+    height: 32px;
+    line-height: 32px;
+    cursor: pointer;
+    color: #999;
+    &:hover{
+      border:dashed 1px #ccc;
+      color: #000;
+    }
+}
 .modal{
     .modal-body{
         overflow:auto;

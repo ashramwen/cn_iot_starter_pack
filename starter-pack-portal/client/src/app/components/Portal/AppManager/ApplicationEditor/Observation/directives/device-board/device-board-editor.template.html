@@ -1,0 +1,114 @@
+<div class="device-board">
+  <div class="modal-content" ng-init="init()">
+    <div class="modal-header">
+        <h3 class="modal-title">Edit Device Group</h3>
+    </div>
+    <div class="modal-body clearfix">
+      <!-- edit tag -->
+      <div class="tag-editBoard">
+        <uib-tabset>
+          <!-- edit tag detail -->
+          <uib-tab heading="Group Info">
+            <div class="form-group">
+              <label>Group Name</label>
+              <input class="form-control" type="text" ng-model="tagBO.name" />
+            </div>
+            <div class="form-group">
+              <label>Refresh Interval</label>
+              <div class="input-group">
+                <input type="text" ng-model="tagBO.refreshInterval" class="form-control" />
+                <span class="input-group-addon">s</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Group Description</label>
+              <textarea class="form-control" type="text" ng-model="tagBO.description" ></textarea>
+            </div>
+          </uib-tab>
+          <!-- end of edit tag detail -->
+          <uib-tab heading="fields">
+            <!-- edit fields -->
+            <div class="form-group">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>fieldName</th>
+                    <th>fieldDisplayName</th>
+                    <th>Operation</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="field in editingFields">
+                    <td><input class="form-control" type="text" ng-model="field.fieldName" /></td>
+                    <td><input class="form-control" type="text" ng-model="field.displayName" /></td>
+                    <td class="operation"><span class="fa fa-trash" ng-click="removeField(field)"></span></td>
+                  </tr>
+                  <tr>
+                    <td colspan="3">
+                      <div class="newField" ng-click="addField()">
+                        <span class="fa fa-plus"></span>Add New Field
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- end of edit fields -->
+          </uib-tab>
+          <uib-tab heading="Monitoring Devices">
+            <!-- edit things -->
+            <div class="form-group">
+              <!-- Existing Devices -->
+              <label>Existing Devices</label>
+              <table st-table="firmwares" class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>_deviceID</th>
+                    <th>_vendorThingID</th>
+                    <th>Model</th>
+                    <th>Firmware Version</th>
+                    <th>_online</th>
+                    <th>_disabled</th>
+                    <th>_created</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="device in tag.getThings()" ng-click="deviceEdit[device.getThingID()] = !deviceEdit[device.getThingID()]">
+                    <td>{{device.getThingID()}}</td>
+                    <td>{{device.getVendorThingID()}}</td>
+                    <td>{{device._productionName}}</td>
+                    <td>{{device._firmwareVersion}}</td>
+                    <td>{{device._online}}</td>
+                    <td>{{device._disabled}}</td>
+                    <td>{{getTime(device.getCreated())}}</td>
+                    <td><span class="fa fa-remove" ng-click="removeThing(device)"></span></td>
+                  </tr>
+                  <tr>
+                    <td colspan="8" class="load-more" ng-click="loadMore()">Load More</td>
+                  </tr>
+                </tbody>
+              </table>
+              <!-- End of existing devices -->
+
+              <!-- add new devices -->
+              <label>Add new Device</label>
+              <div class="form-group">
+                <button class="btn btn-success" ng-disabled="!things || things.length==0" ng-click="addThings(things)">Add Selected Devices</button>
+              </div>
+              <sp-thing-picker my-app="myApp" ng-model="things" selected-things="tag.getThings()"></sp-thing-picker>
+              <!-- end of add new devices -->
+            </div>
+            <!-- end of edit things -->
+          </uib-tab>
+      </div>
+      <!-- end of edit tag -->
+      </uib-tabset>
+    </div>
+    <div class="modal-footer clearfix">
+      <div class="pull-right">
+        <button class="btn btn-success" ng-click="saveTag()">Save</button><button ng-click="cancel()" class="btn btn-danger">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

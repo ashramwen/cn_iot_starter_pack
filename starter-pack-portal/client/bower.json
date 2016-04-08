@@ -37,7 +37,8 @@
     "animate.css": "~3.5.1",
     "jsoneditor": "^5.2.0",
     "jquery-ui": "^1.11.4",
-    "paho-mqtt-js": "^1.0.1"
+    "paho-mqtt-js": "^1.0.1",
+    "angular-gridster": "^0.13.5"
   },
   "devDependencies": {
     "angular-mocks": "~1.4.9"

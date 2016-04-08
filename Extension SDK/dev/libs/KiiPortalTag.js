@@ -62,14 +62,14 @@
             };
 
             this.getName = function(){
-                return _this._name;
+                return _this.get('name');
             };
 
             this.getDescription = function(){
-                return _this._discription;
+                return _this.get('description');
             };
 
-            this.setDescript = function(description){
+            this.setDescription = function(description){
                 _this._description = description;
                 _this.set('description', description);
             };
@@ -189,7 +189,7 @@
          */
         KiiPortalTag.prototype.init = function(){
             this.setName(this.get('name'));
-            this.setDescript(this.get('description'));
+            this.setDescription(this.get('description'));
             this.setThingIDs(this.get('thingIDs'));
             this.setCustomData(this.get('customData'));
         };
@@ -198,6 +198,7 @@
             if(!this._things){
                 this._things = [];
             }
+            if(this.getThingIDs().indexOf(kiiThing.getThingID())>-1) return;
             this._things.push(kiiThing);
             this.addThingID(kiiThing.getThingID());
         };
@@ -211,6 +212,7 @@
         };
 
         KiiPortalTag.prototype.removeThing = function(kiiThing){
+            if(this.getThingIDs().indexOf(kiiThing.getThingID())==-1)return;
             this.removeThingID(kiiThing.getThingID());
             __remove(this._things, kiiThing);
         };
@@ -220,11 +222,25 @@
         }
 
         KiiPortalTag.prototype.refreshThings = function(callbacks){
-            var kiiApp, queryClause, inClause, _this;
+            var kiiApp, queryClause, inClause, _this, thingIDs;
 
             _this = this;
             kiiApp = this.getKiiApp();
-            inClause = KiiClause['in']('_thingID', this.getThingIDs());
+            thingIDs = this.getThingIDs() || [];
+
+            if(thingIDs.length == 0){
+                return new Promise(function(resolve, reject){
+                    _this.setThings([]);
+                    _this.setNextThingQuery(null);
+
+                    if(callbacks && callbacks.success){
+                        callbacks.success([]);
+                    }
+                    resolve([]);
+                });
+            }
+
+            inClause = KiiClause['in']('_thingID', thingIDs);
 
             return new Promise(function(resolve, reject){
                 var tagThingCallbacks = {

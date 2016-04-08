@@ -1,43 +1,28 @@
-<div class="device-board panel">
-  <div class="panel-heading">{{tag.getName()}}</div>
-  <div class="panel-body">
-    <div class="tagDashboard">
-      <table>
-        <thead>
-          <th>_vendorThingID</th>
-          <th ng-repeat="field in fields">{{field.displayName}}</th>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{device.getVendorThingID()}}</td>
-            <td ng-repeat="field in fields">{{device[field.fieldName]}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="tagEditBoard">
-      <table>
-        <thead>
-          <tr>
-            <th>fieldName</th>
-            <th>fieldDisplayName</th>
-            <th>Operation</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr ng-repeat="field in editingFields">
-            <td><input class="form-control" type="text" ng-model="field.fieldName" /></td>
-            <td><input class="form-control" type="text" ng-model="field.displayName" /></td>
-          </tr>
-          <tr>
-            <td colspan="2">
-              <div class="newField">
-                <span class="fa fa-plus"></span>Add New Field
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+<div class="device-board panel" ng-init="init()">
+  <div class="panel-heading">
+    {{tag.getName()}}
+    <div class="pull-right">
+      <span class="fa fa-edit" ng-click="editTag()"></span>
+      <span class="fa fa-refresh" ng-click="refreshThings()"></span>
     </div>
   </div>
+  <div class="panel-body">
+    <div class="panel-body-container">
+      <div class="tag-dashboard">
+        <table class="table">
+          <thead>
+            <th>_vendorThingID</th>
+            <th ng-repeat="field in tag.getFields()">{{field.displayName}}</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="device in tag.getThings()">
+              <td>{{device.getVendorThingID()}}</td>
+              <td ng-repeat="field in tag.getFields()">{{device[field.fieldName] || device['fields'][field.fieldName]}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <span class="hidden tagID">{{tag.getUUID()}}</span>
 </div>

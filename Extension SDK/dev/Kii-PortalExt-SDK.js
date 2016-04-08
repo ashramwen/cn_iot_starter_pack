@@ -42,7 +42,7 @@
      * extension server url
      * @type {String}
      */
-    root._extensionUrl = 'http://localhost:1337';
+    root._extensionUrl = 'http://' + window.location.hostname + ':1337';
 
     root._extApis = {
         MODEL: '/models'

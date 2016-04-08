@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('StarterPack.AppShared', ['ngAnimate', 'ngCookies', 'ngSanitize', 
-    'ui.bootstrap', 'LocalStorageModule', 'awesome-context-menu', 'smart-table'])
+    'ui.bootstrap', 'LocalStorageModule', 'awesome-context-menu', 'smart-table', 'gridster'])
 .constant('AppConfig', {
     StoragePrefix: 'SSP',
     Tags:{
