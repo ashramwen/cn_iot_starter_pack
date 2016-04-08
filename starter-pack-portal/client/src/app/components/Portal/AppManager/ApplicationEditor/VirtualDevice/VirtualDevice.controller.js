@@ -28,6 +28,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         $scope.init = function() {
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
+                thingService.init();
                 demo();
             });
         };
@@ -131,8 +132,8 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                         $scope.deviceList.push(thing);
                         $scope.currentThing = thing;
                     }
-                    thingService.getState(thing).then(function(res) {
-                        var a = 1;
+                    thingService.getCommands(thing).then(function(res) {
+                        console.log('thing:', res.data);
                     });
                     $scope.cancel();
                     break;

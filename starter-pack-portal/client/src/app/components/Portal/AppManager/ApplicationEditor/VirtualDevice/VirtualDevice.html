@@ -48,11 +48,9 @@
         <div class="content"></div> -->
       </div>
       <div class="command-panel">
-        <div class="title">Console</div>
-        <div class="content"><pre ng-if="feedback">{{feedback|json}}</pre></div>
         <div class="title">Controller</div>
         <div class="clearfix">
-          <div class="command pull-left" ng-init="command='1'">
+          <div class="command pull-left hide" ng-init="command='2'">
             <div ng-click="command='1'">Get Current States</div>
             <div ng-click="command='2'">Send Command</div>
             <!-- <div ng-click="command='3'">Manage triggers</div> -->
@@ -98,6 +96,8 @@
             <div class="content" ng-switch-when="4"></div>
           </div>
         </div>
+        <div class="title">Console</div>
+        <div class="content"><pre ng-if="feedback">{{feedback|json}}</pre></div>
       </div>
     </div>
   </div>
