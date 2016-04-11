@@ -106,20 +106,42 @@ angular.module('StarterPack.Portal.AppManager.ModelManager')
     };
 
 
-
+    /**
+     * init model
+     * @return {[type]} [description]
+     */
     $scope.initModel = function(){
         $scope.myModel = _.find($scope.myModels, function(model){
             return model.getUUID() == $state.params['modelId'];
         });
+        /**
+         * for test only
+         */
+        window.model = $scope.myModel;
 
         $scope.modelInfo.modelName = $scope.myModel.getName();
         $scope.modelInfo.imageUrl = $scope.myModel.getImageUrl();
+        $scope.initThings();
 
         AppUtils.setLocalStorageItem(AppConfig.NavNames.MODEL_NAME, $scope.myModel.getName());
 
 
         $("#modelImage").unbind('change');
         $("#modelImage").change($scope.uploadImage);
+    };
+
+    /**
+     * get model's things
+     * @return {[type]} [description]
+     */
+    $scope.initThings = function(){
+        AppUtils.doLoading();
+        $scope.myModel.refreshThings().then(function(){
+            AppUtils.whenLoaded();
+            $scope.$apply();
+        }, function(){
+            AppUtils.whenLoaded();
+        });
     };
 
     

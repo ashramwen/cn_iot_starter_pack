@@ -25,7 +25,33 @@
 
     <!-- devices -->
     <uib-tab heading="Devices">
-      
+       <table st-table="myModel.getThings()" class="table table-striped">
+        <thead>
+        <tr>
+          <th>_deviceID</th>
+          <th>_vendorThingID</th>
+          <th>Model</th>
+          <th>Firmware Version</th>
+          <th>_online</th>
+          <th>_disabled</th>
+          <th>_created</th>
+        </tr>
+        </thead>
+        <tbody>
+          <tr ng-repeat="device in myModel.getThings()">
+            <td>{{device.getThingID()}}</td>
+            <td>{{device.getVendorThingID()}}</td>
+            <td>{{device._productName}}</td>
+            <td>{{device._firmwareVersion}}</td>
+            <td>{{device._online}}</td>
+            <td>{{device._disabled}}</td>
+            <td>{{getTime(device.getCreated())}}</td>
+          </tr>
+          <tr>
+            <td colspan="7" class="load-more" ng-click="loadMore()">Load More</td>
+          </tr>
+        </tbody>
+      </table>
     </uib-tab>
     <!-- end of devices -->
 

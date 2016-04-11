@@ -76,6 +76,16 @@
         QA: 'https://qa21.internal.kii.com/api'
     });
 
+    /**
+     * extends Kii
+     */
+    
+    Kii.getSiteURL = function(){
+        var apiURL = Kii.getBaseURL();
+        apiURL = apiURL.substr(0, apiURL.length - 4);
+        return apiURL;
+    };
+
 
     //<!-- base:js --><!-- injection:end -->
 
