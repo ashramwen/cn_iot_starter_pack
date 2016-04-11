@@ -61,6 +61,12 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
             $scope.myDevices = result.things;
             $scope.nextQuery = result.query;
 
+            /**
+             * for test only
+             */
+            
+            window.things = $scope.myDevices;
+
             $scope.$apply();
 
             AppUtils.whenLoaded();

@@ -328,6 +328,9 @@
          * @private
          */
         KiiPortalObject._getBucketName = function(){
+            if((typeof this._bucketName) == 'function'){
+                return this._bucketName();
+            }
             return this._bucketName;
         };
 

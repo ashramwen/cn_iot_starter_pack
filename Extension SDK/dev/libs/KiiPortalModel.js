@@ -136,6 +136,10 @@
             });
         };
 
+        KiiPortalModel.prototype.getFirmwareUpgrateInfo = function(callbacks){
+            return KiiPortalUpgradeInfo.queryByModel(this);
+        };
+
         /**
          * add firmware
          * @param firmware
@@ -272,6 +276,44 @@
             });
         };
 
+        KiiPortalModel.refreshByName = function(kiiApp, name, callbacks){
+            return new Promise(function(resolve, reject){
+                var refreshModelCallbacks;
+                refreshModelCallbacks = {
+                    success: function(query, models, nextQuery){
+                        if(models.length > 0){
+                            if(callbacks && callbacks.success){
+                                callbacks.success(models[0]);
+                            }
+                            resolve(models[0]);
+                        }else{
+                            /**
+                             * ::TODO
+                             * empty return exception
+                             * @return {[type]}
+                             */
+                            if(callbacks && callbacks.failure){
+                                callbacks.failure(response);
+                            }
+                            reject(models);
+                        }
+                        
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                var queryClause = KiiClause.equals('name', name),
+                    query = KiiQuery.queryWithClause(queryClause);
+
+                return KiiPortalModel.executeQuery(kiiApp, query, refreshModelCallbacks);
+            });
+        };
+
         KiiPortalModel.prototype.createSchema = function(){
             return KiiPortalSchema.create(this);
         }
@@ -347,6 +389,40 @@
                 _super.prototype.uploadBody.call(_this, imageFile).then(publishBody, failure);
             });
         };
+
+        KiiPortalModel.prototype._setThings = function(things){
+            this._things = things;
+        };
+
+        KiiPortalModel.prototype.getThings = function(){
+            return this._things;
+        };
+
+        KiiPortalModel.prototype.refreshThings = function(callbacks){
+            var _this = this;
+
+            return new Promise(function(resolve, reject){
+                var refreshThingsCallbacks = {
+                    success: function(response){
+                        _this._setThings(response.things);
+
+                        if(callbacks && callbacks.success){
+                            callbacks.success(response);
+                        }
+                        resolve(response);
+                    },
+                    failure: function(response){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(response);
+                        }
+                        reject(response);
+                    }
+                };
+
+                KiiThingAdmin.getThingsByModel(_this).then(refreshThingsCallbacks.success, 
+                    refreshThingsCallbacks.failure);
+            });
+        }
 
         /**
          * save a model
@@ -477,6 +553,7 @@
                 _this.setModelId(schema.modelId);
                 _this.createdAt = schema.createdAt;
                 _this.updatedAt = schema.updatedAt;
+                _this.properties = [];
                 if(schema.properties){
                     __each(schema.properties, function(property){
                         _this.properties.push(new KiiPortalSchemaProperty(property));

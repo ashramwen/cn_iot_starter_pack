@@ -219,11 +219,11 @@
         };
 
         KiiPortalApp.prototype.getBaseURL = function(){
-            return Kii.getBaseURL() + '/apps/' + kiiApp.getAppID();
+            return Kii.getBaseURL() + '/apps/' + this.getAppID();
         };
 
         KiiPortalApp.prototype.getThingIFURL = function(){
-            return Kii.getBaseURL() + '/thing-if/apps/' + kiiApp.getAppID();
+            return Kii.getSiteURL() + '/thing-if/apps/' + this.getAppID();
         }
 
         KiiPortalApp.prototype.save = function(callbacks){

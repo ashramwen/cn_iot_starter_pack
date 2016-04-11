@@ -64,6 +64,12 @@
         return KiiPortalAdmin.getCurrentApp().getThingIFURL();
     };
 
+    KiiThingAdmin.getThingsByModel = function(model, callbacks){
+        var queryClause = KiiClause.equals('_productName', model.getName());
+
+        return KiiThingAdmin.query(model.getKiiApp(), callbacks, queryClause);
+    };
+
     KiiThingAdmin.query = function(kiiApp, callbacks, queryClause, dictVal){
         return new Promise(function(resolve, reject){
             var query;
@@ -146,7 +152,7 @@
                     headers: {
                         'Content-Type': 'application/vnd.kii.ThingRegistrationAndAuthorizationRequest+json',
                     },
-                    url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things'
+                    url: KiiThingAdmin.getBaseURL()
                 };
 
                 var request = new KiiObjectRequest(kiiApp, spec);
@@ -166,7 +172,7 @@
                     headers: {
                         'Content-Type': 'application/vnd.kii.ThingUpdateRequest+json',
                     },
-                    url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
+                    url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID()
                 };
 
                 var request = new KiiObjectRequest(kiiApp, spec);
@@ -195,7 +201,7 @@
             kiiApp = KiiPortalAdmin.getCurrentApp();
             spec = {
                 method: 'DELETE',
-                url: Kii.getBaseURL() + '/apps/' + kiiApp.getAppID() + '/things/' + _this.getThingID()
+                url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID()
             };
 
             var request = new KiiObjectRequest(kiiApp, spec);
@@ -214,4 +220,130 @@
             });
         });
     };
+
+    /**
+     * get model's name. by protocal contract, _productName is assigned to model name.
+     * @return {[String]} [model name]
+     */
+    KiiThingAdmin.prototype.getModelName = function(){
+        return this.fields._productName;
+    };
+
+    KiiThingAdmin.prototype.refreshModel = function(){
+        return KiiPortalModel.refreshByName(KiiPortalAdmin.getCurrentApp(), this.getModelName());
+    };
+
+    /**
+     * set thing commands
+     */
+    KiiThingAdmin.prototype._setCommands = function(commands){
+        this._commands = commands;
+    };
+
+    /**
+     * add thing command
+     */
+    KiiThingAdmin.prototype._addCommand = function(command){
+        this._commands = this._commands || [];
+        this._commands.push(command);
+    };
+
+    /**
+     * get thing commands
+     * @return {[KiiPortalCommand]}
+     */
+    KiiThingAdmin.prototype.getCommands = function(){
+        return this._commands;
+    };
+
+    /**
+     * refresh thing's commands
+     * @return {[KiiPortalCommand]}
+     */
+    KiiThingAdmin.prototype.refreshCommands = function(user, callbacks){
+        var _this = this;
+        return new Promise(function(resolve, reject){
+            var spec, kiiApp;
+
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+            spec = {
+                method: 'GET',
+                url: KiiThingAdmin.getThingIFURL() + '/targets/thing:' + _this.getThingID() + '/commands',
+                headers: {
+                    Authorization: 'Bearer ' + user.getAccessToken()
+                }
+            };
+
+            var request = new KiiObjectRequest(kiiApp, spec);
+
+            request.execute().then(function(response){
+                var commands = [];
+                __each(response.data.commands, function(command){
+                    commands.push(new KiiPortalCommand(user, _this, command));
+                });
+                _this._setCommands(commands);
+
+                if(callbacks && callbacks.success){
+                    callbacks.success(commands);
+                }
+                resolve(commands);
+            }, function(error){
+                if(callbacks && callbacks.failure){
+                    callbacks.failure(error);
+                }
+                reject(error);
+            });
+        });
+    };
+
+    /**
+     * create a blank command
+     * @return KiiPortalCommand
+     */
+    KiiThingAdmin.prototype.createCommand = function(user, schema){
+        var command = new KiiPortalCommand(user, this, null);
+        command._setSchema(schema);
+        return command;
+    };
+
+    /**
+     * device onboarding 
+     * @param  {[KiiUser]} user          [description]
+     * @param  {[type]} thingPassword [description]
+     * @param  {[type]} callbacks     [description]
+     * @return {[type]}               [description]
+     */
+    KiiThingAdmin.prototype.onboard = function(user, thingPassword, callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var spec, url;
+            url = this.getThingIFURL() + '/onboardings';
+            spec = {
+                url: url,
+                method: 'POST',
+                data: {
+                    thingPassword: thingPassword,
+                    owner: 'user:' + user.getUUID(),
+                    vendorThingID: _this.getVendorThingID()
+                }
+            };
+
+            var request = new KiiObjectRequest(kiiApp, spec);
+
+            request.execute().then(function(response){
+                if(callbacks && callbacks.success){
+                    callbacks.success(response);
+                }
+                resolve(response);
+            }, function(error){
+                if(callbacks && callbacks.failure){
+                    callbacks.failure(error);
+                }
+                reject(error);
+            });
+        });
+    };
+
+
 
