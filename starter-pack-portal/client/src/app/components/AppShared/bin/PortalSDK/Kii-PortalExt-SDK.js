@@ -220,8 +220,7 @@
                             try{
                                 data = JSON.parse(xmlhttp.responseText);
                             }catch(e){
-                                console.log(e);
-                                reject(e);
+                                reject({status: status, data: {}, code: xmlhttp.status});
                                 return;
                             }
                         }
@@ -1421,9 +1420,8 @@
                         reject(response);
                     }
                 };
-                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks).catch(function(e){
-                    console.log(e);
-                });
+                
+                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks).then(refreshAppsCallbacks.success, refreshAppsCallbacks.failure);
             });
         };
 

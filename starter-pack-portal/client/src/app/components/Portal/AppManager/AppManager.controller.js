@@ -21,6 +21,7 @@ angular.module('StarterPack.Portal.AppManager')
             AppUtils.whenLoaded();
         }, function(error){
             AppUtils.whenLoaded();
+            $scope.showReloginModal();
         }).catch(function(e){
             console.log(e);
         });

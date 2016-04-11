@@ -109,8 +109,12 @@
 
 
     .item-submit {
-        padding-bottom: 20px;
+        margin-bottom: 10px;
         text-align: center;
+
+        &:last-child{
+            margin-bottom: 20px;
+        }
     }
 
     .item-submit-button {

@@ -95,8 +95,10 @@
     cursor: pointer; }
 
 .app-secure .item-submit {
-  padding-bottom: 20px;
+  margin-bottom: 10px;
   text-align: center; }
+  .app-secure .item-submit:last-child {
+    margin-bottom: 20px; }
 
 .app-secure .item-submit-button {
   width: 100%; }

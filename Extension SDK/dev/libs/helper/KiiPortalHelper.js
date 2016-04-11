@@ -215,8 +215,7 @@
                             try{
                                 data = JSON.parse(xmlhttp.responseText);
                             }catch(e){
-                                console.log(e);
-                                reject(e);
+                                reject({status: status, data: {}, code: xmlhttp.status});
                                 return;
                             }
                         }

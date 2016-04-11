@@ -14,6 +14,33 @@ angular.module('StarterPack.Portal.AppManager.UserManager')
             isSuspended: 9
         };
 
+        /**
+         * error message pairs, by George, 2016/4/11
+         * 
+         */
+        $scope.errors = [
+            {
+                statusName: 'isEmpty', 
+                message: 'A login name, email or phone must be provided'
+            },
+            {
+                statusName: 'passwordError',
+                message: 'Password is too short (must be at least 4 characters).'
+            },
+            {
+                statusName: 'loginError',
+                message: 'Login name must be between three and 64 characters'
+            },
+            {
+                statusName: 'phoneError',
+                message: 'Phone numbers must begin with a '+' and be at least 10 digits long.'
+            },
+            {
+                statusName: 'emailError',
+                message: 'Invalid email address.'
+            }
+        ];
+
         $scope.newUser = new User();
         $scope.message = {};
 
