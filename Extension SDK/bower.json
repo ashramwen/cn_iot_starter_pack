@@ -15,7 +15,8 @@
   "license": "http://en.kii.com/terms/",
   "homepage": "http://www.kii.com",
   "dependencies": {
-    "kii-storage": "kii-cloud-sdk#~2.4.0"
+    "kii-storage": "kii-cloud-sdk#~2.4.0",
+    "paho-mqtt-js": "^1.0.1"
   },
   "ignore": [
     "**/.*",

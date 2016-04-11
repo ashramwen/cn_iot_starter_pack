@@ -1,6 +1,76 @@
 @import 'src/app/components/AppShared/scss/global.scss';
-.app-portal-virtualdevice{
-/*
- * TODO
- **/
+.app-portal-virtualdevice {
+    .new-tile {
+        float: left;
+        width: 150px;
+        height: 135px;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        align-items: center;
+    }
+    .thing-entity {
+        font-size: 12px;
+        border: 2px solid #ccc;
+        line-height: 12px;
+        div {
+            text-align: left;
+        }
+        &:hover {
+            border: 2px solid #0099ff;
+        }
+    }
+    .device-panel {
+        margin-top: 50px;
+        .state {
+            position: relative;
+            float: left;
+            border: 1px solid #666;
+            width: 400px;
+            margin-left: 50px;
+        }
+        .command-panel {
+            float: left;
+            border: 1px solid #666;
+            width: 650px;
+            margin-left: 100px;
+            .command {
+                div {
+                    cursor: pointer;
+                    border: 1px solid #666;
+                    padding: 5px;
+                    &:hover {
+                        background-color: #ccc;
+                    }
+                }
+            }
+        }
+        .switch {
+            position: absolute;
+            top: -1px;
+            left: -51px;
+            padding: 5px;
+            border: 1px solid #666;
+            i:hover {
+                cursor: pointer;
+                color: #0099ff;
+            }
+        }
+        .title {
+            padding: 2px 5px;
+            background-color: #ccc;
+            font-weight: bold;
+        }
+        .content {
+            span {
+                float: right;
+            }
+        }
+    }
+}
+
+.onboard-message {
+    text-align: left;
 }

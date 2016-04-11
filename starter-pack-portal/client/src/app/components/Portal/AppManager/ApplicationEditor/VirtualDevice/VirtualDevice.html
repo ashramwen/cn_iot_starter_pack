@@ -1,6 +1,139 @@
-<div class="app-portal-virtualdevice">
-  <!-- Sub State -->
-  <div ui-view>
+<div class="app-portal-virtualdevice" ng-init="init()">
+  <form class="form-inline" ng-if="!myApp.user">
+    <div class="form-group">
+      <input type="text" class="form-control" placeholder="login name" ng-model="user.loginName">
+    </div>
+    <div class="form-group">
+      <input type="password" class="form-control" placeholder="Password" ng-model="user.password">
+    </div>
+    <button type="button" class="btn btn-default" ng-click="login(user)"><i class="fa fa-sign-in"></i></button>
+    <div class="form-group text-danger">{{loginMessage}}</div>
+  </form>
+  <div class="clearfix">
+    <div class="col-md-2" ng-if="myApp.user">
+      User: <strong>{{myApp.user.getUsername()}}</strong>
+      <button type="button" class="btn btn-default" ng-click="mqttInit(myApp.user)">
+        <span class="fa fa-refresh"></span>
+      </button>
+    </div>
+    <div class="col-md-2" ng-if="currentThing._accessToken">
+      Onboarding vendorThingID: <strong>{{currentThing._vendorThingID}}</strong>
+    </div>
   </div>
-  <!-- End of Sub State-->
+  <div class="device" ng-if="mqttInitialed">
+    <div class="device-list clearfix">
+      <div class="new-tile" ng-click="open()"><i class="fa fa-plus"></i></div>
+      <div class="new-tile thing-entity" ng-click="selectThing(device)" ng-repeat="device in deviceList track by device._thingID">
+        <div>
+          <div>{{device._thingID}}</div>
+          <div>{{device._vendorThingID}}</div>
+        </div>
+      </div>
+    </div>
+    <div class="device-panel" ng-if="currentThing._accessToken">
+      <div class="state">
+        <div class="switch">
+          <div><i class="fa fa-power-off fa-3x"></i></div>
+          <div><i class="fa fa-upload fa-3x"></i></div>
+        </div>
+        <div class="title">Thing Attribute</div>
+        <div class="content clearfix">
+          <div>VendorThingID: <span>{{currentThing._vendorThingID}}</span></div>
+          <div>ThingID: <span>{{currentThing._thingID}}</span></div>
+          <!-- <div>Model: <span>{{currentThing.model}}</span></div> -->
+          <div>Firmware Version: <span>{{currentThing.fields._firmwareVersion}}</span></div>
+          <div>Password: <span>***</span></div>
+          <div>CreatedAt: <span>{{currentThing._created|date:'yyyy-MM-dd'}}</span></div>
+        </div>
+        <div class="title">State Attribute</div>
+        <div class="content">
+          <div ng-repeat="(key, value) in currentThing.states">
+            {{key}}:
+            <span ng-if="normal(value)">{{value}}</span>
+            <switchery ng-model="currentThing.states[key]" ng-if="!normal(value)" readonly></switchery>
+          </div>
+        </div>
+      </div>
+      <div class="command-panel">
+        <div class="title">Controller</div>
+        <div class="clearfix">
+          <div class="command pull-left hide" ng-init="command='2'">
+            <div ng-click="command='1'">Get Current States</div>
+            <div ng-click="command='2'">Send Command</div>
+            <!-- <div ng-click="command='3'">Manage triggers</div> -->
+            <!-- <div ng-click="command='4'">Ownership</div> -->
+          </div>
+          <div class="pull-left" ng-switch="command">
+            <div class="content" ng-switch-when="1"></div>
+            <div class="content" ng-switch-when="2">
+              <form class="form">
+                <div class="form-group">
+                  <label for="commandPayload">Command actions</label>
+                  <div class="form-inline">
+                    <input class="form-control" type="text" ng-model="action.name" />
+                    <select class="form-control" ng-model="action.type" ng-init="action.type='string'">
+                      <option>string</option>
+                      <option>boolean</option>
+                      <option>number</option>
+                    </select>
+                    <input class="form-control" type="text" ng-model="action.value" />
+                    <button class="btn btn-positive" ng-click="onClickAddAction(action)">+</button>
+                  </div>
+                  <table class="table table-striped">
+                    <tr>
+                      <th>name</th>
+                      <th>type</th>
+                      <th>value</th>
+                      <th></th>
+                    </tr>
+                    <tr ng-repeat="actionValue in selectedActions">
+                      <td>{{actionValue.name}}</td>
+                      <td>{{actionValue.type}}</td>
+                      <td>{{actionValue.value}}</td>
+                      <td>
+                        <button class="btn btn-danger" ng-click="onClickDeleteAction($index)">X</button>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+                <button type="button" class="btn btn-default" ng-click="onClickSendCommand()">Send command</button>
+              </form>
+            </div>
+            <div class="content" ng-switch-when="3"></div>
+            <div class="content" ng-switch-when="4"></div>
+          </div>
+        </div>
+        <div class="title">Console</div>
+        <div class="content"><pre ng-if="feedback">{{feedback|json}}</pre></div>
+      </div>
+    </div>
+  </div>
+  <!-- register device modal -->
+  <script type="text/ng-template" id="registerThing.html">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Register Device</h3>
+      </div>
+      <div class="modal-body clearfix">
+        <div>
+          <div class="form-group clearfix">
+            <label>VendorThingID</label>
+            <input ng-model="newThing._vendorThingID" type="text" class="form-control" placeholder="VendorThingID" ng-readonly="newThing._thingID" />
+          </div>
+          <div class="form-group clearfix">
+            <label>Password</label>
+            <input ng-model="newThing.password" type="password" class="form-control" placeholder="Password" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer ng-scope">
+        <div>
+          <button class="btn btn-success" type="button" ng-click="onboardThing(newThing)">Onboard</button>
+          <button class="btn btn-danger" type="button" ng-click="cancel()">Cancel</button>
+        </div>
+        <div class="text-danger onboard-message" ng-if="newThing.message">{{newThing.message}}</div>
+      </div>
+    </div>
+  </script>
+  <!-- END register device modal -->
 </div>

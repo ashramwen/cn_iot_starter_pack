@@ -40,7 +40,6 @@ angular.module('StarterPack.Portal.AppManager.UserManager').factory('userValidat
             _status.loginError = !this.validateLogin(user.loginName);
             _status.emailError = !this.validateEmail(user.emailAddress);
             _status.phoneError = !this.validatePhone(user.phoneNumber);
-            console.log(_status);
             return _status;
         }
     }

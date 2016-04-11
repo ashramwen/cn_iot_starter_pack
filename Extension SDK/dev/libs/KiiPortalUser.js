@@ -167,46 +167,6 @@ KiiPortalUser.findUserByUserID = function(userID) {
 };
 
 /**
- * Register a user
- * @param  {[type]} data [user data]
- * @return {[type]}      [description]
- */
-KiiPortalUser.prototype.register = function(data) {
-    var _self = this;
-    return new Promise(function(resolve, reject) {
-        var _data = {
-            'loginName': _self._info.loginName,
-            'password': _self._info.password,
-            'displayName': _self._info.displayName,
-            'emailAddress': _self._info.emailAddress,
-            'phoneNumber': _self._info.phoneNumber,
-            'country': _self._info.country,
-            'phoneNumberVerified': null,
-            'emailAddressVerified': null,
-            'createdAt': null,
-            'modifiedAt': null
-        };
-        if (!_data.country) delete _data.country;
-
-        var spec = {
-            data: _data,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
-            },
-            extraUrl: '/users'
-        };
-
-        var request = new KiiPortalUserRequest(spec);
-        request.execute().then(function(response) {
-            resolve(response);
-        }, function(error) {
-            reject(error);
-        });
-    });
-};
-
-/**
  * Delete the user from the server
  * @return {[type]}      [description]
  */
@@ -271,6 +231,46 @@ KiiPortalUser.prototype.ownerOfGroups = function() {
                 'Content-Type': 'application/vnd.kii.GroupsRetrievalResponse+json',
             },
             extraUrl: '/groups?owner=' + _self.getID()
+        };
+
+        var request = new KiiPortalUserRequest(spec);
+        request.execute().then(function(response) {
+            resolve(response);
+        }, function(error) {
+            reject(error);
+        });
+    });
+};
+
+/**
+ * Register a user
+ * @param  {[type]} data [user data]
+ * @return {[type]}      [description]
+ */
+KiiPortalUser.prototype.register = function(data) {
+    var _self = this;
+    return new Promise(function(resolve, reject) {
+        var _data = {
+            'loginName': _self._info.loginName,
+            'password': _self._info.password,
+            'displayName': _self._info.displayName,
+            'emailAddress': _self._info.emailAddress,
+            'phoneNumber': _self._info.phoneNumber,
+            'country': _self._info.country,
+            'phoneNumberVerified': null,
+            'emailAddressVerified': null,
+            'createdAt': null,
+            'modifiedAt': null
+        };
+        if (!_data.country) delete _data.country;
+
+        var spec = {
+            data: _data,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/vnd.kii.RegistrationRequest+json',
+            },
+            extraUrl: '/users'
         };
 
         var request = new KiiPortalUserRequest(spec);
