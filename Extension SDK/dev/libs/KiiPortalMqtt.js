@@ -54,6 +54,12 @@ root.KiiPortalMqtt = (function() {
     return KiiPortalMqtt;
 })();
 
+KiiPortalMqtt.prototype.on = KiiPortalMqtt.prototype.addEventListener = function(event, fn) {
+    this._callbacks = this._callbacks || {};
+    (this._callbacks[event] = this._callbacks[event] || []).push(fn);
+    return this;
+};
+
 KiiPortalMqtt.prototype.init = function() {
     var _self = this;
     return new Promise(function(resolve, reject) {
