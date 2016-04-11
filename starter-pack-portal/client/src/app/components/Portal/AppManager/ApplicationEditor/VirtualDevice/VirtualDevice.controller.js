@@ -41,13 +41,14 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 newUser.register({
                     success: function(theUser) {
                         $scope.myApp.user = theUser;
-                        $scope.mqttInit(theUser);
+                        $scope.userMqttInit(theUser);
                         $scope.$apply();
+                        AppUtils.whenLoaded();
                     },
                     failure: function(theUser, errorString) {
                         $scope.loginMessage = errorString;
-                        AppUtils.whenLoaded();
                         $scope.$apply();
+                        AppUtils.whenLoaded();
                     }
                 });
             }
@@ -56,7 +57,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             KiiUser.authenticate(user.loginName, user.password, {
                 success: function(theUser) {
                     $scope.myApp.user = theUser;
-                    $scope.mqttInit(theUser);
+                    $scope.userMqttInit(theUser);
                     $scope.queryThing();
                     $scope.$apply();
                     // AppUtils.whenLoaded();
@@ -93,83 +94,141 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             $scope.open();
         }
 
-        var onMessageReceived = function(message) {
-            $scope.$apply(function() {
-                console.log('Message Received by Thing', message);
 
-                var parsed = $scope.mqtt.parseResponse(message);
-                console.log('parsed: ', parsed);
+        $scope.userMqttInit = function(user) {
+            var onMessageReceived = function(message) {
+                $scope.$apply(function() {
+                    console.log('Message Received by Thing', message);
 
-                if (parsed.type == 'PUSH_MESSAGE') {
-                    $scope.thingMessage.receivedActions.push(parsed.payload);
-                }
-                switch (parsed.type) {
-                    case 'ONBOARD_THING':
-                        ONBOARD_THING(parsed);
-                        break;
-                    case 'PUSH_MESSAGE':
+                    var parsed = $scope.userMqtt.parseResponse(message);
+                    console.log('parsed: ', parsed);
+
+                    if (parsed.type == 'PUSH_MESSAGE') {
                         $scope.thingMessage.receivedActions.push(parsed.payload);
+                    }
+                    switch (parsed.type) {
+                        case 'ONBOARD_THING':
+                            ONBOARD_THING(parsed);
+                            break;
+                        case 'PUSH_MESSAGE':
+                            // $scope.thingMessage.receivedActions.push(parsed.payload);
+                            for (var i = 0; i < $scope.userMessage.receivedActionResults.length; i++) {
+                                if ($scope.userMessage.receivedActionResults[i].commandID == parsed.payload.commandID) {
+                                    $scope.userMessage.receivedActionResults[i].actionResults = parsed.payload;
+                                    break;
+                                }
+                            }
+                            break;
+                        case 'SEND_COMMAND':
+                            $scope.feedback = parsed;
+                            var actions = {
+                                commandID: parsed.payload.commandID,
+                                actionResults: {}
+                            };
+                            $scope.userMessage.receivedActionResults.push(actions);
+                            break;
+                        case 'UPDATE_ACTION_RESULTS':
+                            break;
+                        default:
+                            console.log('Unknown type: ' + parsed.type, parsed);
+                            break;
+                    }
+                });
+            };
+
+            var ONBOARD_THING = function(parsed) {
+                switch (parsed.code) {
+                    case '200':
+                        var thing = _.findWhere($scope.deviceList, { '_thingID': parsed.payload.thingID });
+                        if (thing) {
+                            thing._accessToken = parsed.payload.accessToken;
+                            thing.payload = angular.copy(parsed.payload);
+                            $scope.currentThing = thing;
+                        } else {
+                            thing = {
+                                '_accessToken': parsed.payload.accessToken,
+                                '_vendorThingID': $scope.newThing._vendorThingID,
+                                '_thingID': parsed.payload.thingID,
+                                'payload': angular.copy(parsed.payload)
+                            }
+                            $scope.deviceList.push(thing);
+                            $scope.currentThing = thing;
+                            thingService.setState(thing, {
+                                'power': true,
+                                'presetTemperature': 25,
+                                'fanspeed': 5,
+                                'currentTemperature': 28,
+                                'currentHumidity': 65
+                            });
+                        }
+                        connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
+                        thingService.getCommands(thing);
+                        thingService.getState(thing).then(function(res) {
+                            console.log(res.data);
+                            $scope.currentThing.states = res.data;
+                        });
+                        $scope.cancel();
                         break;
-                    case 'SEND_COMMAND':
-                        $scope.feedback = parsed;
+                    default:
+                        $scope.newThing.message = parsed.payload.message;
                         break;
                 }
-            });
-        };
-
-        function ONBOARD_THING(parsed) {
-            switch (parsed.code) {
-                case '200':
-                    var thing = _.findWhere($scope.deviceList, { '_thingID': parsed.payload.thingID });
-                    if (thing) {
-                        thing._accessToken = parsed.payload.accessToken;
-                        thing.payload = angular.copy(parsed.payload);
-                        $scope.currentThing = thing;
-                    } else {
-                        thing = {
-                            '_accessToken': parsed.payload.accessToken,
-                            '_vendorThingID': $scope.newThing._vendorThingID,
-                            '_thingID': parsed.payload.thingID,
-                            'payload': angular.copy(parsed.payload)
-                        }
-                        $scope.deviceList.push(thing);
-                        $scope.currentThing = thing;
-                        thingService.setState(thing, {
-                            'power': true,
-                            'presetTemperature': 25,
-                            'fanspeed': 5,
-                            'currentTemperature': 28,
-                            'currentHumidity': 65
-                        });
-                    }
-                    thingService.getCommands(thing);
-                    thingService.getState(thing).then(function(res) {
-                        console.log(res.data);
-                        $scope.currentThing.states = res.data;
-                    });
-                    $scope.cancel();
-                    break;
-                default:
-                    $scope.newThing.message = parsed.payload.message;
-                    break;
             }
-        }
 
-        var onConnectionLost = function(responseObject) {
-            console.log('Conneciton Lost');
-        };
+            var onConnectionLost = function(responseObject) {
+                console.log('User Mqtt Conneciton Lost');
+            };
 
-        $scope.mqttInit = function(user) {
-            $scope.mqtt = new KiiPortalMqtt(user, onMessageReceived, onConnectionLost);
-            $scope.mqtt.init().then(function(res) {
+            $scope.currentThing = {};
+            $scope.userMqtt = new KiiPortalMqtt(onMessageReceived, onConnectionLost);
+            $scope.userMqtt.init(user).then(function(res) {
                 console.log('onConnect');
-                $scope.mqttInitialed = !0;
+                $scope.userMqttInitialed = !0;
                 $scope.$apply();
             }, function(err) {
                 console.log(err);
                 AppUtils.whenLoaded();
             });
         };
+
+        function connectMQTTEndpointForThing(mqttEndpointInfo) {
+
+            var mqttClientConfig = {
+                host: mqttEndpointInfo.host,
+                port: mqttEndpointInfo.portWS,
+                username: mqttEndpointInfo.username,
+                password: mqttEndpointInfo.password,
+                clientID: mqttEndpointInfo.mqttTopic
+            };
+
+            var onMessageReceived = function(message) {
+                $scope.$apply(function() {
+                    consoleService.log('message ' + JSON.stringify(message));
+                    alert('Message Received by Thing', message);
+
+                    var parsed = $scope.thingMqttClient.parseResponse(message);
+                    consoleService.log('parsed ' + JSON.stringify(parsed));
+
+                    if (parsed.type == 'PUSH_MESSAGE') {
+                        $scope.thingMessage.receivedActions.push(parsed.payload);
+                    }
+                });
+            };
+
+            var onConnectionLost = function(responseObject) {
+                alert('Thing MQTT Conneciton Lost');
+            };
+
+            $scope.thingMqtt = new KiiPortalMqtt(onMessageReceived, onConnectionLost);
+            $scope.thingMqtt.connect(mqttClientConfig).then(function() {
+                console.log('Thing MQTT Connected');
+                $scope.thingMqtt.subscribe(mqttClientConfig.clientID);
+                $scope.isMQTTConnectedForThing = true;
+            }, function(err) {
+                alert('Error connecting: ' + JSON.stringify(err));
+                console.log('Error connecting: ' + JSON.stringify(err));
+            });
+        }
 
         var modalInstance;
         $scope.open = function() {
@@ -191,7 +250,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 '_stringField5': 'VIRTUAL_DEVICE',
                 '_firmwareVersion': '0.0.1'
             }
-            $scope.mqtt.onboardThing(newThing._vendorThingID, newThing.password, thingProperties);
+            $scope.userMqtt.onboardThing(newThing._vendorThingID, newThing.password, thingProperties);
         }
 
         $scope.cancel = function() {
@@ -243,7 +302,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 schema: 'SmartLight',
                 schemaVersion: 1
             };
-            $scope.mqtt.sendCommand(payload, $scope.currentThing._thingID);
+            $scope.userMqtt.sendCommand(payload, $scope.currentThing._thingID);
         }
 
         $scope.normal = function(data) {

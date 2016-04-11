@@ -1,9 +1,18 @@
 @import 'src/app/components/AppShared/scss/global.scss';
-.app-portal-usermanager{
+.app-portal-usermanager {
+    .panel-body {
+        overflow-x: auto;
+    }
     .panel-bottom {
         margin-top: 10px;
     }
     .sm {
         width: 100% !important;
+    }
+    .new-user-form tr {
+        td:first-child {
+            width: 180px;
+            text-align: right;
+        }
     }
 }

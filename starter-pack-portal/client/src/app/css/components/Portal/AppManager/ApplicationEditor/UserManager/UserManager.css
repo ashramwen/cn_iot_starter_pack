@@ -1,5 +1,12 @@
+.app-portal-usermanager .panel-body {
+  overflow-x: auto; }
+
 .app-portal-usermanager .panel-bottom {
   margin-top: 10px; }
 
 .app-portal-usermanager .sm {
   width: 100% !important; }
+
+.app-portal-usermanager .new-user-form tr td:first-child {
+  width: 180px;
+  text-align: right; }
