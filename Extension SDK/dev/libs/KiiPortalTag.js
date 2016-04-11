@@ -198,6 +198,9 @@
             if(!this._things){
                 this._things = [];
             }
+            if(!this._thingIDs){
+                this._thingIDs = [];
+            }
             if(this.getThingIDs().indexOf(kiiThing.getThingID())>-1) return;
             this._things.push(kiiThing);
             this.addThingID(kiiThing.getThingID());
