@@ -49,8 +49,10 @@
         <div class="content">
           <div ng-repeat="(key, value) in currentThing.states">
             {{key}}:
-            <span ng-if="normal(value)">{{value}}</span>
-            <switchery ng-model="currentThing.states[key]" ng-if="!normal(value)" readonly></switchery>
+            <!-- <span ng-if="!isBoolean(value)">{{value}}</span>
+            <switchery ng-model="currentThing.states[key]" ng-if="isBoolean(value)" readonly></switchery> -->
+            <span ng-if="!isBoolean(value)">{{value}}</span>
+            <span ng-if="isBoolean(value)" class="light" ng-class="{'green':value}"></span>
           </div>
         </div>
       </div>
@@ -66,9 +68,15 @@
           <div class="pull-left operator" ng-switch="command">
             <div class="content" ng-switch-when="1">
               <table class="table table-striped">
-                <tr ng-repeat="(key, value) in currentThing.states">
+                <!-- <tr ng-repeat="(key, value) in currentThing.states">
                   <td>{{key}}:</td>
                   <td>{{actionValue.type}}</td>
+                </tr> -->
+                <tr>
+                  <td>Power</td>
+                  <td>
+                    <switchery ng-model="currentThing.states.power" yes-text="on" no-text="off" ng-change="updateState()"></switchery>
+                  </td>
                 </tr>
               </table>
             </div>
