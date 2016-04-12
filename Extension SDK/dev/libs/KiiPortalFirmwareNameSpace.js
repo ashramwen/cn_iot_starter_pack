@@ -147,7 +147,7 @@
          * @override
          * @public
          */
-        KiiPortalFirmwareNamespace.prototype.init = function(){
+        KiiPortalFirmwareNamespace.prototype._init = function(){
             this.setName(this.get('name'));
             this.setVersionName(this.get('versionName'));
         };

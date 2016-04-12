@@ -66,12 +66,38 @@ angular.module('StarterPack.AppShared')
                     $scope.myDevices = result.things;
                     $scope.nextQuery = result.query;
 
+                    if($scope.allSelected){
+                        $scope.selectAll();
+                    };
+
                     $scope.$apply();
 
                     AppUtils.whenLoaded();
                 }, function(){
                     AppUtils.whenLoaded();
                 });
+            };
+
+            $scope.$watch('allSelected', function(newVal){
+                if(newVal){
+                    $scope.selectAll();
+                }else{
+
+                }
+            });
+
+            $scope.unselectAll = function(){
+                _.each($scope.myDevices, function(device){
+                    device._selected = false;
+                });
+                $scope.selectChange();
+            };
+
+            $scope.selectAll = function(){
+                _.each($scope.myDevices, function(device){
+                    device._selected = true;
+                });
+                $scope.selectChange();
             };
 
             $scope.selectedThingsFilter = function(thing){

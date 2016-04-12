@@ -149,7 +149,7 @@ angular.module('StarterPack.Portal.AppManager.Observation').
         fields: [],
         widgetSetting: {
             size: {
-                x: 1,
+                x: 2,
                 y: 2
             },
             position: {

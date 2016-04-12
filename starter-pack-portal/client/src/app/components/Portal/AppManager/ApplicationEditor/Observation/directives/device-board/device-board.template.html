@@ -17,7 +17,7 @@
           <tbody>
             <tr ng-repeat="device in tag.getThings()">
               <td>{{device.getVendorThingID()}}</td>
-              <td ng-repeat="field in tag.getFields()">{{device[field.fieldName] || device['fields'][field.fieldName]}}</td>
+              <td ng-repeat="field in tag.getFields()">{{device[field.fieldName] || device['fields'][field.fieldName] || device.getStates()[field.fieldName]}}</td>
             </tr>
           </tbody>
         </table>

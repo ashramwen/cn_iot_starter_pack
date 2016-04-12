@@ -25,7 +25,7 @@
             }
         }
 
-        KiiPortalCommand.prototype.init = function(user, thing, command){
+        KiiPortalCommand.prototype._init = function(user, thing, command){
             __extends(this, command);
             this._thing = thing;
             this._user = user;
@@ -135,7 +135,7 @@
                 var request = new KiiObjectRequest(_this._kiiApp, spec);
 
                 request.execute().then(function(response){
-                    _this.init(_this._user, _this._thing, response.data);
+                    _this._init(_this._user, _this._thing, response.data);
 
                     if(callbacks && callbacks.success){
                         callbacks.success(_this);
@@ -170,7 +170,7 @@
                 var request = new KiiObjectRequest(_this._kiiApp, spec);
 
                 request.execute().then(function(response){
-                    _this.init(_this._user, _this._thing, response.data);
+                    _this._init(_this._user, _this._thing, response.data);
                     _this._thing._addCommand(_this);
                     if(callbacks && callbacks.success){
                         callbacks.success(_this);

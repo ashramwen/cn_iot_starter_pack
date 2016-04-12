@@ -74,7 +74,7 @@
          * override
          * @private
          */
-        KiiPortalUpgradeInfo.init = function(){
+        KiiPortalUpgradeInfo._init = function(){
             this._setVendorThingID(this.get('vendorThingID'));
             this._setUpdateMessage(this.get('updateMessage'));
             this._setUpdateStatus(this.get('updateStatus'));

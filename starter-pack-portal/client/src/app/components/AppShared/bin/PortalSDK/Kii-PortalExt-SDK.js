@@ -261,7 +261,8 @@
         FIRMWARE: 'FIRMWARE_BUCKET',
         MODEL: 'MODEL_BUCKET',
         TAG: 'TAG_BUCKET',
-        FIRMWARE_NAMESPACE: 'FIRMWARE_NAMESPACE'
+        FIRMWARE_NAMESPACE: 'FIRMWARE_NAMESPACE',
+        STATES: '_states'
     };
 
     /**
@@ -275,8 +276,7 @@
     root.ReservedBucketPrefix = {
         FIRMWARE: '__FIRMWARE_',
         MODEL: '__MODEL_',
-        MODEL_UPDATE_INFO: '__MODEL_UPDATE_INFO_',
-        TAG: '__TAG_'
+        MODEL_UPDATE_INFO: '__MODEL_UPDATE_INFO_'
     };
 
     /**
@@ -484,7 +484,7 @@
          * @abstract
          * @private
          */
-        KiiPortalObject.prototype.init = function(){
+        KiiPortalObject.prototype._init = function(){
             //TODO
         };
 
@@ -494,14 +494,14 @@
 
         KiiPortalObject.prototype._renew = function(kiiObject){
             __cast(this, kiiObject);
-            this.init();
+            this._init();
         };
 
         KiiPortalObject.prototype._cast = function(kiiObject){
             var portalObject = this.constructor.factory(this.getKiiApp());
             __cast(portalObject, kiiObject);
             __cast(this, portalObject);
-            this.init();
+            this._init();
         };
 
         KiiPortalObject.prototype.enableRead = function(callbacks){
@@ -867,7 +867,7 @@
                         if (callbacks) {
                             callbacks.success.call(callbacks, query ,objects, nextQuery);
                         }
-                        resolve(query ,objects, nextQuery);
+                        resolve({query: query ,data: objects, nextQuery: nextQuery});
                     },
                     failure: function(error) {
                         if (callbacks != null && callbacks.failure) {
@@ -2185,7 +2185,7 @@
             }
         }
 
-        KiiPortalCommand.prototype.init = function(user, thing, command){
+        KiiPortalCommand.prototype._init = function(user, thing, command){
             __extends(this, command);
             this._thing = thing;
             this._user = user;
@@ -2295,7 +2295,7 @@
                 var request = new KiiObjectRequest(_this._kiiApp, spec);
 
                 request.execute().then(function(response){
-                    _this.init(_this._user, _this._thing, response.data);
+                    _this._init(_this._user, _this._thing, response.data);
 
                     if(callbacks && callbacks.success){
                         callbacks.success(_this);
@@ -2330,7 +2330,7 @@
                 var request = new KiiObjectRequest(_this._kiiApp, spec);
 
                 request.execute().then(function(response){
-                    _this.init(_this._user, _this._thing, response.data);
+                    _this._init(_this._user, _this._thing, response.data);
                     _this._thing._addCommand(_this);
                     if(callbacks && callbacks.success){
                         callbacks.success(_this);
@@ -2898,7 +2898,7 @@
          * @override
          * @public
          */
-        KiiPortalFirmware.prototype.init = function(){
+        KiiPortalFirmware.prototype._init = function(){
             this.setName(this.get('name'));
             this.setNamespace(this.get('namespace'));
             this.setState(this.get('state'));
@@ -3123,7 +3123,7 @@
          * @override
          * @public
          */
-        KiiPortalFirmwareNamespace.prototype.init = function(){
+        KiiPortalFirmwareNamespace.prototype._init = function(){
             this.setName(this.get('name'));
             this.setVersionName(this.get('versionName'));
         };
@@ -3238,7 +3238,7 @@
          * override
          * @private
          */
-        KiiPortalModel.prototype.init = function(){
+        KiiPortalModel.prototype._init = function(){
             this.setName(_super.prototype.get.call(this, 'name'));
             this.setImageUrl(_super.prototype.get.call(this, 'imageUrl'));
             this.setFirmwareNamespace(_super.prototype.get.call(this, 'firmwareNamespace'));
@@ -3708,10 +3708,10 @@
                 _this._version = version;
             };
 
-            this.init(schema);
+            this._init(schema);
         }
 
-        KiiPortalSchema.prototype.init = function(schema, model){
+        KiiPortalSchema.prototype._init = function(schema, model){
             var _this = this;
             if(schema){
                 _this.id = schema.id;
@@ -3826,7 +3826,7 @@
                             'Authorization': tokenType + ' ' + accessToken
                         },
                         success: function(response){
-                            _this.init(response.data, _this._model);
+                            _this._init(response.data, _this._model);
 
                             if(callbacks && callbacks.success){
                                 callbacks.success(_this);
@@ -3858,7 +3858,7 @@
                             'Authorization': tokenType + ' ' + accessToken
                         },
                         success: function(response){
-                            _this.init(response.data, this._model);
+                            _this._init(response.data, this._model);
                             if(callbacks && callbacks.success){
                                 callbacks.success(_this);
                             }
@@ -4462,7 +4462,7 @@ KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
          * init KiiPortalTag
          * @return null
          */
-        KiiPortalTag.prototype.init = function(){
+        KiiPortalTag.prototype._init = function(){
             this.setName(this.get('name'));
             this.setDescription(this.get('description'));
             this.setThingIDs(this.get('thingIDs'));
@@ -4586,7 +4586,119 @@ KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
         return KiiPortalTag;
     })(KiiPortalObject);
 
-    root.KiiPortalUpgradeInfo = (function(_super){
+    root.KiiPortalThingState = (function(_super){
+
+        KiiPortalThingState.prototype = new _super();
+        __inherits(KiiPortalThingState, _super);
+        KiiPortalThingState.prototype.constructor = KiiPortalThingState;
+
+        function KiiPortalThingState(){
+
+        }
+
+        KiiPortalThingState._bucketName = root.KiiExtensionBuckets.STATES;
+
+        /**
+         * This is called in KiiPortalObject factory process.
+         * @override
+         * @public
+         */
+        KiiPortalThingState.prototype._init = function(){
+
+        };
+
+        KiiPortalThingState.prototype.getThingID = function(){
+            return this.get('target').substr(6);
+        };
+
+        KiiPortalThingState.prototype.getState = function(){
+            return this.get('state');
+        };
+
+        KiiPortalThingState.refreshByThingID = function(thingID, callbacks){
+            return new Promise(function(resolve, reject){
+                var kiiApp, query, refreshStatesCallbacks, ids;
+                kiiApp = KiiPortalAdmin.getCurrentApp();
+                refreshStatesCallbacks = {
+                    success: function(response){
+                        var query = response.query,
+                            states = response.data, 
+                            nextQuery = response.nextQuery;
+
+                        if(states.length > 0){
+                            var state = states[0];
+                            if(callbacks && callbacks.success){
+                                callbacks.success(state);
+                            }
+
+                            resolve(state);
+                        }else{
+                            // ::TODO
+                            // object not found
+                            if(callbacks.failure){
+                                callbacks.failure(error);
+                            }
+                            reject({code: 401, errorMessage: 'Object Not Found'});
+                        }
+                        
+                    },
+                    failure: function(error){
+                        if(callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+
+                var queryClause = KiiClause.equals('target', 'thing:' + thingID),
+                    query = KiiQuery.queryWithClause(queryClause);
+
+                KiiPortalThingState.executeQuery(kiiApp, query)
+                    .then(refreshStatesCallbacks.success, 
+                      refreshStatesCallbacks.failure);
+            });
+        };
+
+        KiiPortalThingState.refreshByThingIDs = function(thingIDs, callbacks){
+            return new Promise(function(resolve, reject){
+                var kiiApp, query, refreshStatesCallbacks, ids;
+                kiiApp = KiiPortalAdmin.getCurrentApp();
+                refreshStatesCallbacks = {
+                    success: function(response){
+                        var query = response.query,
+                            states = response.data, 
+                            nextQuery = response.nextQuery;
+
+                        if(callbacks && callbacks.success){
+                            callbacks.success(states);
+                        }
+
+                        resolve(states);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+                ids = [];
+
+                __each(thingIDs, function(thingID){
+                    ids.push('thing:' + thingID);
+                });
+
+                var queryClause = KiiClause.in('target', ids),
+                    query = KiiQuery.queryWithClause(queryClause);
+
+                KiiPortalThingState.executeQuery(kiiApp, query)
+                    .then(refreshStatesCallbacks.success, 
+                      refreshStatesCallbacks.failure);
+            });
+        };
+
+        return KiiPortalThingState;
+    }(KiiPortalObject));    root.KiiPortalUpgradeInfo = (function(_super){
 
         KiiPortalUpgradeInfo.prototype = new _super();
         __inherits(KiiPortalUpgradeInfo, _super);
@@ -4662,7 +4774,7 @@ KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
          * override
          * @private
          */
-        KiiPortalUpgradeInfo.init = function(){
+        KiiPortalUpgradeInfo._init = function(){
             this._setVendorThingID(this.get('vendorThingID'));
             this._setUpdateMessage(this.get('updateMessage'));
             this._setUpdateStatus(this.get('updateStatus'));
@@ -5414,6 +5526,45 @@ KiiPortalUser.prototype.update = function(data) {
         });
     };
 
+    KiiThingAdmin.prototype.setStates = function(states){
+        this._states = states;
+    };
+
+    KiiThingAdmin.prototype.getStates = function(){
+        if(this._states){
+            return this._states.getState();
+        }
+        return [];
+    };
+
+    /**
+     * refresh thing states
+     * @return {[type]} [description]
+     */
+    KiiThingAdmin.prototype.refreshStates = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var refreshCallbacks = {
+                success: function(states){
+                    _this.setStates(states);
+                    if(callbacks && callbacks.success){
+                        callbacks.success(_this.getStates());
+                    }
+                    resolve(_this.getStates());
+                },
+                failure: function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            };
+
+            KiiPortalThingState.refreshByThingID(_this.getThingID())
+                .then(refreshCallbacks.success, refreshCallbacks.failure);
+        });
+    };
 
 
 
