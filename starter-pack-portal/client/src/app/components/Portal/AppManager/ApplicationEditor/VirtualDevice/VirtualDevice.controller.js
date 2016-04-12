@@ -29,7 +29,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             $scope.$watch('appReady', function(ready) {
                 if (!ready) return;
                 thingService.init();
-                demo();
+                // demo();
             });
         };
 
