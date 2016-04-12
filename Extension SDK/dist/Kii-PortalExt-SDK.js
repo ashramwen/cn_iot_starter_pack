@@ -220,8 +220,7 @@
                             try{
                                 data = JSON.parse(xmlhttp.responseText);
                             }catch(e){
-                                console.log(e);
-                                reject(e);
+                                reject({status: status, data: {}, code: xmlhttp.status});
                                 return;
                             }
                         }
@@ -1421,9 +1420,8 @@
                         reject(response);
                     }
                 };
-                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks).catch(function(e){
-                    console.log(e);
-                });
+                
+                KiiPortalApp._withAdmin(_this, refreshAppsCallbacks).then(refreshAppsCallbacks.success, refreshAppsCallbacks.failure);
             });
         };
 
@@ -4483,6 +4481,9 @@ KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
         KiiPortalTag.prototype.addThing = function(kiiThing){
             if(!this._things){
                 this._things = [];
+            }
+            if(!this._thingIDs){
+                this.setThingIDs([]);
             }
             if(this.getThingIDs().indexOf(kiiThing.getThingID())>-1) return;
             this._things.push(kiiThing);

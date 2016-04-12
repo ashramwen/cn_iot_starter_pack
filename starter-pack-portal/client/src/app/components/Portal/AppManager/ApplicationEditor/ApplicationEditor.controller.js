@@ -31,7 +31,7 @@ angular.module('StarterPack.Portal.AppManager')
                     $scope.$apply();
                     AppUtils.whenLoaded();
                 }, function(error){
-                    console('timeout!');
+                    console.log('timeout!');
                     AppUtils.whenLoaded();
                 });
             }
