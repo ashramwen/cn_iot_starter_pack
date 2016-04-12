@@ -1,49 +1,53 @@
 angular.module('StarterPack.Portal.AppManager.VirtualDevice').factory('thingService', ['$http', function($http) {
     var baseUrl;
-    var _header;
+    var app;
     return {
         init: function() {
             baseUrl = Kii.getBaseURL().slice(0, -3);
+            app = {
+                'id': Kii.getAppID(),
+                'key': Kii.getAppKey()
+            };
         },
         getState: function(thing) {
-            var spec = {
+            var options = {
                 method: 'GET',
                 headers: {
-                    "x-kii-appid": Kii.getAppID(),
-                    "x-kii-appkey": Kii.getAppKey(),
-                    "Authorization": 'Bearer ' + thing._accessToken,
+                    'x-kii-appid': app.id,
+                    'x-kii-appkey': app.key,
+                    'Authorization': 'Bearer ' + thing._accessToken,
                     'Content-Type': 'application/json',
                 },
                 url: baseUrl + 'thing-if/apps/' + Kii.getAppID() + '/targets/thing:' + thing._thingID + '/states'
             };
-            return $http(spec);
+            return $http(options);
         },
         setState: function(thing, data) {
-            var spec = {
+            var options = {
                 data: data,
                 method: 'PUT',
                 headers: {
-                    "x-kii-appid": Kii.getAppID(),
-                    "x-kii-appkey": Kii.getAppKey(),
-                    "Authorization": 'Bearer ' + thing._accessToken,
+                    'x-kii-appid': app.id,
+                    'x-kii-appkey': app.key,
+                    'Authorization': 'Bearer ' + thing._accessToken,
                     'Content-Type': 'application/json',
                 },
                 url: baseUrl + 'thing-if/apps/' + Kii.getAppID() + '/targets/thing:' + thing._thingID + '/states'
             };
-            return $http(spec);
+            return $http(options);
         },
         getCommands: function(thing) {
-            var spec = {
+            var options = {
                 method: 'GET',
                 headers: {
-                    "x-kii-appid": Kii.getAppID(),
-                    "x-kii-appkey": Kii.getAppKey(),
-                    "Authorization": 'Bearer ' + thing._accessToken,
+                    'x-kii-appid': app.id,
+                    'x-kii-appkey': app.key,
+                    'Authorization': 'Bearer ' + thing._accessToken,
                     'Content-Type': 'application/json',
                 },
                 url: baseUrl + 'thing-if/apps/' + Kii.getAppID() + '/targets/thing:' + thing._thingID + '/commands'
             };
-            return $http(spec);
+            return $http(options);
         }
     }
 }]);

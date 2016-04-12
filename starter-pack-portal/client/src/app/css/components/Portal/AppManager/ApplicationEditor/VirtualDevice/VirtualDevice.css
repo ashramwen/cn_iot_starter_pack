@@ -31,12 +31,17 @@
     border: 1px solid #666;
     width: 650px;
     margin-left: 100px; }
-    .app-portal-virtualdevice .device-panel .command-panel .command div {
-      cursor: pointer;
-      border: 1px solid #666;
-      padding: 5px; }
-      .app-portal-virtualdevice .device-panel .command-panel .command div:hover {
-        background-color: #ccc; }
+    .app-portal-virtualdevice .device-panel .command-panel .command {
+      width: 20%; }
+      .app-portal-virtualdevice .device-panel .command-panel .command div {
+        cursor: pointer;
+        border: 1px solid #666;
+        padding: 5px; }
+        .app-portal-virtualdevice .device-panel .command-panel .command div:hover {
+          background-color: #ccc; }
+    .app-portal-virtualdevice .device-panel .command-panel .operator {
+      width: 80%;
+      border: 1px solid #666; }
   .app-portal-virtualdevice .device-panel .switch {
     position: absolute;
     top: -1px;

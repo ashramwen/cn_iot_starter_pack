@@ -3973,9 +3973,9 @@ root.KiiPortalMqtt = (function() {
      * @param {[type]} onConnectionLost   [description]
      * @param {[type]} onMessageDelivered [description]
      */
-    function KiiPortalMqtt(user, onMessageArrived, onConnectionLost, onMessageDelivered) {
+    function KiiPortalMqtt(onMessageArrived, onConnectionLost, onMessageDelivered) {
         this.config = {};
-        this.user = user;
+        this.user = {};
         this.onMessageArrived = onMessageArrived;
         this.onConnectionLost = onConnectionLost;
         this.onMessageDelivered = onMessageDelivered;
@@ -3986,19 +3986,26 @@ root.KiiPortalMqtt = (function() {
     return KiiPortalMqtt;
 })();
 
-KiiPortalMqtt.prototype.init = function() {
+KiiPortalMqtt.prototype.on = KiiPortalMqtt.prototype.addEventListener = function(event, fn) {
+    this._callbacks = this._callbacks || {};
+    (this._callbacks[event] = this._callbacks[event] || []).push(fn);
+    return this;
+};
+
+KiiPortalMqtt.prototype.init = function(user) {
     var _self = this;
+    _self.user = user;
     return new Promise(function(resolve, reject) {
         _self.installMQTTForUser().then(function(response) {
             _self.retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(mqttEndpointInfo) {
-                _self.config = {
+                var config = {
                     host: mqttEndpointInfo.host,
                     port: mqttEndpointInfo.portWS,
                     username: mqttEndpointInfo.username,
                     password: mqttEndpointInfo.password,
                     clientID: mqttEndpointInfo.mqttTopic
                 };
-                _self.connect().then(function(res) {
+                _self.connect(config).then(function(res) {
                     resolve(res);
                 }, function(error) {
                     reject(error);
@@ -4047,6 +4054,7 @@ KiiPortalMqtt.prototype.installMQTTForUser = function() {
  */
 KiiPortalMqtt.prototype.retrieveMQTTEndpointForUser = function(installationID, retryCount) {
     return new Promise(function(resolve, reject) {
+        var _self = this;
         var spec = {
             method: 'GET',
             extraUrl: '/installations/' + installationID + '/mqtt-endpoint'
@@ -4059,7 +4067,7 @@ KiiPortalMqtt.prototype.retrieveMQTTEndpointForUser = function(installationID, r
             console.log("retry: " + retryCount);
             if (retryCount > 0) {
                 setTimeout(function() {
-                    retrieveMQTTEndpointForUser(installationID, retryCount - 1);
+                    _self.retrieveMQTTEndpointForUser(installationID, retryCount - 1);
                 }, 5000);
             } else {
                 reject(error);
@@ -4074,7 +4082,8 @@ KiiPortalMqtt.prototype.subscribe = function(topic) {
 }
 
 // connects to broker and subscribes to clientID topic
-KiiPortalMqtt.prototype.connect = function() {
+KiiPortalMqtt.prototype.connect = function(config) {
+    this.config = config;
     return new Promise(function(resolve, reject) {
         try {
             this.client = new Paho.MQTT.Client(this.config.host, this.config.port, this.config.clientID);
@@ -4089,9 +4098,9 @@ KiiPortalMqtt.prototype.connect = function() {
             this.client.connect({
                 onSuccess: function(res) {
                     // auto subscribe to the topic
-                    // this.client.subscribe(this.config.clientID);
+                    this.client.subscribe(this.config.clientID);
                     resolve(res);
-                },
+                }.bind(this),
                 onFailure: function(err) {
                     reject(err)
                 },
@@ -4176,7 +4185,7 @@ KiiPortalMqtt.prototype.updateState = function(state, thingID, token) {
     // mandatory blank line
     stateMessage += '\n';
     // state
-    stateMessage += state;
+    stateMessage += JSON.stringify(state);
 
     // fill topic
     var topic = 'p/' + this.config.clientID + '/thing-if/apps/' + this.kiiApp.getAppID() + '/targets/THING:' + thingID + '/states';

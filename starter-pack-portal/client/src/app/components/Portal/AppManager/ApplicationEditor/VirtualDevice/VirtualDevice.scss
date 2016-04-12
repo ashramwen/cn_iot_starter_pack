@@ -37,6 +37,7 @@
             width: 650px;
             margin-left: 100px;
             .command {
+                width: 20%;
                 div {
                     cursor: pointer;
                     border: 1px solid #666;
@@ -45,6 +46,10 @@
                         background-color: #ccc;
                     }
                 }
+            }
+            .operator {
+                width: 80%;
+                border: 1px solid #666;
             }
         }
         .switch {

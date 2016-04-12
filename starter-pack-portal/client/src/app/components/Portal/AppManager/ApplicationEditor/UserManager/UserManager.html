@@ -44,61 +44,84 @@
       </button>
     </div>
     <div class="panel-body" uib-collapse="!isExpanded">
-      <form name="newUserForm" action="" class="form-inline clearfix" role="form">
+      <form name="newUserForm" action="" class="form-inline clearfix new-user-form" role="form">
         <table class="table table-striped">
           <tr>
             <td>
+              <label for="new_loginName">Login</label>
+            </td>
+            <td>
               <div class="form-group">
-                <label class="sr-only" for="new_loginName">Login</label>
                 <input type="text" class="form-control" id="new_loginName" placeholder="Login name" ng-model="newUser.loginName" />
               </div>
             </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="new_password">Password</label>
+            </td>
             <td>
               <div class="form-group">
-                <label class="sr-only" for="new_password">Password</label>
                 <input type="password" class="form-control" id="new_password" placeholder="Password" ng-model="newUser.password" />
               </div>
             </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="new_displayName">Display name</label>
+            </td>
             <td>
               <div class="form-group">
-                <label class="sr-only" for="new_displayName">Display name</label>
                 <input type="text" class="form-control" id="new_displayName" placeholder="Display name" ng-model="newUser.displayName" />
               </div>
             </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="new_emailAddress">Email</label>
+            </td>
             <td>
               <div class="form-group">
-                <label class="sr-only" for="new_emailAddress">Email</label>
                 <input type="text" class="form-control" id="new_emailAddress" placeholder="Email" ng-model="newUser.emailAddress" />
               </div>
             </td>
+          </tr>
+          <tr>
             <td>
-              <div class="form-group">
-                <label class="sr-only" for="new_phoneNumber">Phone</label>
-                <input type="text" class="form-control" id="new_phoneNumber" placeholder="Phone" ng-model="newUser.phoneNumber" />
-              </div>
+              <label class="=" for="new_phoneNumber">Phone</label>
             </td>
             <td>
               <div class="form-group">
-                <label class="sr-only" for="new_country">Country</label>
+                <input type="text" class="form-control" id="new_phoneNumber" placeholder="Phone" ng-model="newUser.phoneNumber" />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label for="new_country">Country</label>
+            </td>
+            <td>
+              <div class="form-group">
                 <select class="form-control sm" id="new_country" ng-model="newUser.country" ng-options="c.code as c.name for c in countryList">
                   <option value="" disabled>Select a country</option>
                 </select>
               </div>
             </td>
           </tr>
+          </tr>
           <tr>
-            <td colspan="5">
-              <validate-message errors="errors" class="panel-bottom pull-left" status="newUser._status"></validate-message>
-            </td>
             <td>
               <div class="panel-bottom pull-left">
-                <button type="button" class="btn btn-danger" ng-click="cancelAddUser(newUser)">
-                  <span class="fa fa-remove"></span> Cancel
-                </button>
                 <button type="button" class="btn btn-success" ng-click="addUser(newUser)">
                   <span class="fa fa-user-plus"></span> Save
                 </button>
+                <button type="button" class="btn btn-danger" ng-click="cancelAddUser(newUser)">
+                  <span class="fa fa-remove"></span> Cancel
+                </button>
               </div>
+            </td>
+            <td>
+              <validate-message errors="errors" class="panel-bottom pull-left" status="newUser._status"></validate-message>
             </td>
           </tr>
         </table>
