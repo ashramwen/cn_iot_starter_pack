@@ -501,7 +501,7 @@
          * @override
          * @public
          */
-        KiiPortalFirmware.prototype.init = function(){
+        KiiPortalFirmware.prototype._init = function(){
             this.setName(this.get('name'));
             this.setNamespace(this.get('namespace'));
             this.setState(this.get('state'));

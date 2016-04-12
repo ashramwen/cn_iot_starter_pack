@@ -13,7 +13,8 @@
         FIRMWARE: 'FIRMWARE_BUCKET',
         MODEL: 'MODEL_BUCKET',
         TAG: 'TAG_BUCKET',
-        FIRMWARE_NAMESPACE: 'FIRMWARE_NAMESPACE'
+        FIRMWARE_NAMESPACE: 'FIRMWARE_NAMESPACE',
+        STATES: '_states'
     };
 
     /**
@@ -27,8 +28,7 @@
     root.ReservedBucketPrefix = {
         FIRMWARE: '__FIRMWARE_',
         MODEL: '__MODEL_',
-        MODEL_UPDATE_INFO: '__MODEL_UPDATE_INFO_',
-        TAG: '__TAG_'
+        MODEL_UPDATE_INFO: '__MODEL_UPDATE_INFO_'
     };
 
     /**

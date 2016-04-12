@@ -187,7 +187,7 @@
          * init KiiPortalTag
          * @return null
          */
-        KiiPortalTag.prototype.init = function(){
+        KiiPortalTag.prototype._init = function(){
             this.setName(this.get('name'));
             this.setDescription(this.get('description'));
             this.setThingIDs(this.get('thingIDs'));

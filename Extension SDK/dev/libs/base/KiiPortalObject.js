@@ -40,7 +40,7 @@
          * @abstract
          * @private
          */
-        KiiPortalObject.prototype.init = function(){
+        KiiPortalObject.prototype._init = function(){
             //TODO
         };
 
@@ -50,14 +50,14 @@
 
         KiiPortalObject.prototype._renew = function(kiiObject){
             __cast(this, kiiObject);
-            this.init();
+            this._init();
         };
 
         KiiPortalObject.prototype._cast = function(kiiObject){
             var portalObject = this.constructor.factory(this.getKiiApp());
             __cast(portalObject, kiiObject);
             __cast(this, portalObject);
-            this.init();
+            this._init();
         };
 
         KiiPortalObject.prototype.enableRead = function(callbacks){
@@ -423,7 +423,7 @@
                         if (callbacks) {
                             callbacks.success.call(callbacks, query ,objects, nextQuery);
                         }
-                        resolve(query ,objects, nextQuery);
+                        resolve({query: query ,data: objects, nextQuery: nextQuery});
                     },
                     failure: function(error) {
                         if (callbacks != null && callbacks.failure) {

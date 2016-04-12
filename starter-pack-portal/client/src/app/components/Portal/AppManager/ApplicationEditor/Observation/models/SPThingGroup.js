@@ -70,7 +70,7 @@
 
         SPThingGroup.prototype.getRefreshInterval = function(interval){
             return this.getCustomData().refreshInterval;
-        }
+        };
 
         return SPThingGroup;
     })(KiiPortalTag);

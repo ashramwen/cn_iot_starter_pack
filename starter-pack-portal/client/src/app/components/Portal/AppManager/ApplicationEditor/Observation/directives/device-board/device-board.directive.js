@@ -27,7 +27,13 @@ angular.module('StarterPack.Portal.AppManager.Observation')
                     $scope.tag.refreshThings().then(function(){
                         AppUtils.whenLoaded();
                         initTimer();
-                        $scope.$apply();
+                        var thingIDs = $scope.tag.getThingIDs();
+                        $scope.refreshStates(thingIDs).then(function(){
+                            stopRefresh();
+                            $scope.$apply();
+                        }, function(){
+                            stopRefresh();
+                        });
                     }, function(){
                         AppUtils.whenLoaded();
                         $scope.$apply();
@@ -57,14 +63,48 @@ angular.module('StarterPack.Portal.AppManager.Observation')
             };
 
             $scope.refreshThings = function(){
-                $scope.refresher.addClass('start');
+                startRefresh();
                 $scope.tag.refreshThings().then(function(){
-                    $scope.refresher.removeClass('start');
-                },function(){
-                    $scope.refresher.removeClass('start');
+                    var thingIDs = $scope.tag.getThingIDs();
+                    $scope.refreshStates(thingIDs).then(function(){
+                        stopRefresh();
+                        $scope.$apply();
+                    }, function(){
+                        stopRefresh();
+                    });
+                },function(error){
+                    stopRefresh();
                 });
             };
 
+            /**
+             * refresh thing states
+             * @param  {[type]} thingIDs [description]
+             * @return {[type]}          [description]
+             */
+            $scope.refreshStates = function(thingIDs){
+                return new Promise(function(resolve, reject){
+                    KiiPortalThingState.refreshByThingIDs(thingIDs).then(function(states){
+                        var things = $scope.tag.getThings();
+                        _.each(states, function(state){
+                            var target = _.find(things, function(thing){
+                                return thing.getThingID() == state.getThingID();
+                            });
+                            if(target){
+                                target.setStates(state);
+                            }
+                        });
+                        resolve();
+                    }, function(error){
+                        reject(error);
+                    });
+                });
+            };
+
+            /**
+             * init refresh interval
+             * @return {[type]} [description]
+             */
             function initTimer(){
                 var tag = $scope.tag;
                 destroyTimer();
@@ -73,12 +113,35 @@ angular.module('StarterPack.Portal.AppManager.Observation')
                 }
             }
 
+            /**
+             * destroy timer
+             * @return {[type]} [description]
+             */
             function destroyTimer(){
                 if(myTimer){
                     $interval.cancel(myTimer);
                 }
             }
 
+            /**
+             * start spinning
+             * @return {[type]} [description]
+             */
+            function startRefresh(){
+                $scope.refresher.addClass('start');
+            }
+
+            /**
+             * stop spinning
+             * @return {[type]} [description]
+             */
+            function stopRefresh(){
+                $scope.refresher.removeClass('start');
+            }
+
+            /**
+             * when state changed
+             */
             $scope.$on('$destroy',function(){
                 destroyTimer();
             });

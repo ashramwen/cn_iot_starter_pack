@@ -345,5 +345,44 @@
         });
     };
 
+    KiiThingAdmin.prototype.setStates = function(states){
+        this._states = states;
+    };
+
+    KiiThingAdmin.prototype.getStates = function(){
+        if(this._states){
+            return this._states.getState();
+        }
+        return [];
+    };
+
+    /**
+     * refresh thing states
+     * @return {[type]} [description]
+     */
+    KiiThingAdmin.prototype.refreshStates = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var refreshCallbacks = {
+                success: function(states){
+                    _this.setStates(states);
+                    if(callbacks && callbacks.success){
+                        callbacks.success(_this.getStates());
+                    }
+                    resolve(_this.getStates());
+                },
+                failure: function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            };
+
+            KiiPortalThingState.refreshByThingID(_this.getThingID())
+                .then(refreshCallbacks.success, refreshCallbacks.failure);
+        });
+    };
 
 

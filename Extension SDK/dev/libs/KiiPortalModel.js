@@ -72,7 +72,7 @@
          * override
          * @private
          */
-        KiiPortalModel.prototype.init = function(){
+        KiiPortalModel.prototype._init = function(){
             this.setName(_super.prototype.get.call(this, 'name'));
             this.setImageUrl(_super.prototype.get.call(this, 'imageUrl'));
             this.setFirmwareNamespace(_super.prototype.get.call(this, 'firmwareNamespace'));
@@ -542,10 +542,10 @@
                 _this._version = version;
             };
 
-            this.init(schema);
+            this._init(schema);
         }
 
-        KiiPortalSchema.prototype.init = function(schema, model){
+        KiiPortalSchema.prototype._init = function(schema, model){
             var _this = this;
             if(schema){
                 _this.id = schema.id;
@@ -660,7 +660,7 @@
                             'Authorization': tokenType + ' ' + accessToken
                         },
                         success: function(response){
-                            _this.init(response.data, _this._model);
+                            _this._init(response.data, _this._model);
 
                             if(callbacks && callbacks.success){
                                 callbacks.success(_this);
@@ -692,7 +692,7 @@
                             'Authorization': tokenType + ' ' + accessToken
                         },
                         success: function(response){
-                            _this.init(response.data, this._model);
+                            _this._init(response.data, this._model);
                             if(callbacks && callbacks.success){
                                 callbacks.success(_this);
                             }
