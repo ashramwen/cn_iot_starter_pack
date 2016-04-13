@@ -77,6 +77,22 @@ angular.module('StarterPack.Portal.AppManager.Observation')
                 });
             };
 
+            $scope.getFieldValue = function(device, fieldName){
+                if(device[fieldName] === undefined){
+                    if(device.fields[fieldName] === undefined){
+                        if(device.getStates()[fieldName] === undefined){
+                            return 'N/A';
+                        }else{
+                            return device.getStates()[fieldName].toString();
+                        }
+                    }else{
+                        return device.fields[fieldName].toString();
+                    }
+                }else{
+                    return device[fieldName].toString();
+                }
+            };
+
             /**
              * refresh thing states
              * @param  {[type]} thingIDs [description]

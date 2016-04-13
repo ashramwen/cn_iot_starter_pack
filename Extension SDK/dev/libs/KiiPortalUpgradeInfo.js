@@ -1,3 +1,4 @@
+    
     root.KiiPortalUpgradeInfo = (function(_super){
 
         KiiPortalUpgradeInfo.prototype = new _super();

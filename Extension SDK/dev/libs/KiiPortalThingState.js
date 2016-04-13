@@ -5,7 +5,7 @@
         KiiPortalThingState.prototype.constructor = KiiPortalThingState;
 
         function KiiPortalThingState(){
-
+            __bindMethod(this);
         }
 
         KiiPortalThingState._bucketName = root.KiiExtensionBuckets.STATES;

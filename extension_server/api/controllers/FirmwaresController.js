@@ -1,6 +1,7 @@
 module.exports = {
 
 	init: function(req, res) {
+		var appRegistrationInfo = req.appInfo
 		var authorization = req.headers['authorization']
 		var appID = req.headers['x-app-id']
 		var appKey = req.headers['x-app-key']
@@ -101,7 +102,7 @@ module.exports = {
 			initBucketACL("MODEL_BUCKET", function() {
 				initBucketACL("TAG_BUCKET", function() {
 					initBucketACL("FIRMWARE_NAMESPACE", function () {
-						res.ok('app initialisation finished')
+						res.ok(appRegistrationInfo)
 					})
 				})
 			})

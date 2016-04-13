@@ -1518,7 +1518,7 @@
                         reject(response);
                     }
                 };
-                app._refresh(refreshAppCallbacks);
+                app._refresh().then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
             });
         };
 
@@ -1749,11 +1749,11 @@
             return KiiPortalRequest(settings);
         };
 
-        KiiPortalApp.prototype.getBaseURL = function(){
+        KiiPortalApp.prototype._getBaseURL = function(){
             return Kii.getBaseURL() + '/apps/' + this.getAppID();
         };
 
-        KiiPortalApp.prototype.getThingIFURL = function(){
+        KiiPortalApp.prototype._getThingIFURL = function(){
             return Kii.getSiteURL() + '/thing-if/apps/' + this.getAppID();
         }
 
@@ -1781,7 +1781,16 @@
                 createAppCallbacks = {
                     success: function(response){
                         var appData = response.data;
+                        var admin = _this.getAdmin();
                         KiiPortalApp.fromJson(_this, appData);
+
+                        var apps = admin.getApps();
+                        if(!apps){
+                            admin.setApps([]);
+                            apps = admin.getApps();
+                        }
+                        apps.push(_this);
+
 
                         if(callbacks && callbacks.success){
                             callbacks.success(_this);
@@ -1833,36 +1842,6 @@
                             callbacks.success.call(callbacks, _this);
                         }
                         resolve(_this);
-
-                        /*
-                        setting = {
-                            method: 'GET',
-                            url: root._apis.APP + '/' + appID + '/secret',
-                            headers: {
-                                'Authorization': tokenType + ' ' + accessToken
-                            }
-                        };
-
-                        refreshAppCallbacks = {
-                            success: function(response){
-                                var appData = response.data;
-                                //KiiPortalApp.fromJson(_this, appData);
-                                _this._putSecret(appData);
-                                if(callbacks){
-                                    callbacks.success.call(callbacks, _this);
-                                }
-                                resolve(_this);
-                            },
-                            failure: function(response){
-                                if(callbacks){
-                                    callbacks.failure.apply(callbacks, arguments);
-                                }
-                                reject(response);
-                            }
-                        };
-
-                        KiiPortalRequest(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
-                        */
                     },
                     failure: function(response){
                         if(callbacks){
@@ -2163,37 +2142,66 @@
         function KiiPortalCommand(user, thing, command){
             var _this = this;
             this._kiiApp = KiiPortalAdmin.getCurrentApp();
-            this._thing = thing || null;
-            this._user = user;
 
             __extends(this, {
-                'commandID': '', // default empty
-                'issuer': 'user:', //KiiUser UUID
-                'target': 'thing:', //KiiThing ID
-                'actions': [], 
-                'schema': '', // a string
-                'schemaVersion': '', // a integer
-                'title': '',
-                'description': '',
-                'metadata': {},
-                'created': null,
-                'modified': null
+                '_commandID': '', // default empty
+                '_issuer': 'user:', //KiiUser UUID
+                '_target': 'thing:', //KiiThing ID
+                '_actions': [], 
+                '_schema': '', // a string
+                '_schemaVersion': '', // a integer
+                '_title': '',
+                '_description': '',
+                '_metadata': {},
+                '_created': null,
+                '_modified': null
             })
 
-            if(command){
-                __extends(this, command);
-            }
+            this._init(user, thing, command);
         }
 
         KiiPortalCommand.prototype._init = function(user, thing, command){
-            __extends(this, command);
+            if(command){
+                __extends(this, {
+                    _commandID: command.commandID,
+                    _issuer: command._issuer,
+                    _target: command.target,
+                    _actions: [],
+                    _schema: command.schema,
+                    _title: command.title,
+                    _description: command.description,
+                    _metadata: command.metadata,
+                    _created: command._created,
+                    _modified: command._modified
+                });
+
+                if(command.actions){
+                    var actions = [];
+                    __each(command.actions, function(action){
+                        var commandAction = new KiiPortalCommandAction();
+                        commandAction.dataset = action;
+                        actions.push(commandAction);
+                    });
+                    this._actions = actions;
+                }
+
+                if(command.actionResults){
+                    var actionResults = [];
+                    __each(command.actionResults, function(result){
+                        var actionResult = new KiiPortalActionResult(result);
+                        actionResults.push(actionResult);
+                    });
+                    this._actionResults = actionResults;
+                }
+            }
+            
             this._thing = thing;
             this._user = user;
         };
 
         KiiPortalCommand.prototype.addAction = function(action){
-            this.actions = this.actions || [];
-            this.actions.push(action);
+            this._actions = this.actions || [];
+            this._actions.push(action);
         };
 
         /**
@@ -2201,24 +2209,32 @@
          * @param {[KiiPortalSchema]} schema [description]
          */
         KiiPortalCommand.prototype._setSchema = function(schema){
-            this.schema = schema.id;
-            this.schemaVersion = schema.getVersion();
+            this._schema = schema.id;
+            this._schemaVersion = schema.getVersion();
+        };
+
+        KiiPortalCommand.prototype.getSchema = function(){
+            return this._schema;
+        };
+
+        KiiPortalCommand.prototype.getSchemaVersion = function(){
+            return this._schemaVersion;
         };
 
         KiiPortalCommand.prototype.setTitle = function(title){
-            this.title = title;
+            this._title = title;
         };
 
         KiiPortalCommand.prototype.getTitle = function(){
-            return this.title;
+            return this._title;
         }
 
         KiiPortalCommand.prototype.setDescription = function(description){
-            this.description = description;
+            this._description = description;
         };
 
         KiiPortalCommand.prototype.getDescription = function(){
-            return this.description;
+            return this._description;
         };
 
         KiiPortalCommand.prototype.setThing = function(thing){
@@ -2226,30 +2242,34 @@
         };
 
         KiiPortalCommand.prototype.setMetaData = function(meta){
-            this.metadata = meta;
+            this._metadata = meta;
         };
 
         KiiPortalCommand.prototype.getMetaData = function(){
-            return this.metadata;
-        }
+            return this._metadata;
+        };
+
+        KiiPortalCommand.prototype.getActionResults = function(){
+            return this._actionResults;
+        };
 
         /**
          * purify data for sending
          * @return {[type]} [description]
          */
-        KiiPortalCommand.prototype.purify = function(){
+        KiiPortalCommand.prototype._purify = function(){
             var _this = this,
                 actions = [];
 
-            __each(this.actions, function(action){
-                actions.push(action.produce());
+            __each(this._actions, function(action){
+                actions.push(action._purify());
             });
 
             return{
                 'target': 'thing:' + _this._thing.getThingID(),
-                'actions': _this.actions,
-                'schema': _this.schema,
-                'schemaVersion': _this.schemaVersion,
+                'actions': actions,
+                'schema': _this._schema,
+                'schemaVersion': _this._schemaVersion,
                 'title': _this.getTitle(),
                 'description': _this.getDescription(),
                 'metadata': _this.getMetaData(),
@@ -2257,9 +2277,43 @@
             };
         };
 
+        KiiPortalCommand._withThing = function(user, thing, callbacks){
+            return new Promise(function(resolve, reject){
+                var spec, kiiApp;
+
+                kiiApp = KiiPortalAdmin.getCurrentApp();
+                spec = {
+                    method: 'GET',
+                    url: KiiThingAdmin._getThingIFURL() + '/targets/thing:' + thing.getThingID() + '/commands',
+                    headers: {
+                        Authorization: 'Bearer ' + user.getAccessToken()
+                    }
+                };
+
+                var request = new KiiObjectRequest(kiiApp, spec);
+
+                request.execute().then(function(response){
+                    var commands = [];
+                    __each(response.data.commands, function(command){
+                        commands.push(new KiiPortalCommand(user, thing, command));
+                    });
+
+                    if(callbacks && callbacks.success){
+                        callbacks.success(commands);
+                    }
+                    resolve(commands);
+                }, function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                });
+            });
+        };
+
         KiiPortalCommand.prototype._getAccessToken = function(){
             return 'Bearer ' + this._user.getAccessToken();
-        }
+        };
 
         /**
          * refresh command by its ID
@@ -2280,7 +2334,7 @@
             return new Promise(function(resolve, reject){
                 var spec, url, headers;
 
-                url = _this._kiiApp.getThingIFURL() + '/targets/thing:'
+                url = _this._kiiApp._getThingIFURL() + '/targets/thing:'
                     + _this._thing.getThingID() + '/commands/' + commandID;
                 headers = {
                     Authorization: _this._getAccessToken()
@@ -2312,16 +2366,21 @@
             });
         };
 
+        /**
+         * send command
+         * @param  {[type]} callbacks [description]
+         * @return {[type]}           [description]
+         */
         KiiPortalCommand.prototype.send = function(callbacks){
             var _this = this;
             return new Promise(function(resolve, reject){
                 var spec, url;
                 
-                url = _this._kiiApp.getThingIFURL() + '/targets/thing:' + _this._thing.getThingID() + '/commands';
+                url = _this._kiiApp._getThingIFURL() + '/targets/thing:' + _this._thing.getThingID() + '/commands';
                 spec = {
                     url: url,
                     method: 'POST',
-                    data: _this.purify(),
+                    data: _this._purify(),
                     headers: {
                         Authorization: _this._getAccessToken()
                     }
@@ -2348,6 +2407,10 @@
         return KiiPortalCommand;
     })();
 
+    /**
+     * command action
+     * @param schemaProperty
+     */
     root.KiiPortalCommandAction = (function(){
 
         function KiiPortalCommandAction(schemaProperty){
@@ -2363,13 +2426,26 @@
                 this.min = schemaProperty.min;
                 this.max = schemaProperty.max;
             }
+
+            Object.defineProperties(this, {
+                dataset: {
+                    set: function(data){
+                        var key = Object.keys(data)[0];
+                        data = data[key];
+                        key = Object.keys(data)[0];
+                        value = data[key];
+                        this.value = value;
+                        this.property = key;
+                    }
+                }
+            });
         }
 
         KiiPortalCommandAction.prototype.setValue = function(value){
             this.value = value;
         };
 
-        KiiPortalCommandAction.prototype.produce = function(){
+        KiiPortalCommandAction.prototype._purify = function(){
             var actionValue = {},
                 actionName = 'set' + this.property.replace(/(?:^|\s)\S/g, 
                   function(a) { return a.toUpperCase(); });
@@ -2384,18 +2460,98 @@
     })();
 
 
-    root.KiiPortalCommandResult = (function(){
+    root.KiiPortalActionResult = (function(){
 
-        function KiiPortalCommandResult(commandResult){
-            this.succeeded = false; // required. Specify if the action execution was a success.
-            this.errorMessage = ''; // An additional message for describing the cause of action execution failure.
-            this.data = null; // A custom data.
+        function KiiPortalActionResult(actionResult){
+            __extends(this, {
+                _actionName: '',
+                _succeeded: false, // required. Specify if the action execution was a success.
+                _errorMessage: '', // An additional message for describing the cause of action execution failure.
+                _data: null // A custom data.
+            });
 
-            __extends(this, commandResult);
+            Object.defineProperties(this, {
+                actionName:{
+                    get: function(){
+                        return this._actionName;
+                    }
+                },
+                succeeded: {
+                    get: function(){
+                        return this._succeeded;
+                    }
+                },
+                errorMessage: {
+                    get: function(){
+                        return this._errorMessage;
+                    }
+                },
+                data: {
+                    get: function(){
+                        return this._data;
+                    }
+                },
+                dataset: {
+                    set: function(result){
+                        var actionName = Object.keys(result)[0];
+                        this._actionName = actionName;
+                        this._succeeded = result[actionName].succeeded;
+                        this._errorMessage = result[actionName].errorMessage;
+                        this._data = result[actionName].data;
+                    },
+                    get: function(){
+                        var result = {},
+                            _this = this;
+                        result[this.actionName] = {
+                            succeeded: _this._succeeded,
+                            errorMessage: _this._errorMessage,
+                            data: _this._data
+                        };
+
+                        return result;
+                    }
+                }
+            });
+
+            if(actionResult){
+                this.fullResult = actionResult;
+            }
         }
 
-        return KiiPortalCommandResult;
-    })();
+        return KiiPortalActionResult;
+    })();    root.KiiPortalEndPoint = (function(){
+
+        function KiiPortalEndPoint(endPoint){
+
+        }
+
+        KiiPortalEndPoint.prototype.getName = function(){
+            return this._endPoint;
+        };
+
+        KiiPortalEndPoint.prototype.setName = function(name){
+            this._endPoint = name;
+        };
+
+        KiiPortalEndPoint.prototype.setParams = function(params){
+            this._parameters = params;
+        };
+
+        KiiPortalEndPoint.prototype.getParams = function(){
+            return this._parameters;
+        };
+
+        KiiPortalEndPoint.prototype._purify = function(){
+            var _this = this;
+            return {
+                endPoint: _this.getName(),
+                parameters: _this.getParams()
+            };
+        };
+
+        return KiiPortalEndPoint;
+    }());
+
     /**
      @class Firmware class
      */
@@ -2755,6 +2911,8 @@
                                     reject(error);
                                 });
                             }
+                            var firmwares = _this._namespace.getFirmwares();
+                            firmwares.splice(firmwares.indexOf(firmware), 1);
                         },
                         failure: function(error){
                             if(callbacks && callbacks.failure){
@@ -4650,7 +4808,7 @@ KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
         KiiPortalThingState.prototype.constructor = KiiPortalThingState;
 
         function KiiPortalThingState(){
-
+            __bindMethod(this);
         }
 
         KiiPortalThingState._bucketName = root.KiiExtensionBuckets.STATES;
@@ -4755,7 +4913,455 @@ KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
         };
 
         return KiiPortalThingState;
-    }(KiiPortalObject));    root.KiiPortalUpgradeInfo = (function(_super){
+    }(KiiPortalObject));
+    root.KiiPortalTrigger = (function(){
+
+        function KiiPortalTrigger(user, kiiThing, trigger){
+            this._thing = kiiThing;
+            this._user = user;
+
+            __extends(this, {
+                _predicate: new KiiPortalTriggerPredicator(),
+                _metadata: null,
+                _description: '',
+                _triggersWhat: 'COMMAND',
+                _triggerID: null
+            });
+
+            this._init(user, kiiThing, trigger);
+        }
+
+        KiiPortalTrigger.prototype._init = function(user, kiiThing, trigger){
+            this._setUser(user);
+            this._setThing(kiiThing);
+
+            if(trigger){
+                this._setTriggerID(trigger.triggerID);
+                this.setPredicate(new KiiPortalTriggerPredicator(trigger.predicate));
+                this.setMetaData(trigger.metadata);
+                this.setDescription(trigger.description);
+                this._setDisabled(trigger.disabled);
+                this.setTriggersWhat(trigger.triggersWhat);
+                this.setTitle(trigger.title);
+                this.setCommand(new KiiPortalCommand(user, kiiThing, trigger.command));
+            }
+        };
+
+        KiiPortalTrigger.prototype._setThing = function(thing){
+            this._thing = thing;
+        };
+
+        KiiPortalTrigger.prototype._getThing = function(){
+            return this._thing;
+        }
+
+        KiiPortalTrigger.prototype._setUser = function(user){
+            this._user = user;
+        };
+
+        KiiPortalTrigger.prototype._getUser = function(){
+            return this._user;
+        };
+
+        KiiPortalTrigger.prototype._getFullURL = function(){
+            return KiiPortalTrigger.getBaseURL() + '/' + this.getTriggerID();
+        };
+
+        KiiPortalTrigger.prototype._getBaseURL = function(){
+            return KiiPortalTrigger._getBaseURL(this._thing);
+        };
+
+        KiiPortalTrigger._getBaseURL = function(thing){
+            return KiiThingAdmin._getThingIFURL() + '/targets/thing:' + thing.getThingID() + '/triggers';
+        };
+
+        KiiPortalTrigger._withThing = function(thing, callbacks){
+            return new Promise(function(resolve, reject){
+                var kiiApp, spec, url, refreshTriggersCallbacks, request;
+
+                kiiApp = KiiPortalAdmin.getCurrentApp();
+                url = KiiPortalTrigger.getBaseURL(thing);
+                spec = {
+                    url: url,
+                    method: 'GET'
+                };
+
+                refreshTriggersCallbacks = {
+                    success: function(response){
+                        console.log(response);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+
+                request = new KiiObjectRequest(kiiApp, spec);
+
+                request.execute().then(refreshTriggersCallbacks.success, refreshTriggersCallbacks.failure);
+            });
+        };
+
+        KiiPortalTrigger.prototype._factory = function(thing){
+            return new KiiPortalTrigger(thing);
+        };
+
+        KiiPortalTrigger.prototype.save = function(callbacks){
+            var _this, createFlag;
+            _this = this;
+            createFlag = this.getTriggerID()? false: true;
+
+            return createFlag? this._create(callbacks): this._update(callbacks);
+        };
+
+        KiiPortalTrigger.prototype._getAccessToken = function(){
+            return 'Bearer ' + this._user.getAccessToken();
+        }
+
+        KiiPortalTrigger.prototype._create = function(callbacks){
+            var _this = this;
+            return new Promise(function(resolve, reject){
+                var kiiApp, spec, url, saveTriggersCallbacks, request;
+
+                kiiApp = KiiPortalAdmin.getCurrentApp();
+                url = _this.getBaseURL();
+                spec = {
+                    url: url,
+                    method: 'POST',
+                    data: _this._purify(),
+                    headers: {
+                        Authorization: _this._getAccessToken()
+                    }
+                };
+
+                saveTriggersCallbacks = {
+                    success: function(response){
+                        var triggerID = response.data.triggerID;
+                        _this._setTriggerID(triggerID);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+
+                request = new KiiObjectRequest(kiiApp, spec);
+
+                request.execute().then(saveTriggersCallbacks.success, saveTriggersCallbacks.failure);
+            });
+        };
+
+        KiiPortalTrigger.prototype._update = function(callbacks){
+            var _this = this;
+
+            return new Promise(function(resolve, reject){
+                var kiiApp, spec, url, saveCallbacks;
+
+                kiiApp = KiiPortalAdmin.getCurrentApp();
+                url = _this._getFullURL();
+                spec = {
+                    url: url,
+                    method: 'POST',
+                    data: _this.purify(),
+                    headers: {
+                        Authorization: _this.getAccessToken()
+                    }
+                };
+
+                saveTriggersCallbacks = {
+                    success: function(response){
+                        console.log(response);
+                    },
+                    failure: function(error){
+                        if(callbacks && callbacks.failure){
+                            callbacks.failure(error);
+                        }
+                        reject(error);
+                    }
+                };
+
+                request = new KiiObjectRequest(kiiApp, spec);
+
+                request.execute().then(saveTriggersCallbacks.success, saveTriggersCallbacks.failure);
+            });
+        };
+
+        KiiPortalTrigger.prototype.setPredicate = function(predicate){
+            this._predicate = predicate;
+        };
+
+        KiiPortalTrigger.prototype.getPredicate = function(predicate){
+            return this._predicate;
+        };
+
+        KiiPortalTrigger.prototype.setMetaData = function(metadata){
+            this._metadata = metadata;
+        };
+
+        KiiPortalTrigger.prototype.getMetaData = function(){
+            return this._metadata;
+        };
+
+        KiiPortalTrigger.prototype.setCommand = function(command){
+            this._command = command;
+        };
+
+        KiiPortalTrigger.prototype.getCommand = function(){
+            return this._command;
+        };
+
+        KiiPortalTrigger.prototype.setTitle = function(title){
+            this._title = title;
+        };
+
+        KiiPortalTrigger.prototype.getTitle = function(){
+            return this._title;
+        };
+
+        KiiPortalTrigger.prototype.getTriggerID = function(){
+            return this._triggerID;
+        };
+
+        KiiPortalTrigger.prototype._setTriggerID = function(triggerID){
+            this._triggerID = triggerID;
+        };
+
+        KiiPortalTrigger.TriggersWhatEnum = {
+            'COMMAND': 'COMMAND',
+            'SERVER_CODE':'SERVER_CODE'
+        };
+
+        KiiPortalTrigger.prototype.setTriggersWhat = function(triggersWhat){
+            if(!KiiPortalTrigger.TriggersWhatEnum[triggersWhat]){
+                // ::TODO
+                throw({error: 'triggersWhat type not defined'});
+            }
+            this._triggersWhat = triggersWhat;
+        };
+
+        KiiPortalTrigger.prototype.getTriggersWhat = function(){
+            return this._triggersWhat;
+        };
+
+        KiiPortalTrigger.prototype.setDescription = function(description){
+            this._description = description;
+        };
+
+        KiiPortalTrigger.prototype.getDescription = function(){
+            return this._description;
+        };
+
+        KiiPortalTrigger.prototype._setDisabled = function(flag){
+            this._disabled = flag;
+        };
+
+        KiiPortalTrigger.prototype.getDisabled = function(){
+            return this._disabled;
+        };
+
+        KiiPortalTrigger.prototype.setEndPoint = function(endPoint){
+            this._endPoint = endPoint;
+        };
+
+        KiiPortalTrigger.prototype.getEndPoint = function(){
+            return this._endPoint;
+        }
+
+        KiiPortalTrigger.prototype.disable = function(){
+
+        };
+
+        KiiPortalTrigger.prototype.enable = function(){
+
+        };
+
+        KiiPortalTrigger.prototype.remove = function(){
+
+        };
+
+        KiiPortalTrigger.prototype._purify = function(){
+            var _this = this;
+
+            var result = {
+                "predicate": _this.getPredicate()._purify(),
+                "metadata": _this.getMetaData(),
+                "description": _this.getDescription(),
+                "disabled": _this.getDisabled(),
+                "triggersWhat": _this.getTriggersWhat(),
+                "title": _this.getTitle()
+            };
+
+            switch(this.getTriggersWhat()){
+                case KiiPortalTrigger.TriggersWhatEnum.COMMAND:
+                    result.command = this.getCommand()._purify();
+                    break;
+                case KiiPortalTrigger.TriggersWhatEnum.SERVER_CODE:
+                    result.servercode = this.getEndPoint()._purify();
+                    break;
+            }
+
+            return result;
+        };
+
+        return KiiPortalTrigger;
+    }());
+
+    root.KiiPortalTriggerPredicator = (function(){
+
+        function KiiPortalTriggerPredicator(predicate){
+
+            __extends(this, {
+                _condition: null,
+                _triggersWhen: "CONDITION_TRUE",
+                _eventSource: "STATES"
+            });
+
+            if(predicate){
+                this.setCondition(new KiiPortalTriggerCondition(predicate.condition));
+                this.setTriggersWhen(predicate.triggersWhen);
+                this.setEventSource(predicate.eventSource);
+            }
+        }
+
+        KiiPortalTriggerPredicator.TriggersWhenEnum = {
+            'CONDITION_TRUE': 'CONDITION_TRUE', 
+            'CONDITION_CHANGED': 'CONDITION_CHANGED',
+            'CONDITION_FALSE_TO_TRUE': 'CONDITION_FALSE_TO_TRUE'
+        };
+
+        KiiPortalTriggerPredicator.EventSourceEnum = {
+            'STATES': 'STATES'
+        };
+
+        KiiPortalTriggerPredicator.prototype.setCondition = function(condition){
+            this._condition = condition;
+        };
+
+        KiiPortalTriggerPredicator.prototype.getCondition = function(){
+            return this._condition;
+        };
+
+        KiiPortalTriggerPredicator.prototype.setTriggersWhen = function(triggersWhen){
+            if(!KiiPortalTriggerPredicator.TriggersWhenEnum[triggersWhen]){
+                // ::TODO
+                throw({error: 'triggersWhen type not defined'});
+            }
+            this._triggersWhen = triggersWhen;
+        };
+
+        KiiPortalTriggerPredicator.prototype.getTriggersWhen = function(){
+            return this._triggersWhen;
+        };
+
+        KiiPortalTriggerPredicator.prototype.setEventSource = function(eventSource){
+            if(!KiiPortalTriggerPredicator.EventSourceEnum[eventSource]){
+                // ::TODO
+                throw({error: 'eventSource type not defined'});
+            }
+            this._eventSource = eventSource;
+        };
+
+        KiiPortalTriggerPredicator.prototype.getEventSource = function(){
+            return this._eventSource;
+        }
+
+
+        KiiPortalTriggerPredicator.prototype._purify = function(){
+            var _this = this;
+            return {
+                condition: _this.getCondition()._getDictValue(),
+                triggersWhen: _this.getTriggersWhen(),
+                eventSource: _this.getEventSource()
+            };
+        };
+
+        return KiiPortalTriggerPredicator;
+    }());
+
+    root.KiiPortalTriggerCondition = (function(_super){
+
+        KiiPortalTriggerCondition.prototype = new _super();
+        __inherits(KiiPortalTriggerCondition, _super);
+        KiiPortalTriggerCondition.prototype.constructor = KiiPortalTriggerCondition;
+
+        function KiiPortalTriggerCondition(condition){
+            __bindMethod(this);
+
+            if(condition){
+                this._init(condition);
+                if(condition.clauses){
+                    this._setWhereClauses(initCondition(condition.clauses));
+                }
+            }
+            
+            function initCondition(conditions){
+                var conditions = [];
+                __each(conditions, function(condition){
+                    var childTriggerCondition = KiiPortalTriggerCondition._createCondition(childCondition);
+                    conditions.push(childTriggerCondition);
+                });
+
+                return conditions;
+            }
+        }
+
+        KiiPortalTriggerCondition.ConjunctionTypeEnum = {
+            'and': 'and',
+            'or': 'or',
+            'not': 'not'
+        };
+        KiiPortalTriggerCondition.WhereTypeEnum = {
+            'eq': 'eq',
+            'range': 'range',
+            'in': 'in',
+            'prefix': 'prefix'
+        };
+
+        KiiPortalTriggerCondition._createCondition = function(conditionBO){
+            var condition = new KiiPortalTriggerCondition(conditionBO);
+            return condition;
+        };
+
+        KiiPortalTriggerCondition.prototype._init = function(conditionBO){
+            if(KiiPortalTriggerCondition.ConjunctionTypeEnum[conditionBO.type]){
+                this._setWhereType(conditionBO.type);
+            }else if(KiiPortalTriggerCondition.WhereTypeEnum[conditionBO.type]){
+                var _dict = {
+                    field: conditionBO.field,
+                    type: conditionBO.type
+                };
+
+                switch(conditionBO.type){
+                    case 'eq':
+                        _dict.value = conditionBO.value;
+                        break;
+                    case 'range':
+                        _dict.upperLimit = conditionBO.upperLimit;
+                        _dict.upperIncluded = conditionBO.upperIncluded;
+                        _dict.lowerLimit = conditionBO.lowerLimit;
+                        _dict.lowerIncluded = conditionBO.lowerIncluded;
+                        break;
+                    case 'in':
+                        _dict.values = conditionBO.values;
+                        break;
+                    case 'prefix':
+                        _dict.prefix = conditionBO.prefix;
+                        break;
+                }
+
+                this._setWhereType(conditionBO.type);
+                this._setDictValue(_dict);
+            }
+        }
+
+        return KiiPortalTriggerCondition;
+    }(KiiClause));
+    
+    root.KiiPortalUpgradeInfo = (function(_super){
 
         KiiPortalUpgradeInfo.prototype = new _super();
         __inherits(KiiPortalUpgradeInfo, _super);
@@ -5245,15 +5851,7 @@ KiiPortalUser.prototype.update = function(data) {
         KiiThingAdminQuery.prototype.constructor = KiiThingAdminQuery;
 
         function KiiThingAdminQuery(query){
-            /*
-            var _this = this;
-            __each(KiiPortalFirmware.prototype, function(value, key){
-                if(__isFunction(value))
-                    _this[key] = __bind(value, _this);
-            });
 
-            return this._clone(query);
-            */
         };
 
         KiiThingAdminQuery.queryName = 'thingQuery';
@@ -5294,12 +5892,12 @@ KiiPortalUser.prototype.update = function(data) {
 
     KiiThingAdmin._baseUrl = '/things'; 
 
-    KiiThingAdmin.getBaseURL = function(){
-        return KiiPortalAdmin.getCurrentApp().getBaseURL() + KiiThingAdmin._baseUrl;
+    KiiThingAdmin._getBaseURL = function(){
+        return KiiPortalAdmin.getCurrentApp()._getBaseURL() + KiiThingAdmin._baseUrl;
     };
 
-    KiiThingAdmin.getThingIFURL = function(){
-        return KiiPortalAdmin.getCurrentApp().getThingIFURL();
+    KiiThingAdmin._getThingIFURL = function(){
+        return KiiPortalAdmin.getCurrentApp()._getThingIFURL();
     };
 
     KiiThingAdmin.getThingsByModel = function(model, callbacks){
@@ -5390,7 +5988,7 @@ KiiPortalUser.prototype.update = function(data) {
                     headers: {
                         'Content-Type': 'application/vnd.kii.ThingRegistrationAndAuthorizationRequest+json',
                     },
-                    url: KiiThingAdmin.getBaseURL()
+                    url: KiiThingAdmin._getBaseURL()
                 };
 
                 var request = new KiiObjectRequest(kiiApp, spec);
@@ -5410,7 +6008,7 @@ KiiPortalUser.prototype.update = function(data) {
                     headers: {
                         'Content-Type': 'application/vnd.kii.ThingUpdateRequest+json',
                     },
-                    url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID()
+                    url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID()
                 };
 
                 var request = new KiiObjectRequest(kiiApp, spec);
@@ -5439,7 +6037,7 @@ KiiPortalUser.prototype.update = function(data) {
             kiiApp = KiiPortalAdmin.getCurrentApp();
             spec = {
                 method: 'DELETE',
-                url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID()
+                url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID()
             };
 
             var request = new KiiObjectRequest(kiiApp, spec);
@@ -5460,6 +6058,88 @@ KiiPortalUser.prototype.update = function(data) {
     };
 
     /**
+     * enable thing
+     * @return {[type]} [description]
+     */
+    KiiThingAdmin.prototype.enable = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var spec, kiiApp, enableCallbacks, request;
+
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+            spec = {
+                headers: {
+                    'Content-Type': 'application/vnd.kii.ThingStatusUpdateRequest+json'
+                },
+                method: 'PUT',
+                url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID() + '/status',
+                data: {disabled: false}
+            };
+
+            var enableCallbacks = {
+                success: function(states){
+                    _this._disabled = false;
+                    if(callbacks && callbacks.success){
+                        callbacks.success(_this);
+                    }
+                    resolve(_this);
+                },
+                failure: function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            }
+
+            request = new KiiObjectRequest(kiiApp, spec);
+            request.execute().then(enableCallbacks.success, enableCallbacks.failure);
+        });
+    };
+
+    /**
+     * disable thing
+     * @return {[type]} [description]
+     */
+    KiiThingAdmin.prototype.disable = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var spec, kiiApp, enableCallbacks, request;
+
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+            spec = {
+                headers: {
+                    'Content-Type': 'application/vnd.kii.ThingStatusUpdateRequest+json'
+                },
+                method: 'PUT',
+                url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID() + '/status',
+                data: {disabled: true}
+            };
+
+            var disableCallbacks = {
+                success: function(states){
+                    _this._disabled = true;
+                    if(callbacks && callbacks.success){
+                        callbacks.success(_this);
+                    }
+                    resolve(_this);
+                },
+                failure: function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            }
+
+            request = new KiiObjectRequest(kiiApp, spec);
+            request.execute().then(disableCallbacks.success, disableCallbacks.failure);
+        });
+    };
+
+    /**
      * get model's name. by protocal contract, _productName is assigned to model name.
      * @return {[String]} [model name]
      */
@@ -5467,8 +6147,24 @@ KiiPortalUser.prototype.update = function(data) {
         return this.fields._productName;
     };
 
+    KiiThingAdmin.prototype.getFirmwareVersion = function(){
+        return this.fields._firmwareVersion;
+    };
+
+    KiiThingAdmin.prototype.getOnline = function(){
+        return this.fields._online;
+    };
+
     KiiThingAdmin.prototype.refreshModel = function(){
         return KiiPortalModel.refreshByName(KiiPortalAdmin.getCurrentApp(), this.getModelName());
+    };
+
+    KiiThingAdmin.prototype.setModelName = function(modelName){
+        this.fields._productName = modelName;
+    };
+
+    KiiThingAdmin.prototype.setFirmwareVersion = function(version){
+        this.fields._firmwareVersion = version;
     };
 
     /**
@@ -5501,24 +6197,9 @@ KiiPortalUser.prototype.update = function(data) {
     KiiThingAdmin.prototype.refreshCommands = function(user, callbacks){
         var _this = this;
         return new Promise(function(resolve, reject){
-            var spec, kiiApp;
 
-            kiiApp = KiiPortalAdmin.getCurrentApp();
-            spec = {
-                method: 'GET',
-                url: KiiThingAdmin.getThingIFURL() + '/targets/thing:' + _this.getThingID() + '/commands',
-                headers: {
-                    Authorization: 'Bearer ' + user.getAccessToken()
-                }
-            };
-
-            var request = new KiiObjectRequest(kiiApp, spec);
-
-            request.execute().then(function(response){
-                var commands = [];
-                __each(response.data.commands, function(command){
-                    commands.push(new KiiPortalCommand(user, _this, command));
-                });
+            KiiPortalCommand._withThing(user, _this, callbacks).then(function(commands){
+                
                 _this._setCommands(commands);
 
                 if(callbacks && callbacks.success){
@@ -5556,7 +6237,7 @@ KiiPortalUser.prototype.update = function(data) {
 
         return new Promise(function(resolve, reject){
             var spec, url;
-            url = this.getThingIFURL() + '/onboardings';
+            url = this._getThingIFURL() + '/onboardings';
             spec = {
                 url: url,
                 method: 'POST',
@@ -5582,6 +6263,8 @@ KiiPortalUser.prototype.update = function(data) {
             });
         });
     };
+
+    /*============================= Thing State related  */
 
     KiiThingAdmin.prototype.setStates = function(states){
         this._states = states;
@@ -5620,6 +6303,42 @@ KiiPortalUser.prototype.update = function(data) {
 
             KiiPortalThingState.refreshByThingID(_this.getThingID())
                 .then(refreshCallbacks.success, refreshCallbacks.failure);
+        });
+    };
+
+    /*============================= Thing Trigger related  */
+
+    KiiThingAdmin.prototype.getTriggers = function(){
+        return this._triggers;
+    };
+
+    KiiThingAdmin.prototype._setTriggers = function(triggers){
+        this._triggers = triggers;
+    };
+
+    KiiThingAdmin.prototype.addTrigger = function(trigger){
+        this._triggers = this._triggers || [];
+    };
+
+    KiiThingAdmin.prototype.refreshTriggers = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var refreshCallbacks = {
+                success: function(triggers){
+                    _this._setTriggers(triggers);
+                    if(callbacks && callbacks.success){
+                        callbacks.success(triggers);
+                    }
+                    resolve(triggers);
+                },
+                failure: function(){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            };
         });
     };
 

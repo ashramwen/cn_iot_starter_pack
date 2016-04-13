@@ -17,7 +17,7 @@
           <td>
             <text-limit max="100" ng-model="device.fields._lot"></text-limit>
           </td>
-          <td>_productName</td>
+          <td>modelName</td>
             <td>
               <text-limit max="100" ng-model="device.fields._productName"></text-limit>
             </td>
@@ -29,7 +29,7 @@
           </td>
           <td>_disabled</td>
           <td>
-            <switchery ng-model="device._disabled" yes-text="Yes" no-text="No"></switchery>
+            {{device.getDisabled()}}
           </td>
         </tr>
       </table>
@@ -94,6 +94,8 @@
   </uib-tabset>
   <div class="tab-pane-footer clearfix">
     <div class="clearfix pull-right">
+      <button class="btn btn-info" ng-click="disableDevice(device)" ng-if="!device.getDisabled()"><span class="fa fa-stop"></span>Disable</button>
+      <button class="btn btn-info" ng-click="enableDevice(device)" ng-if="device.getDisabled()"><span class="fa fa-play"></span>Enable</button>
       <button class="btn btn-danger" ng-click="deleteDevice(device)"><span class="fa fa-remove"></span>Delete</button>
       <button class="btn btn-success" ng-click="saveDevice(device)"><span class="fa fa-cloud-upload"></span>Update</button>
     </div>

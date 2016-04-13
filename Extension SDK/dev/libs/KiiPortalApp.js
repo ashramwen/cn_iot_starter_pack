@@ -218,11 +218,11 @@
             return KiiPortalRequest(settings);
         };
 
-        KiiPortalApp.prototype.getBaseURL = function(){
+        KiiPortalApp.prototype._getBaseURL = function(){
             return Kii.getBaseURL() + '/apps/' + this.getAppID();
         };
 
-        KiiPortalApp.prototype.getThingIFURL = function(){
+        KiiPortalApp.prototype._getThingIFURL = function(){
             return Kii.getSiteURL() + '/thing-if/apps/' + this.getAppID();
         }
 
@@ -250,7 +250,16 @@
                 createAppCallbacks = {
                     success: function(response){
                         var appData = response.data;
+                        var admin = _this.getAdmin();
                         KiiPortalApp.fromJson(_this, appData);
+
+                        var apps = admin.getApps();
+                        if(!apps){
+                            admin.setApps([]);
+                            apps = admin.getApps();
+                        }
+                        apps.push(_this);
+
 
                         if(callbacks && callbacks.success){
                             callbacks.success(_this);
@@ -302,36 +311,6 @@
                             callbacks.success.call(callbacks, _this);
                         }
                         resolve(_this);
-
-                        /*
-                        setting = {
-                            method: 'GET',
-                            url: root._apis.APP + '/' + appID + '/secret',
-                            headers: {
-                                'Authorization': tokenType + ' ' + accessToken
-                            }
-                        };
-
-                        refreshAppCallbacks = {
-                            success: function(response){
-                                var appData = response.data;
-                                //KiiPortalApp.fromJson(_this, appData);
-                                _this._putSecret(appData);
-                                if(callbacks){
-                                    callbacks.success.call(callbacks, _this);
-                                }
-                                resolve(_this);
-                            },
-                            failure: function(response){
-                                if(callbacks){
-                                    callbacks.failure.apply(callbacks, arguments);
-                                }
-                                reject(response);
-                            }
-                        };
-
-                        KiiPortalRequest(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
-                        */
                     },
                     failure: function(response){
                         if(callbacks){

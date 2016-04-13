@@ -28,7 +28,7 @@ angular.module('StarterPack.AppShared')
                 {type: 'string', text: '_vendor', value: '_vendor'},
                 {type: 'boolean', text: '_created', value: '_created'},
                 {type: 'string', text: '_lot', value: '_lot'},
-                {type: 'string', text: '_productName', value: '_lot'},
+                {type: 'string', text: '_productName', value: '_productName'},
                 {type: 'string', text: '_firmwareVersion', value: '_firmwareVersion'},
                 {type: 'string', text: '_stringField1', value: '_stringField1'},
                 {type: 'float', text: '_numberField1', value: '_numberField1'},

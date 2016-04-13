@@ -23,7 +23,7 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
         {type: 'string', text: '_vendor', value: '_vendor'},
         {type: 'boolean', text: '_created', value: '_created'},
         {type: 'string', text: '_lot', value: '_lot'},
-        {type: 'string', text: '_productName', value: '_lot'},
+        {type: 'string', text: '_productName', value: '_productName'},
         {type: 'string', text: '_firmwareVersion', value: '_firmwareVersion'},
         {type: 'string', text: '_stringField1', value: '_stringField1'},
         {type: 'float', text: '_numberField1', value: '_numberField1'},
@@ -175,7 +175,7 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
                     jsonEditor = $(element).find('.json-editor')[0];
                     jsonEditor = new JSONEditor(jsonEditor, options);
                     jsonEditor.set($scope.customFields);
-                });
+                }, 200);
             };
 
             /**
@@ -211,6 +211,22 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
                     };
 
                 AppUtils.confirm(title, message, func);
+            };
+
+            $scope.enableDevice = function(device){
+                AppUtils.doLoading();
+                device.enable().then(function(){
+                    AppUtils.whenLoaded();
+                    $scope.$apply();
+                });
+            };
+
+            $scope.disableDevice = function(device){
+                AppUtils.doLoading();
+                device.disable().then(function(){
+                    AppUtils.whenLoaded();
+                    $scope.$apply();
+                });
             };
 
             $scope.init();

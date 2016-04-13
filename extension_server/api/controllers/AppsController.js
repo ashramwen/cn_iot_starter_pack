@@ -31,6 +31,7 @@ module.exports = {
 				return
 			} 
 
+			var appRegistrationInfo = body
 			var appID = body['app_id']
 			var appKey = body['app_key']
 
@@ -52,11 +53,12 @@ module.exports = {
 				var authorization = 'Bearer ' + JSON.parse(body)['access_token']
 
 				var appInfo = {
+					appInfo: appRegistrationInfo,
 					headers: {
 						authorization: authorization,
 						'x-app-id': appID,
 						'x-app-key': appKey,
-						'x-app-site': 'qa'
+						'x-app-site': server
 					}
 				}
 				//TODO add site info when in production

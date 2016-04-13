@@ -51,8 +51,8 @@
             {{key}}:
             <!-- <span ng-if="!isBoolean(value)">{{value}}</span>
             <switchery ng-model="currentThing.states[key]" ng-if="isBoolean(value)" readonly></switchery> -->
-            <span ng-if="!isBoolean(value)">{{value}}</span>
-            <span ng-if="isBoolean(value)" class="light" ng-class="{'green':value}"></span>
+            <span ng-if="!_.isBoolean(value)">{{value}}</span>
+            <span ng-if="_.isBoolean(value)" class="light" ng-class="{'green':value}"></span>
           </div>
         </div>
       </div>

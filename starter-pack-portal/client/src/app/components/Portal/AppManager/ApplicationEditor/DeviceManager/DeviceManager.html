@@ -37,9 +37,9 @@
         <td>{{device.getThingID()}}</td>
         <td>{{device.getVendorThingID()}}</td>
         <td>{{device.getModelName()}}</td>
-        <td>{{device._firmwareVersion}}</td>
-        <td>{{device._online}}</td>
-        <td>{{device._disabled}}</td>
+        <td>{{device.getFirmwareVersion()}}</td>
+        <td>{{device.getOnline()}}</td>
+        <td>{{device.getDisabled()}}</td>
         <td>{{getTime(device.getCreated())}}</td>
       </tr>
       <tr ng-repeat-end>
