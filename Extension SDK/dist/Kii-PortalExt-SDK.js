@@ -2911,6 +2911,8 @@
                                     reject(error);
                                 });
                             }
+                            var firmwares = _this._namespace.getFirmwares();
+                            firmwares.splice(firmwares.indexOf(firmware), 1);
                         },
                         failure: function(error){
                             if(callbacks && callbacks.failure){

@@ -175,7 +175,7 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
                     jsonEditor = $(element).find('.json-editor')[0];
                     jsonEditor = new JSONEditor(jsonEditor, options);
                     jsonEditor.set($scope.customFields);
-                });
+                }, 200);
             };
 
             /**
