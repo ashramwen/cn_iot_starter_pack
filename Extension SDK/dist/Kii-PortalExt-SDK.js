@@ -1749,7 +1749,7 @@
             return KiiPortalRequest(settings);
         };
 
-        KiiPortalApp.prototype.getBaseURL = function(){
+        KiiPortalApp.prototype._getBaseURL = function(){
             return Kii.getBaseURL() + '/apps/' + this.getAppID();
         };
 
