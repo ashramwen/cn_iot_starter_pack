@@ -7,15 +7,7 @@
         KiiThingAdminQuery.prototype.constructor = KiiThingAdminQuery;
 
         function KiiThingAdminQuery(query){
-            /*
-            var _this = this;
-            __each(KiiPortalFirmware.prototype, function(value, key){
-                if(__isFunction(value))
-                    _this[key] = __bind(value, _this);
-            });
-
-            return this._clone(query);
-            */
+            
         };
 
         KiiThingAdminQuery.queryName = 'thingQuery';
@@ -222,6 +214,88 @@
     };
 
     /**
+     * enable thing
+     * @return {[type]} [description]
+     */
+    KiiThingAdmin.prototype.enable = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var spec, kiiApp, enableCallbacks, request;
+
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+            spec = {
+                headers: {
+                    'Content-Type': 'application/vnd.kii.ThingStatusUpdateRequest+json'
+                },
+                method: 'PUT',
+                url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID() + '/status',
+                data: {disabled: false}
+            };
+
+            var enableCallbacks = {
+                success: function(states){
+                    _this._disabled = false;
+                    if(callbacks && callbacks.success){
+                        callbacks.success(_this);
+                    }
+                    resolve(_this);
+                },
+                failure: function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            }
+
+            request = new KiiObjectRequest(kiiApp, spec);
+            request.execute().then(enableCallbacks.success, enableCallbacks.failure);
+        });
+    };
+
+    /**
+     * disable thing
+     * @return {[type]} [description]
+     */
+    KiiThingAdmin.prototype.disable = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var spec, kiiApp, enableCallbacks, request;
+
+            kiiApp = KiiPortalAdmin.getCurrentApp();
+            spec = {
+                headers: {
+                    'Content-Type': 'application/vnd.kii.ThingStatusUpdateRequest+json'
+                },
+                method: 'PUT',
+                url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID() + '/status',
+                data: {disabled: true}
+            };
+
+            var disableCallbacks = {
+                success: function(states){
+                    _this._disabled = true;
+                    if(callbacks && callbacks.success){
+                        callbacks.success(_this);
+                    }
+                    resolve(_this);
+                },
+                failure: function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            }
+
+            request = new KiiObjectRequest(kiiApp, spec);
+            request.execute().then(disableCallbacks.success, disableCallbacks.failure);
+        });
+    };
+
+    /**
      * get model's name. by protocal contract, _productName is assigned to model name.
      * @return {[String]} [model name]
      */
@@ -229,8 +303,24 @@
         return this.fields._productName;
     };
 
+    KiiThingAdmin.prototype.getFirmwareVersion = function(){
+        return this.fields._firmwareVersion;
+    };
+
+    KiiThingAdmin.prototype.getOnline = function(){
+        return this.fields._online;
+    };
+
     KiiThingAdmin.prototype.refreshModel = function(){
         return KiiPortalModel.refreshByName(KiiPortalAdmin.getCurrentApp(), this.getModelName());
+    };
+
+    KiiThingAdmin.prototype.setModelName = function(modelName){
+        this.fields._productName = modelName;
+    };
+
+    KiiThingAdmin.prototype.setFirmwareVersion = function(version){
+        this.fields._firmwareVersion = version;
     };
 
     /**
@@ -345,6 +435,8 @@
         });
     };
 
+    /*============================= Thing State related  */
+
     KiiThingAdmin.prototype.setStates = function(states){
         this._states = states;
     };
@@ -382,6 +474,42 @@
 
             KiiPortalThingState.refreshByThingID(_this.getThingID())
                 .then(refreshCallbacks.success, refreshCallbacks.failure);
+        });
+    };
+
+    /*============================= Thing Trigger related  */
+
+    KiiThingAdmin.prototype.getTriggers = function(){
+        return this._triggers;
+    };
+
+    KiiThingAdmin.prototype._setTriggers = function(triggers){
+        this._triggers = triggers;
+    };
+
+    KiiThingAdmin.prototype.addTrigger = function(trigger){
+        this._triggers = this._triggers || [];
+    };
+
+    KiiThingAdmin.prototype.refreshTriggers = function(callbacks){
+        var _this = this;
+
+        return new Promise(function(resolve, reject){
+            var refreshCallbacks = {
+                success: function(triggers){
+                    _this._setTriggers(triggers);
+                    if(callbacks && callbacks.success){
+                        callbacks.success(triggers);
+                    }
+                    resolve(triggers);
+                },
+                failure: function(){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                }
+            };
         });
     };
 

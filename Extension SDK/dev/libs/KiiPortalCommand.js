@@ -3,8 +3,6 @@
         function KiiPortalCommand(user, thing, command){
             var _this = this;
             this._kiiApp = KiiPortalAdmin.getCurrentApp();
-            this._thing = thing || null;
-            this._user = user;
 
             __extends(this, {
                 'commandID': '', // default empty
@@ -20,13 +18,14 @@
                 'modified': null
             })
 
-            if(command){
-                __extends(this, command);
-            }
+            this._init(user, thing, command);
         }
 
         KiiPortalCommand.prototype._init = function(user, thing, command){
-            __extends(this, command);
+            if(command){
+                __extends(this, command);
+            }
+            
             this._thing = thing;
             this._user = user;
         };
@@ -77,17 +76,17 @@
          * purify data for sending
          * @return {[type]} [description]
          */
-        KiiPortalCommand.prototype.purify = function(){
+        KiiPortalCommand.prototype._purify = function(){
             var _this = this,
                 actions = [];
 
             __each(this.actions, function(action){
-                actions.push(action.produce());
+                actions.push(action._purify());
             });
 
             return{
                 'target': 'thing:' + _this._thing.getThingID(),
-                'actions': _this.actions,
+                'actions': actions,
                 'schema': _this.schema,
                 'schemaVersion': _this.schemaVersion,
                 'title': _this.getTitle(),
@@ -161,7 +160,7 @@
                 spec = {
                     url: url,
                     method: 'POST',
-                    data: _this.purify(),
+                    data: _this._purify(),
                     headers: {
                         Authorization: _this._getAccessToken()
                     }
@@ -209,7 +208,7 @@
             this.value = value;
         };
 
-        KiiPortalCommandAction.prototype.produce = function(){
+        KiiPortalCommandAction.prototype._purify = function(){
             var actionValue = {},
                 actionName = 'set' + this.property.replace(/(?:^|\s)\S/g, 
                   function(a) { return a.toUpperCase(); });

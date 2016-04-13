@@ -187,7 +187,7 @@
                         reject(response);
                     }
                 };
-                app._refresh(refreshAppCallbacks);
+                app._refresh().then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
             });
         };
 

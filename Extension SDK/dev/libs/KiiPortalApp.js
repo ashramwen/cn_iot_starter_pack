@@ -302,36 +302,6 @@
                             callbacks.success.call(callbacks, _this);
                         }
                         resolve(_this);
-
-                        /*
-                        setting = {
-                            method: 'GET',
-                            url: root._apis.APP + '/' + appID + '/secret',
-                            headers: {
-                                'Authorization': tokenType + ' ' + accessToken
-                            }
-                        };
-
-                        refreshAppCallbacks = {
-                            success: function(response){
-                                var appData = response.data;
-                                //KiiPortalApp.fromJson(_this, appData);
-                                _this._putSecret(appData);
-                                if(callbacks){
-                                    callbacks.success.call(callbacks, _this);
-                                }
-                                resolve(_this);
-                            },
-                            failure: function(response){
-                                if(callbacks){
-                                    callbacks.failure.apply(callbacks, arguments);
-                                }
-                                reject(response);
-                            }
-                        };
-
-                        KiiPortalRequest(setting).then(refreshAppCallbacks.success, refreshAppCallbacks.failure);
-                        */
                     },
                     failure: function(response){
                         if(callbacks){

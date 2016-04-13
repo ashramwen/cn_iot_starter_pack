@@ -213,6 +213,22 @@ angular.module('StarterPack.Portal.AppManager.DeviceManager')
                 AppUtils.confirm(title, message, func);
             };
 
+            $scope.enableDevice = function(device){
+                AppUtils.doLoading();
+                device.enable().then(function(){
+                    AppUtils.whenLoaded();
+                    $scope.$apply();
+                });
+            };
+
+            $scope.disableDevice = function(device){
+                AppUtils.doLoading();
+                device.disable().then(function(){
+                    AppUtils.whenLoaded();
+                    $scope.$apply();
+                });
+            };
+
             $scope.init();
         }
     };
