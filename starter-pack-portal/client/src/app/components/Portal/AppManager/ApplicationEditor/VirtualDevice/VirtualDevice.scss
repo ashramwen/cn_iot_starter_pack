@@ -74,6 +74,17 @@
             }
         }
     }
+    .light {
+        width: 20px;
+        height: 20px;
+        -webkit-border-radius: 50%;
+        -moz-border-radius: 50%;
+        border-radius: 50%;
+        border: 1px solid #666;
+        &.green {
+            background-color: #66FF00;
+        }
+    }
 }
 
 .onboard-message {

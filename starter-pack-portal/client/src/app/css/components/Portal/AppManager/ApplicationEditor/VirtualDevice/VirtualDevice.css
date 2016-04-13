@@ -58,5 +58,15 @@
   .app-portal-virtualdevice .device-panel .content span {
     float: right; }
 
+.app-portal-virtualdevice .light {
+  width: 20px;
+  height: 20px;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  border-radius: 50%;
+  border: 1px solid #666; }
+  .app-portal-virtualdevice .light.green {
+    background-color: #66FF00; }
+
 .onboard-message {
   text-align: left; }

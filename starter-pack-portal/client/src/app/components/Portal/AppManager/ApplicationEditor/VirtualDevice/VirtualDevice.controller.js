@@ -151,22 +151,11 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                                 '_thingID': parsed.payload.thingID,
                                 'payload': angular.copy(parsed.payload)
                             }
+                            thing.isNew = true;
                             $scope.deviceList.push(thing);
                             $scope.currentThing = thing;
-                            thingService.setState(thing, {
-                                'power': true,
-                                'presetTemperature': 25,
-                                'fanspeed': 5,
-                                'currentTemperature': 28,
-                                'currentHumidity': 65
-                            });
                         }
                         connectMQTTEndpointForThing(parsed.payload.mqttEndpoint);
-                        thingService.getCommands(thing);
-                        thingService.getState(thing).then(function(res) {
-                            console.log(res.data);
-                            $scope.currentThing.states = res.data;
-                        });
                         $scope.cancel();
                         break;
                     default:
@@ -203,14 +192,22 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
 
             var onMessageReceived = function(message) {
                 $scope.$apply(function() {
-                    consoleService.log('message ' + JSON.stringify(message));
-                    alert('Message Received by Thing', message);
+                    console.log('message ' + JSON.stringify(message));
+                    // alert('Message Received by Thing', message);
 
-                    var parsed = $scope.thingMqttClient.parseResponse(message);
-                    consoleService.log('parsed ' + JSON.stringify(parsed));
+                    var parsed = $scope.thingMqtt.parseResponse(message);
+                    console.log('parsed ' + JSON.stringify(parsed));
 
-                    if (parsed.type == 'PUSH_MESSAGE') {
-                        $scope.thingMessage.receivedActions.push(parsed.payload);
+                    switch (parsed.type) {
+                        case 'PUSH_MESSAGE':
+                            $scope.thingMessage.receivedActions.push(parsed.payload);
+                            break
+                        case 'UPDATE_STATE':
+                            thingService.getState($scope.currentThing).then(function(res) {
+                                console.log(res.data);
+                                $scope.currentThing.states = res.data;
+                            });
+                            break;
                     }
                 });
             };
@@ -224,6 +221,21 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 console.log('Thing MQTT Connected');
                 $scope.thingMqtt.subscribe(mqttClientConfig.clientID);
                 $scope.isMQTTConnectedForThing = true;
+                if ($scope.currentThing.isNew) {
+                    $scope.thingMqtt.updateState({
+                        'power': true,
+                        'presetTemperature': 25,
+                        'fanspeed': 5,
+                        'currentTemperature': 28,
+                        'currentHumidity': 65
+                    }, $scope.currentThing._thingID, $scope.currentThing._accessToken);
+                } else {
+                    thingService.getCommands($scope.currentThing);
+                    thingService.getState($scope.currentThing).then(function(res) {
+                        console.log(res.data);
+                        $scope.currentThing.states = res.data;
+                    });
+                }
             }, function(err) {
                 alert('Error connecting: ' + JSON.stringify(err));
                 console.log('Error connecting: ' + JSON.stringify(err));
@@ -305,7 +317,11 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
             $scope.userMqtt.sendCommand(payload, $scope.currentThing._thingID);
         }
 
-        $scope.normal = function(data) {
-            return typeof(data) !== 'boolean';
+        $scope.isBoolean = function(data) {
+            return typeof(data) === 'boolean';
+        }
+
+        $scope.updateState = function() {
+            $scope.thingMqtt.updateState($scope.currentThing.states, $scope.currentThing._thingID, $scope.currentThing._accessToken);
         }
     }]);
