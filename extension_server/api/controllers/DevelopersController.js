@@ -54,10 +54,13 @@ module.exports = {
 				res.serverError()
 				return
 			}
-			if (response.statusCode == 200) {
+			if (response.statusCode <= 210) {
 				res.ok(JSON.parse(body))
 			} else {
 				res.unauthorized()
+				console.log(response.statusCode)
+				console.log(JSON.parse(body))
+				console.log(options)
 			}
 		});
 	},
