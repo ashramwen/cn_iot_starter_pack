@@ -303,7 +303,7 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
         $scope.onClickDeleteAction = function(index) {
             $scope.selectedActions.splice(index, 1);
             $scope.userMessage.actions.splice(index, 1);
-        }
+        };
 
         $scope.onClickSendCommand = function() {
             $scope.feedback = undefined;
@@ -315,13 +315,9 @@ angular.module('StarterPack.Portal.AppManager.VirtualDevice')
                 schemaVersion: 1
             };
             $scope.userMqtt.sendCommand(payload, $scope.currentThing._thingID);
-        }
-
-        $scope.isBoolean = function(data) {
-            return typeof(data) === 'boolean';
-        }
+        };
 
         $scope.updateState = function() {
             $scope.thingMqtt.updateState($scope.currentThing.states, $scope.currentThing._thingID, $scope.currentThing._accessToken);
-        }
+        };
     }]);

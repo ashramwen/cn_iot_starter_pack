@@ -1,6 +1,6 @@
 angular.module('StarterPack.AppShared')
-    .factory('AppUtils', ['$http', '$location', '$q', '$state', '$timeout', '$uibModal', 'AppConfig',
-    function ($http, $location, $q, $state, $timeout, $uibModal, AppConfig) {
+    .factory('AppUtils', ['$rootScope', '$http', '$location', '$q', '$state', '$timeout', '$uibModal', 'AppConfig',
+    function ($rootScope, $http, $location, $q, $state, $timeout, $uibModal, AppConfig) {
         window.app = {};
         app.utils = {
             requestInProcess:0,
@@ -10,6 +10,12 @@ angular.module('StarterPack.AppShared')
             },
             _initialize: function(){
                 this._IEPlaceholder();
+
+                /**
+                 * import underscore
+                 * @type {[type]}
+                 */
+                $rootScope._ = _;
 
                 String.prototype.lowerFirstLetter = function() {
                     return this.charAt(0).toLowerCase() + this.slice(1);

@@ -48,16 +48,16 @@
             return this._user;
         };
 
-        KiiPortalTrigger.prototype.getFullURL = function(){
+        KiiPortalTrigger.prototype._getFullURL = function(){
             return KiiPortalTrigger.getBaseURL() + '/' + this.getTriggerID();
         };
 
-        KiiPortalTrigger.prototype.getBaseURL = function(){
-            return KiiPortalTrigger.getBaseURL(this._thing);
+        KiiPortalTrigger.prototype._getBaseURL = function(){
+            return KiiPortalTrigger._getBaseURL(this._thing);
         };
 
-        KiiPortalTrigger.getBaseURL = function(thing){
-            return KiiThingAdmin.getThingIFURL() + '/targets/thing:' + thing.getThingID() + '/triggers';
+        KiiPortalTrigger._getBaseURL = function(thing){
+            return KiiThingAdmin._getThingIFURL() + '/targets/thing:' + thing.getThingID() + '/triggers';
         };
 
         KiiPortalTrigger._withThing = function(thing, callbacks){
@@ -123,7 +123,8 @@
 
                 saveTriggersCallbacks = {
                     success: function(response){
-                        console.log(response);
+                        var triggerID = response.data.triggerID;
+                        _this._setTriggerID(triggerID);
                     },
                     failure: function(error){
                         if(callbacks && callbacks.failure){
@@ -146,7 +147,7 @@
                 var kiiApp, spec, url, saveCallbacks;
 
                 kiiApp = KiiPortalAdmin.getCurrentApp();
-                url = _this.getFullURL();
+                url = _this._getFullURL();
                 spec = {
                     url: url,
                     method: 'POST',

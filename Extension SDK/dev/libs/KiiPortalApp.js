@@ -222,7 +222,7 @@
             return Kii.getBaseURL() + '/apps/' + this.getAppID();
         };
 
-        KiiPortalApp.prototype.getThingIFURL = function(){
+        KiiPortalApp.prototype._getThingIFURL = function(){
             return Kii.getSiteURL() + '/thing-if/apps/' + this.getAppID();
         }
 

@@ -7,7 +7,7 @@
         KiiThingAdminQuery.prototype.constructor = KiiThingAdminQuery;
 
         function KiiThingAdminQuery(query){
-            
+
         };
 
         KiiThingAdminQuery.queryName = 'thingQuery';
@@ -48,12 +48,12 @@
 
     KiiThingAdmin._baseUrl = '/things'; 
 
-    KiiThingAdmin.getBaseURL = function(){
-        return KiiPortalAdmin.getCurrentApp().getBaseURL() + KiiThingAdmin._baseUrl;
+    KiiThingAdmin._getBaseURL = function(){
+        return KiiPortalAdmin.getCurrentApp()._getBaseURL() + KiiThingAdmin._baseUrl;
     };
 
-    KiiThingAdmin.getThingIFURL = function(){
-        return KiiPortalAdmin.getCurrentApp().getThingIFURL();
+    KiiThingAdmin._getThingIFURL = function(){
+        return KiiPortalAdmin.getCurrentApp()._getThingIFURL();
     };
 
     KiiThingAdmin.getThingsByModel = function(model, callbacks){
@@ -144,7 +144,7 @@
                     headers: {
                         'Content-Type': 'application/vnd.kii.ThingRegistrationAndAuthorizationRequest+json',
                     },
-                    url: KiiThingAdmin.getBaseURL()
+                    url: KiiThingAdmin._getBaseURL()
                 };
 
                 var request = new KiiObjectRequest(kiiApp, spec);
@@ -164,7 +164,7 @@
                     headers: {
                         'Content-Type': 'application/vnd.kii.ThingUpdateRequest+json',
                     },
-                    url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID()
+                    url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID()
                 };
 
                 var request = new KiiObjectRequest(kiiApp, spec);
@@ -193,7 +193,7 @@
             kiiApp = KiiPortalAdmin.getCurrentApp();
             spec = {
                 method: 'DELETE',
-                url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID()
+                url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID()
             };
 
             var request = new KiiObjectRequest(kiiApp, spec);
@@ -229,7 +229,7 @@
                     'Content-Type': 'application/vnd.kii.ThingStatusUpdateRequest+json'
                 },
                 method: 'PUT',
-                url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID() + '/status',
+                url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID() + '/status',
                 data: {disabled: false}
             };
 
@@ -270,7 +270,7 @@
                     'Content-Type': 'application/vnd.kii.ThingStatusUpdateRequest+json'
                 },
                 method: 'PUT',
-                url: KiiThingAdmin.getBaseURL() + '/' + _this.getThingID() + '/status',
+                url: KiiThingAdmin._getBaseURL() + '/' + _this.getThingID() + '/status',
                 data: {disabled: true}
             };
 
@@ -353,24 +353,9 @@
     KiiThingAdmin.prototype.refreshCommands = function(user, callbacks){
         var _this = this;
         return new Promise(function(resolve, reject){
-            var spec, kiiApp;
 
-            kiiApp = KiiPortalAdmin.getCurrentApp();
-            spec = {
-                method: 'GET',
-                url: KiiThingAdmin.getThingIFURL() + '/targets/thing:' + _this.getThingID() + '/commands',
-                headers: {
-                    Authorization: 'Bearer ' + user.getAccessToken()
-                }
-            };
-
-            var request = new KiiObjectRequest(kiiApp, spec);
-
-            request.execute().then(function(response){
-                var commands = [];
-                __each(response.data.commands, function(command){
-                    commands.push(new KiiPortalCommand(user, _this, command));
-                });
+            KiiPortalCommand._withThing(user, _this, callbacks).then(function(commands){
+                
                 _this._setCommands(commands);
 
                 if(callbacks && callbacks.success){
@@ -408,7 +393,7 @@
 
         return new Promise(function(resolve, reject){
             var spec, url;
-            url = this.getThingIFURL() + '/onboardings';
+            url = this._getThingIFURL() + '/onboardings';
             spec = {
                 url: url,
                 method: 'POST',

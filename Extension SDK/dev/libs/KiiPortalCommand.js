@@ -5,17 +5,17 @@
             this._kiiApp = KiiPortalAdmin.getCurrentApp();
 
             __extends(this, {
-                'commandID': '', // default empty
-                'issuer': 'user:', //KiiUser UUID
-                'target': 'thing:', //KiiThing ID
-                'actions': [], 
-                'schema': '', // a string
-                'schemaVersion': '', // a integer
-                'title': '',
-                'description': '',
-                'metadata': {},
-                'created': null,
-                'modified': null
+                '_commandID': '', // default empty
+                '_issuer': 'user:', //KiiUser UUID
+                '_target': 'thing:', //KiiThing ID
+                '_actions': [], 
+                '_schema': '', // a string
+                '_schemaVersion': '', // a integer
+                '_title': '',
+                '_description': '',
+                '_metadata': {},
+                '_created': null,
+                '_modified': null
             })
 
             this._init(user, thing, command);
@@ -23,7 +23,37 @@
 
         KiiPortalCommand.prototype._init = function(user, thing, command){
             if(command){
-                __extends(this, command);
+                __extends(this, {
+                    _commandID: command.commandID,
+                    _issuer: command._issuer,
+                    _target: command.target,
+                    _actions: [],
+                    _schema: command.schema,
+                    _title: command.title,
+                    _description: command.description,
+                    _metadata: command.metadata,
+                    _created: command._created,
+                    _modified: command._modified
+                });
+
+                if(command.actions){
+                    var actions = [];
+                    __each(command.actions, function(action){
+                        var commandAction = new KiiPortalCommandAction();
+                        commandAction.dataset = action;
+                        actions.push(commandAction);
+                    });
+                    this._actions = actions;
+                }
+
+                if(command.actionResults){
+                    var actionResults = [];
+                    __each(command.actionResults, function(result){
+                        var actionResult = new KiiPortalActionResult(result);
+                        actionResults.push(actionResult);
+                    });
+                    this._actionResults = actionResults;
+                }
             }
             
             this._thing = thing;
@@ -31,8 +61,8 @@
         };
 
         KiiPortalCommand.prototype.addAction = function(action){
-            this.actions = this.actions || [];
-            this.actions.push(action);
+            this._actions = this.actions || [];
+            this._actions.push(action);
         };
 
         /**
@@ -40,24 +70,32 @@
          * @param {[KiiPortalSchema]} schema [description]
          */
         KiiPortalCommand.prototype._setSchema = function(schema){
-            this.schema = schema.id;
-            this.schemaVersion = schema.getVersion();
+            this._schema = schema.id;
+            this._schemaVersion = schema.getVersion();
+        };
+
+        KiiPortalCommand.prototype.getSchema = function(){
+            return this._schema;
+        };
+
+        KiiPortalCommand.prototype.getSchemaVersion = function(){
+            return this._schemaVersion;
         };
 
         KiiPortalCommand.prototype.setTitle = function(title){
-            this.title = title;
+            this._title = title;
         };
 
         KiiPortalCommand.prototype.getTitle = function(){
-            return this.title;
+            return this._title;
         }
 
         KiiPortalCommand.prototype.setDescription = function(description){
-            this.description = description;
+            this._description = description;
         };
 
         KiiPortalCommand.prototype.getDescription = function(){
-            return this.description;
+            return this._description;
         };
 
         KiiPortalCommand.prototype.setThing = function(thing){
@@ -65,12 +103,16 @@
         };
 
         KiiPortalCommand.prototype.setMetaData = function(meta){
-            this.metadata = meta;
+            this._metadata = meta;
         };
 
         KiiPortalCommand.prototype.getMetaData = function(){
-            return this.metadata;
-        }
+            return this._metadata;
+        };
+
+        KiiPortalCommand.prototype.getActionResults = function(){
+            return this._actionResults;
+        };
 
         /**
          * purify data for sending
@@ -80,15 +122,15 @@
             var _this = this,
                 actions = [];
 
-            __each(this.actions, function(action){
+            __each(this._actions, function(action){
                 actions.push(action._purify());
             });
 
             return{
                 'target': 'thing:' + _this._thing.getThingID(),
                 'actions': actions,
-                'schema': _this.schema,
-                'schemaVersion': _this.schemaVersion,
+                'schema': _this._schema,
+                'schemaVersion': _this._schemaVersion,
                 'title': _this.getTitle(),
                 'description': _this.getDescription(),
                 'metadata': _this.getMetaData(),
@@ -96,9 +138,43 @@
             };
         };
 
+        KiiPortalCommand._withThing = function(user, thing, callbacks){
+            return new Promise(function(resolve, reject){
+                var spec, kiiApp;
+
+                kiiApp = KiiPortalAdmin.getCurrentApp();
+                spec = {
+                    method: 'GET',
+                    url: KiiThingAdmin._getThingIFURL() + '/targets/thing:' + thing.getThingID() + '/commands',
+                    headers: {
+                        Authorization: 'Bearer ' + user.getAccessToken()
+                    }
+                };
+
+                var request = new KiiObjectRequest(kiiApp, spec);
+
+                request.execute().then(function(response){
+                    var commands = [];
+                    __each(response.data.commands, function(command){
+                        commands.push(new KiiPortalCommand(user, thing, command));
+                    });
+
+                    if(callbacks && callbacks.success){
+                        callbacks.success(commands);
+                    }
+                    resolve(commands);
+                }, function(error){
+                    if(callbacks && callbacks.failure){
+                        callbacks.failure(error);
+                    }
+                    reject(error);
+                });
+            });
+        };
+
         KiiPortalCommand.prototype._getAccessToken = function(){
             return 'Bearer ' + this._user.getAccessToken();
-        }
+        };
 
         /**
          * refresh command by its ID
@@ -119,7 +195,7 @@
             return new Promise(function(resolve, reject){
                 var spec, url, headers;
 
-                url = _this._kiiApp.getThingIFURL() + '/targets/thing:'
+                url = _this._kiiApp._getThingIFURL() + '/targets/thing:'
                     + _this._thing.getThingID() + '/commands/' + commandID;
                 headers = {
                     Authorization: _this._getAccessToken()
@@ -151,12 +227,17 @@
             });
         };
 
+        /**
+         * send command
+         * @param  {[type]} callbacks [description]
+         * @return {[type]}           [description]
+         */
         KiiPortalCommand.prototype.send = function(callbacks){
             var _this = this;
             return new Promise(function(resolve, reject){
                 var spec, url;
                 
-                url = _this._kiiApp.getThingIFURL() + '/targets/thing:' + _this._thing.getThingID() + '/commands';
+                url = _this._kiiApp._getThingIFURL() + '/targets/thing:' + _this._thing.getThingID() + '/commands';
                 spec = {
                     url: url,
                     method: 'POST',
@@ -187,6 +268,10 @@
         return KiiPortalCommand;
     })();
 
+    /**
+     * command action
+     * @param schemaProperty
+     */
     root.KiiPortalCommandAction = (function(){
 
         function KiiPortalCommandAction(schemaProperty){
@@ -202,6 +287,19 @@
                 this.min = schemaProperty.min;
                 this.max = schemaProperty.max;
             }
+
+            Object.defineProperties(this, {
+                dataset: {
+                    set: function(data){
+                        var key = Object.keys(data)[0];
+                        data = data[key];
+                        key = Object.keys(data)[0];
+                        value = data[key];
+                        this.value = value;
+                        this.property = key;
+                    }
+                }
+            });
         }
 
         KiiPortalCommandAction.prototype.setValue = function(value){
@@ -223,15 +321,63 @@
     })();
 
 
-    root.KiiPortalCommandResult = (function(){
+    root.KiiPortalActionResult = (function(){
 
-        function KiiPortalCommandResult(commandResult){
-            this.succeeded = false; // required. Specify if the action execution was a success.
-            this.errorMessage = ''; // An additional message for describing the cause of action execution failure.
-            this.data = null; // A custom data.
+        function KiiPortalActionResult(actionResult){
+            __extends(this, {
+                _actionName: '',
+                _succeeded: false, // required. Specify if the action execution was a success.
+                _errorMessage: '', // An additional message for describing the cause of action execution failure.
+                _data: null // A custom data.
+            });
 
-            __extends(this, commandResult);
+            Object.defineProperties(this, {
+                actionName:{
+                    get: function(){
+                        return this._actionName;
+                    }
+                },
+                succeeded: {
+                    get: function(){
+                        return this._succeeded;
+                    }
+                },
+                errorMessage: {
+                    get: function(){
+                        return this._errorMessage;
+                    }
+                },
+                data: {
+                    get: function(){
+                        return this._data;
+                    }
+                },
+                dataset: {
+                    set: function(result){
+                        var actionName = Object.keys(result)[0];
+                        this._actionName = actionName;
+                        this._succeeded = result[actionName].succeeded;
+                        this._errorMessage = result[actionName].errorMessage;
+                        this._data = result[actionName].data;
+                    },
+                    get: function(){
+                        var result = {},
+                            _this = this;
+                        result[this.actionName] = {
+                            succeeded: _this._succeeded,
+                            errorMessage: _this._errorMessage,
+                            data: _this._data
+                        };
+
+                        return result;
+                    }
+                }
+            });
+
+            if(actionResult){
+                this.fullResult = actionResult;
+            }
         }
 
-        return KiiPortalCommandResult;
+        return KiiPortalActionResult;
     })();
