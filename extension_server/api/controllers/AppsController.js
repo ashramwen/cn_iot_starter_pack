@@ -56,7 +56,7 @@ module.exports = {
 						authorization: authorization,
 						'x-app-id': appID,
 						'x-app-key': appKey,
-						'x-app-site': 'qa'
+						'x-app-site': sails.config.kiiSite[server]
 					}
 				}
 				//TODO add site info when in production
