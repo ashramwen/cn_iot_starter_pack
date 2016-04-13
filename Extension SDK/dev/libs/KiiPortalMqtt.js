@@ -54,36 +54,42 @@ root.KiiPortalMqtt = (function() {
     return KiiPortalMqtt;
 })();
 
+/**
+ * [mqtt on description]
+ * @param {[type]}   event [description]
+ * @param {Function} fn    [description]
+ */
 KiiPortalMqtt.prototype.on = KiiPortalMqtt.prototype.addEventListener = function(event, fn) {
     this._callbacks = this._callbacks || {};
     (this._callbacks[event] = this._callbacks[event] || []).push(fn);
     return this;
 };
 
+/**
+ * [mqtt init description]
+ * @param  {[type]} user [description]
+ * @return {[type]}      [description]
+ */
 KiiPortalMqtt.prototype.init = function(user) {
     var _self = this;
     _self.user = user;
     return new Promise(function(resolve, reject) {
         _self.installMQTTForUser().then(function(response) {
-            _self.retrieveMQTTEndpointForUser(response.data.installationID, 5).then(function(mqttEndpointInfo) {
-                var config = {
-                    host: mqttEndpointInfo.host,
-                    port: mqttEndpointInfo.portWS,
-                    username: mqttEndpointInfo.username,
-                    password: mqttEndpointInfo.password,
-                    clientID: mqttEndpointInfo.mqttTopic
-                };
-                _self.connect(config).then(function(res) {
-                    resolve(res);
-                }, function(error) {
-                    reject(error);
-                });
-            }, function(error) {
-                reject(error);
-            });
-        }, function(error) {
+            return _self.retrieveMQTTEndpointForUser(response.data.installationID, 5)
+        }).then(function(mqttEndpointInfo) {
+            var config = {
+                host: mqttEndpointInfo.host,
+                port: mqttEndpointInfo.portWS,
+                username: mqttEndpointInfo.username,
+                password: mqttEndpointInfo.password,
+                clientID: mqttEndpointInfo.mqttTopic
+            };
+            return _self.connect(config)
+        }).then(function(res) {
+            resolve(res);
+        }).catch(function(error) {
             reject(error);
-        })
+        });
     });
 }
 
@@ -135,7 +141,7 @@ KiiPortalMqtt.prototype.retrieveMQTTEndpointForUser = function(installationID, r
             console.log("retry: " + retryCount);
             if (retryCount > 0) {
                 setTimeout(function() {
-                    _self.retrieveMQTTEndpointForUser(installationID, retryCount - 1);
+                    return _self.retrieveMQTTEndpointForUser(installationID, retryCount - 1);
                 }, 5000);
             } else {
                 reject(error);
@@ -144,12 +150,20 @@ KiiPortalMqtt.prototype.retrieveMQTTEndpointForUser = function(installationID, r
     }.bind(this));
 }
 
-// subscribes to the topic
+/**
+ * subscribes to the topic
+ * @param  {[type]} topic [description]
+ * @return {[type]}       [description]
+ */
 KiiPortalMqtt.prototype.subscribe = function(topic) {
     this.client.subscribe(topic);
 }
 
-// connects to broker and subscribes to clientID topic
+/**
+ * connects to broker and subscribes to clientID topic
+ * @param  {[type]} config [description]
+ * @return {[type]}        [description]
+ */
 KiiPortalMqtt.prototype.connect = function(config) {
     this.config = config;
     return new Promise(function(resolve, reject) {
@@ -181,14 +195,22 @@ KiiPortalMqtt.prototype.connect = function(config) {
     }.bind(this));
 }
 
-// disconnects
+/**
+ * disconnects
+ * @return {[type]} [description]
+ */
 KiiPortalMqtt.prototype.disconnect = function() {
     this.client.disconnect();
 }
 
 // endpoints
 
-// send message to topic
+/**
+ * send message to topic
+ * @param  {[type]} topic   [description]
+ * @param  {[type]} message [description]
+ * @return {[type]}         [description]
+ */
 KiiPortalMqtt.prototype.sendMessage = function(topic, message) {
     console.log("send message", topic, message);
 
@@ -230,6 +252,12 @@ KiiPortalMqtt.prototype.onboardThing = function(vendorThingID, thingPassword, th
     this.sendMessage(topic, onboardingMessage);
 }
 
+/**
+ * [sendCommand description]
+ * @param  {[type]} payload [description]
+ * @param  {[type]} thingID [description]
+ * @return {[type]}         [description]
+ */
 KiiPortalMqtt.prototype.sendCommand = function(payload, thingID) {
     // fill onboarding message
     var commandMessage = 'POST\n';
@@ -245,6 +273,13 @@ KiiPortalMqtt.prototype.sendCommand = function(payload, thingID) {
     this.sendMessage(topic, commandMessage);
 }
 
+/**
+ * [updateState description]
+ * @param  {[type]} state   [description]
+ * @param  {[type]} thingID [description]
+ * @param  {[type]} token   [description]
+ * @return {[type]}         [description]
+ */
 KiiPortalMqtt.prototype.updateState = function(state, thingID, token) {
     // fill message
     var stateMessage = 'PUT\n';
@@ -262,6 +297,14 @@ KiiPortalMqtt.prototype.updateState = function(state, thingID, token) {
     this.sendMessage(topic, stateMessage);
 }
 
+/**
+ * [updateActionResults description]
+ * @param  {[type]} actionResults [description]
+ * @param  {[type]} thingID       [description]
+ * @param  {[type]} commandID     [description]
+ * @param  {[type]} token         [description]
+ * @return {[type]}               [description]
+ */
 KiiPortalMqtt.prototype.updateActionResults = function(actionResults, thingID, commandID, token) {
     // fill message
     var actionResultsMessage = 'PUT\n';
@@ -282,6 +325,11 @@ KiiPortalMqtt.prototype.updateActionResults = function(actionResults, thingID, c
     this.sendMessage(topic, actionResultsMessage);
 }
 
+/**
+ * [parseResponse description]
+ * @param  {[type]} messageToParse [description]
+ * @return {[type]}                [description]
+ */
 KiiPortalMqtt.prototype.parseResponse = function(messageToParse) {
 
     function parseType(topic) {
