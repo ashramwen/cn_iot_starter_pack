@@ -250,7 +250,16 @@
                 createAppCallbacks = {
                     success: function(response){
                         var appData = response.data;
+                        var admin = _this.getAdmin();
                         KiiPortalApp.fromJson(_this, appData);
+
+                        var apps = admin.getApps();
+                        if(!apps){
+                            admin.setApps([]);
+                            apps = admin.getApps();
+                        }
+                        apps.push(_this);
+
 
                         if(callbacks && callbacks.success){
                             callbacks.success(_this);
